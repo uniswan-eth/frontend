@@ -80,6 +80,11 @@
             :offers="$parent.$parent.userprefs"></offers-table>
         </b-col>
       </b-row>
+      <b-row class="mt-5">
+        <b-col xl="6" class="mb-5 mb-xl-0">
+          <pre>{{$parent.$parent.userSwapOptions}}</pre>
+        </b-col>
+      </b-row>
     </b-container>
   </div>
 </template>

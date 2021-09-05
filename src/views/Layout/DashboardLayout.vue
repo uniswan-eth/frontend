@@ -230,6 +230,7 @@
         tempnfts: [],
         usernfts: [],
         userprefs: [],
+        userSwapOptions: [],
         currentOrder: null,
         newOrderNFT: null,
         newOrderOwnerNFTs: null,
@@ -272,6 +273,74 @@
       this.loadApp()
     },
     methods: {
+      async getSwapOptions() {
+        var options = [];
+        for (let i = 0; i < this.usernfts.length; i++) {
+          const bundle = [this.usernfts[i]];
+          let wantAssetData = [];
+          let wantAssetAmounts = [];
+          for (let i = 0; i < bundle.length; i++) {
+            let assetData = assetDataUtils.encodeERC721AssetData(
+              bundle[i].contract,
+              bundle[i].tokenID
+            );
+            wantAssetData.push(assetData);
+            wantAssetAmounts.push(new BigNumber(1));
+          }
+          var encodedData = assetDataUtils.encodeMultiAssetData(
+            wantAssetAmounts,
+            wantAssetData
+          );
+          var bundlesDBURI = DB_BASE_URL + "options/" + encodedData;
+          var res = await fetch(bundlesDBURI);
+          var hi = await res.json();
+          options = options.concat(hi);
+        }
+        console.log(options);
+        var newChains = [];
+        await Promise.all(
+          options.map(async (chain) => {
+            var preferences = [];
+            for (let i = 0; i < chain.length; i++) {
+              var inter = assetDataUtils.decodeMultiAssetData(
+                chain[i].order.makerAssetData
+              );
+              const exchangeBundle = [];
+              for (let i = 0; i < inter.nestedAssetData.length; i++) {
+                var bytes = assetDataUtils.decodeERC721AssetData(
+                  inter.nestedAssetData[i]
+                );
+                exchangeBundle.push(
+                  await this.getNFT(bytes.tokenAddress, bytes.tokenId.toNumber())
+                );
+              }
+              inter = assetDataUtils.decodeMultiAssetData(
+                chain[i].order.takerAssetData
+              );
+              const wishBundle = [];
+              for (let i = 0; i < inter.nestedAssetData.length; i++) {
+                bytes = assetDataUtils.decodeERC721AssetData(
+                  inter.nestedAssetData[i]
+                );
+                wishBundle.push(
+                  await this.getNFT(bytes.tokenAddress, bytes.tokenId.toNumber())
+                );
+              }
+              preferences.push({
+                wisher: chain[i].order.makerAddress,
+                exchangeBundle: exchangeBundle,
+                wishBundle: wishBundle,
+                makerAssetData: chain[i].order.makerAssetData,
+                takerAssetData: chain[i].order.takerAssetData,
+                signedOrder: chain[i],
+              });
+            }
+            newChains.push(preferences);
+          })
+        );
+        this.userSwapOptions = newChains;
+      },
+
       formatAsset(nft) {
         return {
           token_id: nft.tokenID,
@@ -390,6 +459,7 @@
 
         this.usernfts = await this.getUserNFTsByCollection(this.nonFungibleMaticV2Address, this.signeraddr)
         this.userprefs = await this.getPreferences(this.signeraddr)
+        await this.getSwapOptions()
         // console.log(this.userprefs);
       },
       async loadNetwork() {

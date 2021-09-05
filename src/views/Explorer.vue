@@ -161,7 +161,7 @@
     },
     methods: {
       navNFT() {
-        this.$router.push('/#/nft/'+this.currentContract+'/'+this.currentTokenID)
+        this.$router.push('/nft/'+this.currentContract+'/'+this.currentTokenID)
       },
       async loadPage() {
         this.assets = []
@@ -169,6 +169,8 @@
         console.log(this.$parent.$parent.network);
         if (this.$parent.$parent.network.chainId === 137) { // Matic
           this.featuredCollections = [
+
+            {"contract":"0x2db4acdd606fa4677e472083eeb0c91e6585a5de", "name":"Lode Runner 001"},
             {"contract":"0xa5f1ea7df861952863df2e8d1312f7305dabf215", "name":"Zed run"},
             {"contract":"0x36a8377e2bb3ec7d6b0f1675e243e542eb6a4764", "name":"Non-Fungible Matic V2"},
             {"contract":"0x8634666ba15ada4bbc83b9dbf285f73d9e46e4c2", "name":"Chicken derby"},
@@ -208,12 +210,14 @@
           this.$parent.$parent.signer
         );
         var collectionName = await collection.name();
+        // var number = await collection.name();
         this.collection = {
           name: collectionName
         }
         var rndNFTs = []
         for (var i = 0; i < 3; i++) {
-          rndNFTs.push([collectionAddress, this.$parent.$parent.rnd(10000) ])
+          // rndNFTs.push([collectionAddress, this.$parent.$parent.rnd(10000) ])
+          rndNFTs.push([collectionAddress, this.$parent.$parent.rnd(5) ])
         }
         for (i = 0; i < rndNFTs.length; i++) {
           var nft = await this.$parent.$parent.getNFT(rndNFTs[i][0], rndNFTs[i][1]);
