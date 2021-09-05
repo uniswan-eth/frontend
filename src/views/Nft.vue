@@ -122,7 +122,7 @@
                   </b-media>
                 </b-col>
                 <b-col class="text-right">
-                  <a :href="'/#/account/'+asset.owner.address" class="btn btn-sm btn-primary">See all NFTs</a>
+                  <a :href="'/#/account/'+asset.owner.address" class="btn btn-sm btn-secondary">See all owners NFTs</a>
                 </b-col>
               </b-row>
             </template>
@@ -335,8 +335,8 @@
         this.asset = this.$parent.$parent.formatAsset(nft)
 
         // Swap Options
-        this.validSwaps = this.$parent.$parent.nftSwapOptions(nft);
-        console.log('Yohoo Swaps', this.validSwaps);
+        // this.validSwaps = this.$parent.$parent.nftSwapOptions(nft);
+        // console.log('Yohoo Swaps', this.validSwaps);
 
 
         // Owner Assets - Matic / OpenSea?

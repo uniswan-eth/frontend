@@ -47,7 +47,7 @@
            <stats-card title="Options"
                        type="gradient-green"
                        :class="['', $route.query.tab  === 'options' ? 'tabselected' : 'tabdimmed']"
-                       sub-title="356"
+                       :sub-title="swapOptions.length.toString()"
                        icon="ni ni-money-coins"
                        class="mb-4">
 
@@ -60,7 +60,7 @@
            <stats-card title="History"
                        type="gradient-info"
                        :class="['', $route.query.tab  === 'history' ? 'tabselected' : 'tabdimmed']"
-                       sub-title="346"
+                       :sub-title="history.length.toString()"
                        icon="ni ni-chart-bar-32"
                        class="mb-4">
 
@@ -83,6 +83,12 @@
           <offers-table :offers="offers"></offers-table>
         </b-col>
       </b-row>
+      <b-row v-if="$route.query.tab === 'options'" class="justify-content-center">
+        <b-col lg="12">
+          <pre>{{swapOptions}}</pre>
+          <!-- <offers-table :offers="swapOptions"></offers-table> -->
+        </b-col>
+      </b-row>
     </b-container>
   </div>
 </template>
@@ -92,6 +98,7 @@
   import BaseHeader from '@/components/BaseHeader';
   import NftsTable from '@/views/Dashboard/NftsTable';
   import OffersTable from './Dashboard/OffersTable';
+  const DB_BASE_URL = "https://uns-backend.vercel.app/api/";
 
   Vue.use(VueClipboard)
   export default {
@@ -106,6 +113,8 @@
         contractAddress: this.$parent.$parent.nonFungibleMaticV2Address,
         nfts:[],
         offers:[],
+        swapOptions:[],
+        history:[],
       }
     },
     async mounted() {
@@ -115,15 +124,16 @@
     },
     methods: {
       async loadPage() {
+        if (this.$route.params.address === this.$parent.$parent.signeraddr) {
+          this.nfts = this.$parent.$parent.usernfts
+        } else {
+          this.nfts = await this.$parent.$parent.getUserNFTsByCollection(
+            this.contractAddress,
+            this.$route.params.address
+          )
+        }
+
         if (!this.$route.query.tab) {
-          if (this.$route.params.address === this.$parent.$parent.signeraddr) {
-            this.nfts = this.$parent.$parent.usernfts
-          } else {
-            this.nfts = await this.$parent.$parent.getUserNFTsByCollection(
-              this.contractAddress,
-              this.$route.params.address
-            )
-          }
         } else if (this.$route.query.tab === 'offers') {
           if (this.$route.params.address === this.$parent.$parent.signeraddr) {
             this.offers = this.$parent.$parent.userprefs
@@ -132,6 +142,17 @@
               this.$route.params.address
             )
           }
+        } else if (this.$route.query.tab === 'options') {
+          this.swapOptions = await this.$parent.$parent.getSwapOptions(this.nfts)
+          // var bundlesDBURI = DB_BASE_URL + "options/"+;
+
+          // if (this.$route.params.address === this.$parent.$parent.signeraddr) {
+          //   this.offers = this.$parent.$parent.userprefs
+          // } else {
+          //   this.offers = await this.$parent.$parent.getPreferences(
+          //     this.$route.params.address
+          //   )
+          // }
         }
       },
       onCopy() {

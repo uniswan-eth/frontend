@@ -190,11 +190,18 @@
           orderHashHex,
           this.$parent.signeraddr
         );
+        var self = this
         axios
           // .post(DB_BASE_URL + "preferences/add", { order, signature })
           .post(DB_BASE_URL + "orders/add", { order, signature })
-          .then((res) => {
-            console.log(res.data);
+          .then(async (res) => {
+            self.$parent.userprefs = await self.$parent.getPreferences(self.$parent.signeraddr)
+            console.log(res.data, self.$parent.userprefs);
+            this.$bvModal.hide('modalCreateOffer')
+            this.$notify({
+              type: 'danger',
+              message: 'Made new order'
+            })
           });
       },
     }
