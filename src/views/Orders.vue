@@ -67,7 +67,8 @@
         this.orders = []
         console.log('Network', this.$parent.$parent.network.chainId);
         if (this.$parent.$parent.network.chainId === 137) { // Matic
-          this.orders = this.$parent.$parent.preferences
+          // this.orders = this.$parent.$parent.preferences
+          this.orders = await this.$parent.$parent.getPreferences()
           console.log('Orders', this.orders);
         } else if (this.$parent.$parent.network.chainId === 1) { // Main net
           // this.loadOS(0)

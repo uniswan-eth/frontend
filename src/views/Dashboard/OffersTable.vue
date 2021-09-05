@@ -5,9 +5,9 @@
         <b-col>
           <h3 class="mb-0">Offers</h3>
         </b-col>
-        <b-col class="text-right">
+        <!-- <b-col class="text-right">
           <a href="#!" class="btn btn-sm btn-primary">See all</a>
-        </b-col>
+        </b-col> -->
       </b-row>
     </template>
     <el-table class="table-responsive table"

@@ -231,6 +231,7 @@
         usernfts: [],
         userprefs: [],
         userSwapOptions: [],
+        userHistory: [],
         currentOrder: null,
         newOrderNFT: null,
         newOrderOwnerNFTs: null,
@@ -260,10 +261,13 @@
         // console.log('New Block', blockNumber);
         this.blockNumber = blockNumber
       })
-      window.ethereum.on('accountsChanged', function (accounts) {
+      window.ethereum.on('accountsChanged', async function (accounts) {
         // Time to reload your interface with accounts[0]!
         // console.log('New Account', accounts);
-        self.loadUser()
+        self.pageloaded = false
+        await self.loadApp()
+        self.pageloaded = true
+
       })
       window.ethereum.on('networkChanged', function (networkId) {
             // Time to reload your interface with the new networkId
@@ -273,7 +277,110 @@
       this.loadApp()
     },
     methods: {
-      async getSwapOptions() {
+      async loadApp() {
+        this.access = false;
+        this.signer = this.provider.getSigner();
+        this.signeraddr = await this.signer.getAddress();
+
+        if (this.acl.includes(this.signeraddr)) {
+          this.access = true;
+        }
+        console.log(this.access);
+        if (this.access) {
+
+          // this.preferences = await this.getPreferences()
+          await this.loadNetwork()
+          await this.loadUser()
+          this.pageloaded = true
+        }
+      },
+      async loadUser() {
+        // this.signerblockie = makeBlockie("0x4f5F6D3c7e8aDef6be8e51288F098d440bAc12ec")
+
+        // this.UniSwanContractV2 = new ethers.Contract(
+        //   this.UniSwanContractAddressV2,
+        //   UNISWANABI,
+        //   this.signer
+        // );
+
+        this.usernfts = await this.getUserNFTsByCollection(this.nonFungibleMaticV2Address, this.signeraddr)
+        this.userprefs = await this.getPreferences(this.signeraddr)
+        this.userSwapOptions = await this.getSwapOptions(this.usernfts)
+        // console.log(this.userprefs);
+      },
+      async loadNetwork() {
+        this.network = await this.provider.getNetwork()
+        this.blockNumber = await this.provider.getBlockNumber()
+      },
+      async getSwapOptions(NFTs) {
+        var options = [];
+        for (let i = 0; i < NFTs.length; i++) {
+          const bundle = [NFTs[i]];
+          let wantAssetData = [];
+          let wantAssetAmounts = [];
+          for (let i = 0; i < bundle.length; i++) {
+            let assetData = assetDataUtils.encodeERC721AssetData(
+              bundle[i].contract,
+              bundle[i].tokenID
+            );
+            wantAssetData.push(assetData);
+            wantAssetAmounts.push(new BigNumber(1));
+          }
+          var encodedData = assetDataUtils.encodeMultiAssetData(
+            wantAssetAmounts,
+            wantAssetData
+          );
+          var bundlesDBURI = DB_BASE_URL + "options/" + encodedData;
+          var res = await fetch(bundlesDBURI);
+          var hi = await res.json();
+          options = options.concat(hi);
+        }
+        // console.log(options, this.usernfts);
+        var newChains = [];
+        await Promise.all(
+          options.map(async (chain) => {
+            var preferences = [];
+            for (let i = 0; i < chain.length; i++) {
+              var inter = assetDataUtils.decodeMultiAssetData(
+                chain[i].order.makerAssetData
+              );
+              const exchangeBundle = [];
+              for (let i = 0; i < inter.nestedAssetData.length; i++) {
+                var bytes = assetDataUtils.decodeERC721AssetData(
+                  inter.nestedAssetData[i]
+                );
+                exchangeBundle.push(
+                  await this.getNFT(bytes.tokenAddress, bytes.tokenId.toNumber())
+                );
+              }
+              inter = assetDataUtils.decodeMultiAssetData(
+                chain[i].order.takerAssetData
+              );
+              const wishBundle = [];
+              for (let i = 0; i < inter.nestedAssetData.length; i++) {
+                bytes = assetDataUtils.decodeERC721AssetData(
+                  inter.nestedAssetData[i]
+                );
+                wishBundle.push(
+                  await this.getNFT(bytes.tokenAddress, bytes.tokenId.toNumber())
+                );
+              }
+              preferences.push({
+                wisher: chain[i].order.makerAddress,
+                exchangeBundle: exchangeBundle,
+                wishBundle: wishBundle,
+                makerAssetData: chain[i].order.makerAssetData,
+                takerAssetData: chain[i].order.takerAssetData,
+                signedOrder: chain[i],
+              });
+            }
+            newChains.push(preferences);
+          })
+        );
+        // this.userSwapOptions = newChains;
+        return newChains;
+      },
+      async XXXgetSwapOptions() {
         var options = [];
         for (let i = 0; i < this.usernfts.length; i++) {
           const bundle = [this.usernfts[i]];
@@ -296,7 +403,7 @@
           var hi = await res.json();
           options = options.concat(hi);
         }
-        console.log(options);
+        console.log(options, this.usernfts);
         var newChains = [];
         await Promise.all(
           options.map(async (chain) => {
@@ -356,7 +463,7 @@
           }
         }
       },
-      nftSwapOptions(nft) {
+      ZZZnftSwapOptions(nft) {
         this.currentNftSwapOptions = []
         // const bundle = [nfts[i]];
         const bundle = [nft];
@@ -414,6 +521,7 @@
           ringswap.map((b) => b.signedOrder.order.takerAssetAmount),
           ringswap.map((b) => b.signedOrder.signature)
         );
+        console.log('Notify and refresh user NFTs', exchange);
         // this.$parent.currentRingSwap = null;
       },
       viewOrder(order) {
@@ -425,46 +533,11 @@
         this.newOrderNFT = nft
         this.newOrderOwnerNFTs = ownerNFTs
       },
-      async loadApp() {
-        this.access = false;
-        this.signer = this.provider.getSigner();
-        this.signeraddr = await this.signer.getAddress();
-
-        if (this.acl.includes(this.signeraddr)) {
-          this.access = true;
-        }
-        console.log(this.access);
-        if (this.access) {
-
-          this.preferences = await this.getPreferences()
-          await this.loadUser()
-          await this.loadNetwork()
-          this.pageloaded = true
-        }
-      },
       initScrollbar() {
         let isWindows = navigator.platform.startsWith('Win');
         if (isWindows) {
           initScrollbar('sidenav');
         }
-      },
-      async loadUser() {
-        this.signerblockie = makeBlockie("0x4f5F6D3c7e8aDef6be8e51288F098d440bAc12ec")
-
-        // this.UniSwanContractV2 = new ethers.Contract(
-        //   this.UniSwanContractAddressV2,
-        //   UNISWANABI,
-        //   this.signer
-        // );
-
-        this.usernfts = await this.getUserNFTsByCollection(this.nonFungibleMaticV2Address, this.signeraddr)
-        this.userprefs = await this.getPreferences(this.signeraddr)
-        await this.getSwapOptions()
-        // console.log(this.userprefs);
-      },
-      async loadNetwork() {
-        this.network = await this.provider.getNetwork()
-        this.blockNumber = await this.provider.getBlockNumber()
       },
       async getNFT(collectionAddress, tokenId) {
         // See if we have in temp
