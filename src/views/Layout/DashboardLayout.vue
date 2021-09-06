@@ -386,10 +386,11 @@ export default {
     contract {
       id
     }
-    tokenID
     owner {
       id
     }
+    tokenID
+    metadata
   }
 }
         `;
