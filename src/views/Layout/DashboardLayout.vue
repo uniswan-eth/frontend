@@ -50,7 +50,7 @@
         ></sidebar-item>
         <sidebar-item
         :link="{
-          name: 'NFT Exlorer',
+          name: 'NFT Explorer',
           path: '/explorer',
           icon: 'ni ni-world-2 text-warning',
           }"
@@ -386,7 +386,15 @@
        );
        return newChains;
      },
+     async approveTransfers(collectionAddress) {
+       var collection = new ethers.Contract(
+         collectionAddress,
+         ERC721ABI,
+         this.signer
+       );
 
+       collection.setApprovalForAll(this.ERC721_PROXY_ADDRESS, true);
+     },
       async XXXgetSwapOptions(NFTs) {
         var options = [];
         for (let i = 0; i < NFTs.length; i++) {

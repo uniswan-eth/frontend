@@ -47,13 +47,13 @@
               {{asset.description}}
             </p>
             <!-- <pre>{{asset}}</pre> -->
+            <!-- v-if="
+            $parent.$parent.signeraddr === asset.owner.address &&
+            !asset.signerApprovedForCollection
+            " -->
             <!-- <div
               class="btn purple"
-              v-if="
-                $parent.$parent.signeraddr === asset.owner &&
-                !asset.signerApprovedForCollection
-              "
-              @click="$parent.$parent.approveTransfers(asset.contract)"
+              @click="$parent.$parent.approveTransfers(asset.asset_contract.address)"
             >
               Approve transfers
             </div>
