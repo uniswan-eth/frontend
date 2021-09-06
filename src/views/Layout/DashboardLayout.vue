@@ -308,7 +308,7 @@ export default {
       });
       const tokenData = data.data.tokens;
       const output = await this.constructBundle(tokenData);
-      return output;
+      return output[0];
     },
     async getTokenByName(name) {
       const tokensQuery = `
