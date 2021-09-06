@@ -82,6 +82,7 @@
                 On auction
               </a>
             </div>
+            {{ this.nfts }}
             <el-table
               class="table-responsive table"
               :data="nfts"

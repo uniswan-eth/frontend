@@ -366,7 +366,7 @@ export default {
       const tokenData = data.data.tokenContracts[0].tokens;
       await Promise.all(
         tokenData.map(async (d) => {
-          // If there's no metadata, we can't render it
+          // Unless there's metadata, we can't render it
           if (d.metadata) {
             var collection = new ethers.Contract(
               d.contract.id,
