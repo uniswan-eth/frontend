@@ -378,6 +378,27 @@ export default {
       const tokenData = data.data.tokenContracts[0].tokens;
       return constructBundle(tokenData);
     },
+    async getTokenByName(name) {
+      const tokensQuery = `
+          query {
+  tokens(where:{name:"${name}"}) {
+    id
+    contract {
+      id
+    }
+    tokenID
+    owner {
+      id
+    }
+  }
+}
+        `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      const tokenData = data.data.tokens;
+      return constructBundle(tokenData);
+    },
     async loadApp() {
       this.access = false;
       this.signer = this.provider.getSigner();
@@ -390,6 +411,8 @@ export default {
       if (this.access) {
         await this.loadNetwork();
         await this.loadUser();
+        var hi = await this.getTokenByName("orang");
+        console.log(hi);
 
         this.pageloaded = true;
       }
