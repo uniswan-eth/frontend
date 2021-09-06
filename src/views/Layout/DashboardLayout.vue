@@ -400,7 +400,10 @@ export default {
                 inter.nestedAssetData[i]
               );
               exchangeBundle.push(
-                await this.getNFT(bytes.tokenAddress, bytes.tokenId.toNumber())
+                await this.getUserTokensFromSubGraph(
+                  bytes.tokenAddress,
+                  bytes.tokenId.toNumber().toString()
+                )
               );
             }
             inter = assetDataUtils.decodeMultiAssetData(
@@ -412,7 +415,10 @@ export default {
                 inter.nestedAssetData[i]
               );
               wishBundle.push(
-                await this.getNFT(bytes.tokenAddress, bytes.tokenId.toNumber())
+                await this.getUserTokensFromSubGraph(
+                  bytes.tokenAddress,
+                  bytes.tokenId.toNumber().toString()
+                )
               );
             }
             preferences.push({
