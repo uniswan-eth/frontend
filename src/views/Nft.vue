@@ -76,7 +76,6 @@
           </card>
         </b-col>
         <b-col lg="6">
-          <!-- <pre>{{validSwaps}}</pre> -->
           <options-table :root="$parent.$parent" :options="validSwaps">
             <template v-slot:unsHeader>
               <b-row align-v="center">
@@ -99,36 +98,6 @@
               </b-row>
             </template>
           </options-table>
-          <!-- <card header-classes="bg-transparent">
-            <template v-slot:header>
-              <b-row align-v="center">
-                <b-col>
-                  <h3 class="mb-0">Offers</h3>
-                </b-col>
-                <b-col class="text-right">
-                  <b-button
-                    :disabled="$parent.$parent.signeraddr === asset.owner.address"
-                    @click="$parent.$parent.createOrder(asset, ownerAssets)"
-                    v-b-modal.modalCreateOffer size="lg" variant="success">
-                    Make offer
-                  </b-button>
-                </b-col>
-              </b-row>
-            </template>
-            <div class="">
-            </div>
-            <div v-for="(chain, idx) in validSwaps" :key="'chain' + idx">
-              <b-button
-                @click="$parent.$parent.viewSwapChain(chain)"
-                v-b-modal.modalSwapChain size="sm" variant="secondary">
-                Details
-              </b-button>
-              <div v-for="(n, idy) in chain" :key="'wnft' + idy">
-                <bundle :bundle="n.exchangeBundle" />
-              </div>
-              <hr>
-            </div>
-          </card> -->
           <br />
           <card header-classes="bg-transparent">
             <h3 slot="header" class="mb-0">Get it now!</h3>
@@ -152,7 +121,6 @@
                     </span>
                     <b-media-body class="ml-2 d-none d-lg-block">
                       <span class="mb-0 text-sm font-weight-bold">
-                        <!-- {{asset.owner.address.substr(0,6)}} -->
                         <account-card
                           :address="asset.owner.address"
                           :root="$parent.$parent"
@@ -390,9 +358,9 @@ export default {
     async loadPage() {
       this.ownerAssets = [];
       this.asset = null;
-      var nft = await this.$parent.$parent.getNFT(
+      var nft = await this.$parent.$parent.getTokenFromSubgraph(
         this.$route.params.contract,
-        this.$route.params.tokenid
+        this.$route.params.tokenid.toString()
       );
 
       // Use same fromat as OpenSea API
