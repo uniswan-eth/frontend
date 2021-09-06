@@ -351,7 +351,8 @@ export default {
         query: gql(tokensQuery),
       });
       const tokenData = data.data.owners[0].tokens;
-      return this.constructBundle(tokenData);
+      const output = await this.constructBundle(tokenData);
+      return output;
     },
     async getContractTokensFromSubGraph(contractAddress, startIndex, amount) {
       const tokensQuery = `
@@ -376,7 +377,32 @@ export default {
         query: gql(tokensQuery),
       });
       const tokenData = data.data.tokenContracts[0].tokens;
-      return this.constructBundle(tokenData);
+      const output = await this.constructBundle(tokenData);
+      return output;
+    },
+    async getTokenFromSubgraph(contractAddress, tokenId) {
+      const id = contractAddress.toLowerCase() + tokenId;
+      const tokensQuery = `
+          query {
+  tokens(where:{id:"${id}"}) {
+    id
+    contract {
+      id
+    }
+    owner {
+      id
+    }
+    tokenID
+    metadata
+  }
+}
+        `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      const tokenData = data.data.tokens;
+      const output = await this.constructBundle(tokenData);
+      return output;
     },
     async getTokenByName(name) {
       const tokensQuery = `
@@ -398,7 +424,8 @@ export default {
         query: gql(tokensQuery),
       });
       const tokenData = data.data.tokens;
-      return this.constructBundle(tokenData);
+      const output = await this.constructBundle(tokenData);
+      return output;
     },
     async loadApp() {
       this.access = false;
@@ -424,6 +451,12 @@ export default {
       this.userprefs = await this.getPreferences(this.signeraddr);
       this.userSwapOptions = await this.getSwapOptions(this.usernfts);
       // console.log(this.userprefs);
+
+      var hi = await this.getTokenFromSubgraph(
+        "0x36a8377E2bB3ec7D6b0F1675E243E542eb6A4764",
+        "3027"
+      );
+      console.log(hi);
     },
     async loadNetwork() {
       this.network = await this.provider.getNetwork();
