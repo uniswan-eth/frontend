@@ -347,7 +347,7 @@ export default {
           query {
           tokenContracts(where:{id:"${contractAddress.toLowerCase()}"}) {
             id
-            tokens {
+            tokens(first:5) {
               id,
               contract {
                 id
@@ -368,7 +368,6 @@ export default {
       const tokenData = data.data.tokenContracts[0].tokens;
       await Promise.all(
         tokenData.map(async (d) => {
-          console.log(d);
           var collection = new ethers.Contract(
             d.contract.id,
             ERC721ABI,
@@ -406,7 +405,6 @@ export default {
         var hi = await this.getContractTokensFromSubGraph(
           this.nonFungibleMaticV2Address
         );
-        console.log(hi);
 
         this.pageloaded = true;
       }
