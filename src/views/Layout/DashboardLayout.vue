@@ -314,6 +314,80 @@
         this.blockNumber = await this.provider.getBlockNumber()
       },
       async getSwapOptions(NFTs) {
+       let wantAssetData = [];
+       let wantAssetAmounts = [];
+       for (let i = 0; i < NFTs.length; i++) {
+         let assetData = assetDataUtils.encodeERC721AssetData(
+           NFTs[i].contract,
+           NFTs[i].tokenID
+         );
+         wantAssetData.push(assetData);
+         wantAssetAmounts.push(new BigNumber(1));
+       }
+       var encodedData = assetDataUtils.encodeMultiAssetData(
+         wantAssetAmounts,
+         wantAssetData
+       );
+       var bundlesDBURI = DB_BASE_URL + "options/" + encodedData;
+       var res = await fetch(bundlesDBURI);
+       var options = await res.json();
+       const exchange = new ethers.Contract(
+         "0x2682798109c35310B76db070b98Fc21833DCAA61",
+         EXCHANGEABI,
+         this.signer
+       );
+       // TODO: This should check that the maker of deal still owns everything they are offering.
+       var newChains = [];
+       await Promise.all(
+         options.map(async (chain) => {
+           var preferences = [];
+           for (let i = 0; i < chain.length; i++) {
+             // Check that the order is valid.
+             // This should really be checked by the backend, but it doesn't have an Ethereum node to get on-chain data.
+             const orderHashHex = orderHashUtils.getOrderHashHex(chain[i].order);
+             const cancelled = await exchange.cancelled(orderHashHex);
+             const filledStatus = await exchange.filled(orderHashHex);
+             if (filledStatus.toNumber() > 0 || cancelled) return;
+             var inter = assetDataUtils.decodeMultiAssetData(
+               chain[i].order.makerAssetData
+             );
+             const exchangeBundle = [];
+             for (let i = 0; i < inter.nestedAssetData.length; i++) {
+               var bytes = assetDataUtils.decodeERC721AssetData(
+                 inter.nestedAssetData[i]
+               );
+               exchangeBundle.push(
+                 await this.getNFT(bytes.tokenAddress, bytes.tokenId.toNumber())
+               );
+             }
+             inter = assetDataUtils.decodeMultiAssetData(
+               chain[i].order.takerAssetData
+             );
+             const wishBundle = [];
+             for (let i = 0; i < inter.nestedAssetData.length; i++) {
+               bytes = assetDataUtils.decodeERC721AssetData(
+                 inter.nestedAssetData[i]
+               );
+               wishBundle.push(
+                 await this.getNFT(bytes.tokenAddress, bytes.tokenId.toNumber())
+               );
+             }
+             preferences.push({
+               wisher: chain[i].order.makerAddress,
+               exchangeBundle: exchangeBundle,
+               wishBundle: wishBundle,
+               makerAssetData: chain[i].order.makerAssetData,
+               takerAssetData: chain[i].order.takerAssetData,
+               signedOrder: chain[i],
+             });
+           }
+           newChains.push(preferences);
+         })
+       );
+       return newChains;
+     },
+
+      async XXXgetSwapOptions(NFTs) {
         var options = [];
         for (let i = 0; i < NFTs.length; i++) {
           const bundle = [NFTs[i]];
@@ -456,6 +530,7 @@
           image_preview_url: nft.tokenJSON.image,
           name: nft.tokenJSON.name,
           description: nft.tokenJSON.description,
+          signerApprovedForCollection: nft.signerApprovedForCollection,
           asset_contract: {
             address: nft.contract,
           },

@@ -47,6 +47,27 @@
               {{asset.description}}
             </p>
             <!-- <pre>{{asset}}</pre> -->
+            <!-- <div
+              class="btn purple"
+              v-if="
+                $parent.$parent.signeraddr === asset.owner &&
+                !asset.signerApprovedForCollection
+              "
+              @click="$parent.$parent.approveTransfers(asset.contract)"
+            >
+              Approve transfers
+            </div>
+            <div
+              class="btn"
+              v-if="
+                $parent.$parent.signeraddr === asset.owner &&
+                asset.signerApprovedForCollection
+              "
+            >
+              Remove approval
+            </div> -->
+
+            <!-- <pre>{{asset}}</pre> -->
           </card>
           <br>
           <card header-classes="bg-transparent">

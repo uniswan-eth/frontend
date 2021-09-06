@@ -54,6 +54,7 @@
         </template>
       </el-table-column>
     </el-table> -->
+    <!-- <pre>{{chain}}</pre> -->
     <template slot="modal-footer">
       <base-button
         @click="$parent.executeSwap(chain)"
