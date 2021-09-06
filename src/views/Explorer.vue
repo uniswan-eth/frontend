@@ -218,8 +218,6 @@ export default {
       this.collection = {
         name: collectionName,
       };
-
-      console.log(this.nfts);
     },
     async loadOS(offset) {
       if (!this.$route.query.slug) {
