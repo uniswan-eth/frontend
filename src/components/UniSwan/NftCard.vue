@@ -15,14 +15,15 @@
             {{nft.tokenJSON.name}}
           </span>
           <br>
-          <router-link :to="'/account/'+nft.owner">
+          <account-card :address="nft.owner" :root="root"/>
+          <!-- <router-link :to="'/account/'+nft.owner">
             <i>{{
               nft.owner === root.signeraddr ?
               'Me'
               :
               nft.owner.substr(0,6)
             }}</i>
-          </router-link>
+          </router-link> -->
           <!-- <pre>{{nft}}</pre> -->
       </b-media-body>
     </b-media>
@@ -30,10 +31,12 @@
 </template>
 <script>
   // import { Table, TableColumn, DropdownMenu, DropdownItem, Dropdown} from 'element-ui'
+  import AccountCard from '@/components/UniSwan/AccountCard';
   export default {
     name: 'nft-card',
     props: ["nft", "display", "root"],
     components: {
+      AccountCard
       // [Table.name]: Table,
       // [TableColumn.name]: TableColumn,
       // [Dropdown.name]: Dropdown,

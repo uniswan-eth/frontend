@@ -13,7 +13,7 @@
         <!-- <pre>{{nftOptions}}</pre> -->
         <b-button
           @click="root.viewSwapChain(nftOptions)"
-          v-b-modal.modalSwapChain size="sm" variant="success">
+          v-b-modal.modalSwapChain size="sm" variant="secondary">
           Swap details
         </b-button>
         <br>
@@ -21,13 +21,13 @@
         <el-table class="table-responsive table"
           :data="nftOptions"
           header-row-class-name="thead-light">
-          <el-table-column label="wisher"
+          <!-- <el-table-column label="wisher"
             min-width="130px"
             prop="page">
             <template v-slot="{row}">
               {{row.wisher.substr(0,6)}}
             </template>
-          </el-table-column>
+          </el-table-column> -->
           <el-table-column label="To receive"
             min-width="130px"
             prop="page">

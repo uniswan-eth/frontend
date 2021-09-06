@@ -56,9 +56,12 @@
     </el-table> -->
     <!-- <pre>{{chain}}</pre> -->
     <template slot="modal-footer">
+      <!-- <pre>{{chain[0].wishBundle[0]}}</pre> -->
       <base-button
+        v-if="chain[0].wishBundle[0].owner === $parent.signeraddr"
         @click="$parent.executeSwap(chain)"
         type="success">Execute offer</base-button>
+        <br>
     </template>
   </b-modal>
 </template>

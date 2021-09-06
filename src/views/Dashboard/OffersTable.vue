@@ -22,8 +22,8 @@
             v-b-modal.modalOffer size="sm" variant="secondary">
             Order
           </b-button>
-          &nbsp;
-          {{row.wisher.substr(0,6)}}
+          <!-- &nbsp;
+          {{row.wisher.substr(0,6)}} -->
         </template>
       </el-table-column>
 

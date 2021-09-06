@@ -45,7 +45,7 @@
                   <h4>
                     <b-button
                       @click="getRndNFTs(row.contract)"
-                      v-b-modal.modalOffer size="sm" variant="secondary">
+                      size="sm" variant="secondary">
                       See collection
                     </b-button>
                     &nbsp;

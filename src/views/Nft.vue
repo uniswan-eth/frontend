@@ -46,11 +46,28 @@
             <p>
               {{asset.description}}
             </p>
+            <br>
+            <b-button
+              v-if="
+              $parent.$parent.signeraddr === asset.owner.address &&
+              !asset.signerApprovedForCollection
+              "
+              @click="$parent.$parent.approveTransfers(asset.asset_contract.address)"
+              size="lg" variant="success">
+              Approve transfers
+            </b-button>
+            <!-- @click="$parent.$parent.approveTransfers(asset.asset_contract.address)" -->
+            <b-button
+              v-if="
+              $parent.$parent.signeraddr === asset.owner.address &&
+              asset.signerApprovedForCollection
+              "
+              size="sm" variant="secondary">
+              Remove approval
+            </b-button>
+
+
             <!-- <pre>{{asset}}</pre> -->
-            <!-- v-if="
-            $parent.$parent.signeraddr === asset.owner.address &&
-            !asset.signerApprovedForCollection
-            " -->
             <!-- <div
               class="btn purple"
               @click="$parent.$parent.approveTransfers(asset.asset_contract.address)"
@@ -157,7 +174,10 @@
                         </a>
                       </span>
                       <b-media-body class="ml-2 d-none d-lg-block">
-                        <span class="mb-0 text-sm  font-weight-bold">{{asset.owner.address.substr(0,6)}}</span>
+                        <span class="mb-0 text-sm  font-weight-bold">
+                          <!-- {{asset.owner.address.substr(0,6)}} -->
+                          <account-card :address="asset.owner.address" :root="$parent.$parent"/>
+                        </span>
                       </b-media-body>
                   </b-media>
                 </b-col>
@@ -193,12 +213,14 @@
   import OptionsTable from './Dashboard/OptionsTable';
   import NftCard from '@/components/UniSwan/NftCard';
   import Bundle from '@/components/UniSwan/Bundle';
+  import AccountCard from '@/components/UniSwan/AccountCard';
 
 
   Vue.use(VueClipboard)
   export default {
     name: 'nft',
     components: {
+      AccountCard,
       OptionsTable,
       Bundle,
       NftCard,
