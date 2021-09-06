@@ -315,55 +315,11 @@ export default {
       const data = await client.query({
         query: gql(tokensQuery),
       });
-      var bundle = [];
       const tokenData = data.data.owners[0].tokens;
-      await Promise.all(
-        tokenData.map(async (d) => {
-          var collection = new ethers.Contract(
-            d.contract.id,
-            ERC721ABI,
-            this.signer
-          );
-          var signerApprovedForCollection = await collection.isApprovedForAll(
-            this.signeraddr,
-            this.ERC721_PROXY_ADDRESS
-          );
-          const nft = {
-            contract: d.contract.id,
-            tokenID: d.tokenID,
-            owner: d.owner.id,
-            tokenJSON: d.metadata ? JSON.parse(d.metadata) : null, // FIXME, this metadata should be a dummy object
-            signerApprovedForCollection: signerApprovedForCollection,
-          };
-          bundle.push(nft);
-        })
-      );
-      return bundle;
+      return constructBundle(tokenData);
     },
-    async getContractTokensFromSubGraph(contractAddress) {
-      const tokensQuery = `
-          query {
-          tokenContracts(where:{id:"${contractAddress.toLowerCase()}"}) {
-            id
-            tokens(first:5) {
-              id,
-              contract {
-                id
-              },
-              owner {
-                id
-              }
-              tokenID
-              metadata
-            }
-          }
-        }
-        `;
-      const data = await client.query({
-        query: gql(tokensQuery),
-      });
+    async constructBundle(tokenData) {
       var bundle = [];
-      const tokenData = data.data.tokenContracts[0].tokens;
       await Promise.all(
         tokenData.map(async (d) => {
           var collection = new ethers.Contract(
@@ -396,6 +352,31 @@ export default {
         })
       );
       return bundle;
+    },
+    async getContractTokensFromSubGraph(contractAddress) {
+      const tokensQuery = `
+          query {
+          tokenContracts(where:{id:"${contractAddress.toLowerCase()}"}) {
+            id
+            tokens(first:5) {
+              id,
+              contract {
+                id
+              },
+              owner {
+                id
+              }
+              tokenID
+              metadata
+            }
+          }
+        }
+        `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      const tokenData = data.data.tokenContracts[0].tokens;
+      return constructBundle(tokenData);
     },
     async loadApp() {
       this.access = false;
