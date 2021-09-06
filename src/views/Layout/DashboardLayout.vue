@@ -165,9 +165,7 @@
   </div>
 </template>
 <script>
-import ERC20ABI from "@/abis/erc20.json";
 import ERC721ABI from "@/abis/erc721.json";
-import UNISWANABI from "@/abis/uniswan.json";
 
 import { gql } from "apollo-boost";
 import { ApolloClient } from "apollo-client";
@@ -334,7 +332,7 @@ export default {
             contract: d.contract.id,
             tokenID: d.tokenID,
             owner: d.owner.id,
-            tokenJSON: d.metadata ? JSON.parse(d.metadata) : null,
+            tokenJSON: d.metadata ? JSON.parse(d.metadata) : null, // FIXME, this metadata should be a dummy object
             signerApprovedForCollection: signerApprovedForCollection,
           };
           bundle.push(nft);
@@ -401,10 +399,6 @@ export default {
       if (this.access) {
         await this.loadNetwork();
         await this.loadUser();
-
-        var hi = await this.getContractTokensFromSubGraph(
-          this.nonFungibleMaticV2Address
-        );
 
         this.pageloaded = true;
       }

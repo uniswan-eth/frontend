@@ -167,7 +167,6 @@ export default {
     async loadPage() {
       this.assets = [];
       this.nfts = [];
-      console.log(this.$parent.$parent.network);
       if (this.$parent.$parent.network.chainId === 137) {
         // Matic
         this.featuredCollections = [
@@ -206,7 +205,7 @@ export default {
       }
     },
     async getRndNFTs(collectionAddress) {
-      this.nfts = await this.$parent.getContractTokensFromSubGraph(
+      this.nfts = await this.$parent.$parent.getContractTokensFromSubGraph(
         collectionAddress
       );
 
