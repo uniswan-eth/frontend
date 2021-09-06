@@ -331,7 +331,53 @@ export default {
             this.signeraddr,
             this.ERC721_PROXY_ADDRESS
           );
-          console.log();
+          const nft = {
+            contract: d.contract.id,
+            tokenID: d.tokenID,
+            owner: d.owner.id,
+            tokenJSON: d.metadata ? JSON.parse(d.metadata) : null,
+            signerApprovedForCollection: signerApprovedForCollection,
+          };
+          bundle.push(nft);
+        })
+      );
+      return bundle;
+    },
+    async getContractTokensFromSubGraph(contractAddress) {
+      const tokensQuery = `
+          query {
+          tokenContracts(where:{id:"${contractAddress.toLowerCase()}"}) {
+            id
+            tokens {
+              id,
+              contract {
+                id
+              },
+              owner {
+                id
+              }
+              tokenID
+              metadata
+            }
+          }
+        }
+        `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      var bundle = [];
+      const tokenData = data.data.owners[0].tokens;
+      await Promise.all(
+        tokenData.map(async (d) => {
+          var collection = new ethers.Contract(
+            d.contract.id,
+            ERC721ABI,
+            this.signer
+          );
+          var signerApprovedForCollection = await collection.isApprovedForAll(
+            this.signeraddr,
+            this.ERC721_PROXY_ADDRESS
+          );
           const nft = {
             contract: d.contract.id,
             tokenID: d.tokenID,
@@ -345,11 +391,15 @@ export default {
       return bundle;
     },
     async loadApp() {
+      var hi = await getContractTokensFromSubGraph(
+        this.nonFungibleMaticV2Address
+      );
+      console.log(hi);
+
       this.access = false;
       this.signer = this.provider.getSigner();
       this.signeraddr = await this.signer.getAddress();
 
-      console.log(this.signeraddr);
       if (this.acl.includes(this.signeraddr)) {
         this.access = true;
       }
