@@ -167,6 +167,12 @@
   import ERC721ABI from "@/abis/erc721.json";
   import UNISWANABI from "@/abis/uniswan.json";
 
+  import { gql } from "apollo-boost";
+  import { ApolloClient } from "apollo-client";
+  import { createHttpLink } from "apollo-link-http";
+  import { InMemoryCache } from "apollo-cache-inmemory";
+  // const DB_BASE_URL = "https://uns-backend.vercel.app/api/";
+
   import { assetDataUtils, orderHashUtils } from "@0x/order-utils";
   import { BigNumber } from "@0x/utils";
   import EXCHANGEABI from "@/abis/Exchange.json";
@@ -175,6 +181,9 @@
   /* eslint-disable no-new */
   import PerfectScrollbar from 'perfect-scrollbar';
   import 'perfect-scrollbar/css/perfect-scrollbar.css';
+
+  const SUBGRAPH_URL =
+  "https://api.thegraph.com/subgraphs/name/zapaz/eip721-matic";
 
   function hasElement(className) {
     return document.getElementsByClassName(className).length > 0;
@@ -276,13 +285,74 @@
             self.loadNetwork()
           })
       this.loadApp()
+      var test = await this.getUserTokensFromSubGraph(this.signeraddr)
+      console.log(test);
     },
     methods: {
+      async getUserTokensFromSubGraph(userAddress) {
+        const tokensQuery = `
+          query {
+          owners(where:{id:"${userAddress.toLowerCase()}"}) {
+            id
+            tokens {
+              id,
+              contract {
+                id
+              },
+              owner {
+                id
+              }
+              tokenID
+              metadata
+            }
+          }
+        }
+        `; // HTTP connection to the API
+        const httpLink = createHttpLink({
+          // You should use an absolute URL here
+          uri: SUBGRAPH_URL,
+        });
+        const client = new ApolloClient({
+          link: httpLink,
+          cache: new InMemoryCache(),
+        });
+        const data = await client.query({
+          query: gql(tokensQuery),
+        });
+        var bundle = [];
+        const tokenData = data.data.owners[0].tokens;
+        console.log('kkk', tokenData, tokensQuery, userAddress.toLowerCase());
+        // await Promise.all(
+          for (let i = 0; i < tokenData.length; i++) {
+            var collection = new ethers.Contract(
+              tokenData[i].contract.id,
+              ERC721ABI,
+              this.signer
+            );
+            var signerApprovedForCollection = await collection.isApprovedForAll(
+              this.signeraddr,
+              this.ERC721_PROXY_ADDRESS
+            );
+            console.log();
+            const nft = {
+              contract: tokenData[i].contract.id,
+              tokenID: tokenData[i].tokenID,
+              owner: tokenData[i].owner.id,
+              tokenJSON: tokenData[i].metadata ? JSON.parse(tokenData[i].metadata) : null,
+              signerApprovedForCollection: signerApprovedForCollection,
+            };
+            bundle.push(nft);
+          }
+        // )
+        return bundle;
+      },
       async loadApp() {
         this.access = false;
         this.signer = this.provider.getSigner();
         this.signeraddr = await this.signer.getAddress();
 
+        console.log(this.signeraddr);
+        var test = await this.getUserTokensFromSubGraph(this.signeraddr)
         if (this.acl.includes(this.signeraddr)) {
           this.access = true;
         }

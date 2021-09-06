@@ -38,6 +38,7 @@
         type="white">Ok, Got it</base-button>
       <base-button type="link"
         >Close</base-button> -->
+        <br>
     </template>
   </b-modal>
 </template>
