@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Header -->
     <div class="header bg-gradient-warning py-7 py-lg-8 pt-lg-9">
       <b-container>
         <div class="header-body text-center mb-7">
@@ -22,14 +21,104 @@
         </svg>
       </div>
     </div>
-    <!-- Page content -->
     <b-container class="mt--8 pb-5">
       <b-row class="justify-content-center">
         <b-col lg="10">
+          <b-card
+            v-if="$route.query.tab === 'about'"
+            no-body class="bg-secondary border-0 mb-0">
+            <b-card-header class="bg-transparent"  >
+              <h2>About</h2>
+            </b-card-header>
+            <b-card-body class="px-lg-5 py-lg-5">
+              <b-tabs pills style="zzbackground:#ccc;">
+                <b-tab>
+                  <template v-slot:title>
+                    <i class="ni ni-bell-55 mr-2"></i> Protocol
+                  </template>
+                  <br>
+                  <h2>The protocol</h2>
+                  <br>
+                  <p>
+                    UniSwan is an n-party bartering protocol for NFT's. That sounds
+                    complicated, so it's best to give an example:
+                  </p>
+                  <p>
+                    Imagine that there are three NFT collectors: Alice, Bob, and Charlie.
+                  </p>
+                  <p>
+                    Each of them has an NFT that they don't want. Alice was airdropped a
+                    UniSock; but hates it. Bob’s bought a CryptoKitty a long time ago, but
+                    never got it to breed successfuly. Charlie has a HashMask, but would
+                    prefer something more useful.
+                  </p>
+                  <p>
+                    In addition, each of them desires another collectors NFT. Alice wants
+                    Bob’s CryptoKitty, Bob wants Charlie’s Hashmask, and Charlie wants
+                    Alice’s UniSock.
+                  </p>
+                  <p>
+                    With just two of the collectors, there is no way that they can trade.
+                    However, with the three collectors, they can trade in a 'ring'.
+                  </p>
+                  <p>
+                    However, the three of them have never met. And even if they knew there
+                    was a coincidence of wants, they might not trust eachother. UniSwan
+                    allows Alice, Bob, and Charlie to easily broadcast their preferences,
+                    then enact a single, atomic ‘ring’ swap.
+                  </p>
+                </b-tab>
+                <!-- <b-tab>
+                  <template v-slot:title>
+                    <i class="ni ni-cloud-upload-96 mr-2"></i> FAQ
+                  </template>
+                  <br>
+                  <h2>FAQ</h2>
+                  <br>
+                  <h4><i>How is this free?</i></h4>
+                  <p>
+                    When you create a swap preference, you generate a digital signature,
+                    indicating which NFTs you would be happy to swap. When your swap is
+                    executed, we supply the signature to the UniSwan smart contract, which
+                    verifies that you agreed to the swapping those NFTs. All the security
+                    of Ethereum, but half of the gas costs!
+                  </p>
+                  <h4><i>Removing an offer</i></h4>
+                  <p>
+                    If you changed your mind, and want to remove an offer.
+                    Simply head to <b>My Account</b>, then find offer in the <b>Offers</b> tab.
+                    Click <span class="highlight">Remove offer</span>,
+                    then sign the transaction.
+                  </p>
+                  <h4>
+                    <i>Why does removing a preference costs ETH?</i>
+                  </h4>
+                  <p>
+                    When you create a swap preference, you generate a digital signature,
+                    indicating which NFTs you would be happy to swap. However, once the
+                    signature is out in the world, there's no way for you to delete it,
+                    and anyone could use it to swap your NFTs!
+                  </p>
+                  <p>
+                    To solve this problem, the UniSwan smart contract contains a set
+                    counters, indicating how many times a preference has been deleted.
+                    When you create a preference, we include this counter in the
+                    signature. Then, to invalidate a preference, simply incremement the
+                    value of the counter. If someone tries to use an old signature, the
+                    contract will compare the two counter values, notice that they are
+                    different, and the transaction will fail.
+                  </p>
+                </b-tab> -->
+              </b-tabs>
+            </b-card-body>
+          </b-card>
 
-          <b-card no-body class="bg-secondary border-0 mb-0">
-            <b-card-header class="bg-transparent pb-5"  >
+          <b-card
+            v-if="!$route.query.tab"
+            no-body class="bg-secondary border-0 mb-0">
+            <b-card-header class="bg-transparent"  >
               <h2>How it works</h2>
+              <p>Some explainer.</p>
             </b-card-header>
             <b-card-body class="px-lg-5 py-lg-5">
               <b-tabs pills style="zzbackground:#ccc;">
@@ -70,72 +159,8 @@
                   <b-img src="img/screenshots/screenexecute.png" fluid/>
                 </b-tab>
               </b-tabs>
-
-
-              <!-- <h3>Find an NFT using the explorer</h3>
-              <hr>
-              <hr>
-              <hr>
-              <b-img src="img/screenshots/screenorders.png" fluid/>
-              <hr> -->
             </b-card-body>
           </b-card>
-
-          <!-- <b-card no-body class="bg-secondary border-0 mb-0">
-            <b-card-header class="bg-transparent pb-5"  >
-              <div class="text-muted text-center mt-2 mb-3"><small>Sign in with</small></div>
-              <div class="btn-wrapper text-center">
-                <a href="#" class="btn btn-neutral btn-icon">
-                  <span class="btn-inner--icon"><img src="img/icons/common/github.svg"></span>
-                  <span class="btn-inner--text">Github</span>
-                </a>
-                <a href="#" class="btn btn-neutral btn-icon">
-                  <span class="btn-inner--icon"><img src="img/icons/common/google.svg"></span>
-                  <span class="btn-inner--text">Google</span>
-                </a>
-              </div>
-            </b-card-header>
-            <b-card-body class="px-lg-5 py-lg-5">
-              <div class="text-center text-muted mb-4">
-                <small>Or sign in with credentials</small>
-              </div>
-              <validation-observer v-slot="{handleSubmit}" ref="formValidator">
-                <b-form role="form" @submit.prevent="handleSubmit(onSubmit)">
-                  <base-input alternative
-                              class="mb-3"
-                              name="Email"
-                              :rules="{required: true, email: true}"
-                              prepend-icon="ni ni-email-83"
-                              placeholder="Email"
-                              v-model="model.email">
-                  </base-input>
-
-                  <base-input alternative
-                              class="mb-3"
-                              name="Password"
-                              :rules="{required: true, min: 6}"
-                              prepend-icon="ni ni-lock-circle-open"
-                              type="password"
-                              placeholder="Password"
-                              v-model="model.password">
-                  </base-input>
-
-                  <b-form-checkbox v-model="model.rememberMe">Remember me</b-form-checkbox>
-                  <div class="text-center">
-                    <base-button type="primary" native-type="submit" class="my-4">Sign in</base-button>
-                  </div>
-                </b-form>
-              </validation-observer>
-            </b-card-body>
-          </b-card> -->
-          <!-- <b-row class="mt-3">
-            <b-col cols="6">
-              <router-link to="/dashboard" class="text-light"><small>Forgot password?</small></router-link>
-            </b-col>
-            <b-col cols="6" class="text-right">
-              <router-link to="/register" class="text-light"><small>Create new account</small></router-link>
-            </b-col>
-          </b-row> -->
         </b-col>
       </b-row>
     </b-container>
@@ -145,17 +170,9 @@
   export default {
     data() {
       return {
-        model: {
-          email: '',
-          password: '',
-          rememberMe: false
-        }
       };
     },
     methods: {
-      onSubmit() {
-        // this will be called only after form is valid. You can do api call here to login
-      }
     }
   };
 </script>
