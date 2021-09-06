@@ -5,8 +5,8 @@ import NotFound from '@/views/NotFoundPage.vue';
 
 const routes = [
   {
-    path: '/',
-    redirect: 'dashboard',
+    path: '/test/',
+    // redirect: 'dashboard',
     component: DashboardLayout,
     children: [
       {
@@ -43,26 +43,26 @@ const routes = [
         component: () => import(/* webpackChunkName: "demo" */ '../views/About.vue')
       },
 
-      {
-        path: '/icons',
-        name: 'icons',
-        component: () => import(/* webpackChunkName: "demo" */ '../views/Icons.vue')
-      },
-      {
-        path: '/profile',
-        name: 'profile',
-        component: () => import(/* webpackChunkName: "demo" */ '../views/Pages/UserProfile.vue')
-      },
-      {
-        path: '/maps',
-        name: 'maps',
-        component: () => import(/* webpackChunkName: "demo" */ '../views/GoogleMaps.vue')
-      },
-      {
-        path: '/tables',
-        name: 'tables',
-        component: () => import(/* webpackChunkName: "demo" */ '../views/RegularTables.vue')
-      }
+      // {
+      //   path: '/icons',
+      //   name: 'icons',
+      //   component: () => import(/* webpackChunkName: "demo" */ '../views/Icons.vue')
+      // },
+      // {
+      //   path: '/profile',
+      //   name: 'profile',
+      //   component: () => import(/* webpackChunkName: "demo" */ '../views/Pages/UserProfile.vue')
+      // },
+      // {
+      //   path: '/maps',
+      //   name: 'maps',
+      //   component: () => import(/* webpackChunkName: "demo" */ '../views/GoogleMaps.vue')
+      // },
+      // {
+      //   path: '/tables',
+      //   name: 'tables',
+      //   component: () => import(/* webpackChunkName: "demo" */ '../views/RegularTables.vue')
+      // }
     ]
   },
   {
@@ -70,6 +70,11 @@ const routes = [
     redirect: 'login',
     component: AuthLayout,
     children: [
+      {
+        path: '/',
+        name: 'landing',
+        component: () => import(/* webpackChunkName: "demo" */ '../views/Pages/Landing.vue')
+      },
       {
         path: '/login',
         name: 'login',

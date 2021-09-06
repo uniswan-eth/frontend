@@ -9,7 +9,10 @@
     >
       <div slot="brand" class="navbar-wrapper">
         <b-navbar-brand to="/">
-          <img src="img/brand/white.png">
+          <span style="font-size:52px;">
+            🦢
+          </span>
+          <!-- <img src="img/brand/white.png"> -->
         </b-navbar-brand>
       </div>
 
@@ -31,22 +34,22 @@
          </b-row>
        </div>
          <b-navbar-nav  class="align-items-lg-center ml-lg-auto">
-           <b-nav-item to="/dashboard">
+           <!-- <b-nav-item to="/dashboard">
                <i class="ni ni-planet"></i>
                <span class="nav-link-inner--text">Dashboard</span>
-           </b-nav-item>
-           <b-nav-item to="/register">
+           </b-nav-item> -->
+           <b-nav-item to="/">
                <i class="ni ni-circle-08"></i>
-               <span class="nav-link-inner--text">Register</span>
+               <span class="nav-link-inner--text">How it works</span>
            </b-nav-item>
-           <b-nav-item to="/login">
+           <b-nav-item to="/?tab=about">
                <i class="ni ni-key-25"></i>
-               <span class="nav-link-inner--text">Login</span>
+               <span class="nav-link-inner--text">About</span>
            </b-nav-item>
-           <b-nav-item to="/profile">
+           <!-- <b-nav-item to="/profile">
                <i class="ni ni-single-02"></i>
                <span class="nav-link-inner--text">Profile</span>
-           </b-nav-item>
+           </b-nav-item> -->
        </b-navbar-nav>
      </template>
     </base-nav>
@@ -62,7 +65,7 @@
 
     <footer class="py-5" id="footer-main">
       <b-container >
-        <b-row align-v="center" class="justify-content-xl-between">
+        <!-- <b-row align-v="center" class="justify-content-xl-between">
           <b-col xl="6">
             <div class="copyright text-center text-xl-left text-muted">
               © {{year}} <a href="https://www.creative-tim.com" class="font-weight-bold ml-1" target="_blank">Creative Tim</a>
@@ -84,7 +87,7 @@
               </b-nav-item>
             </b-nav>
           </b-col>
-        </b-row>
+        </b-row> -->
       </b-container>
     </footer>
   </div>
