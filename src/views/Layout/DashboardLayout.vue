@@ -366,14 +366,14 @@ export default {
       const tokenData = data.data.tokenContracts[0].tokens;
       await Promise.all(
         tokenData.map(async (d) => {
-          // If the subgraph doesn't give us the MetaData, retrieve it manually
+          // If the subgraph doesn't give us the metadata, retrieve it manually
           var tokenJSON;
           if (d.metadata) {
             tokenJSON = JSON.parse(d.metadata);
           } else {
             var tokenURI = await collection.tokenURI(d.tokenID);
             var res = await fetch(tokenURI);
-            var tokenJSON = await res.json();
+            tokenJSON = await res.json();
           }
           var collection = new ethers.Contract(
             d.contract.id,
