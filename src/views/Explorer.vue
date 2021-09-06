@@ -124,6 +124,7 @@ import {
 import Collection from "@/components/UniSwan/Collection";
 import NftCard from "@/components/UniSwan/NftCard";
 import ERC721ABI from "@/abis/erc721.json";
+import { ethers } from "ethers";
 
 Vue.use(VueClipboard);
 export default {
