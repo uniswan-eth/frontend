@@ -8,8 +8,12 @@
       <i class="ni ni-bell-55 ni-3x"></i>
       <h4 class="heading mt-4">Order details</h4>
       <p>The owner of the wish bundle can execute this order.</p>
+      <p>
+        Wisher:
+        <account-card :address="order.wisher" :root="$parent"/>
+      </p>
     </div>
-    <nfts-table :nfts="order.exchangeBundle">
+    <nfts-table :nfts="order.exchangeBundle" :root="$parent">
       <template v-slot:unsHeader>
         <b-row align-v="center">
           <b-col>
@@ -19,7 +23,7 @@
       </template>
     </nfts-table>
     <br>
-    <nfts-table :nfts="order.wishBundle">
+    <nfts-table :nfts="order.wishBundle" :root="$parent">
       <template v-slot:unsHeader>
         <b-row align-v="center">
           <b-col>
@@ -28,20 +32,26 @@
         </b-row>
       </template>
     </nfts-table>
-    <template slot="footer">
-      <base-button type="white">Ok, Got it</base-button>
-      <base-button type="link" class="text-white ml-auto" @click="modals.notice = false">Close</base-button>
+    <template slot="modal-footer">
+      <!-- <base-button
+        @click="modals.modalOffer = false"
+        type="white">Ok, Got it</base-button>
+      <base-button type="link"
+        >Close</base-button> -->
+        <br>
     </template>
   </b-modal>
 </template>
 <script>
   import NftsTable from '@/views/Dashboard/NftsTable';
+  import AccountCard from '@/components/UniSwan/AccountCard';
 
   export default {
     name: 'order-modal',
     props: ["order"],
     components: {
-      NftsTable
+      AccountCard,
+      NftsTable,
     },
     data() {
       return {

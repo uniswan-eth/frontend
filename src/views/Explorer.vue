@@ -45,7 +45,7 @@
                   <h4>
                     <b-button
                       @click="getRndNFTs(row.contract)"
-                      v-b-modal.modalOffer size="sm" variant="secondary">
+                      size="sm" variant="secondary">
                       See collection
                     </b-button>
                     &nbsp;
@@ -99,7 +99,7 @@
                 min-width="130px"
                 prop="page">
                 <template v-slot="{row}">
-                  <nft-card :nft="row"/>
+                  <nft-card :nft="row" :root="$parent.$parent"/>
                 </template>
               </el-table-column>
             </el-table>
@@ -172,8 +172,8 @@
           this.featuredCollections = [
 
             // {"contract":"0x2db4acdd606fa4677e472083eeb0c91e6585a5de", "name":"Lode Runner 001"},
-            {"contract":"0xa5f1ea7df861952863df2e8d1312f7305dabf215", "name":"Zed run"},
             {"contract":"0x36a8377e2bb3ec7d6b0f1675e243e542eb6a4764", "name":"Non-Fungible Matic V2"},
+            {"contract":"0xa5f1ea7df861952863df2e8d1312f7305dabf215", "name":"Zed run"},
             {"contract":"0x8634666ba15ada4bbc83b9dbf285f73d9e46e4c2", "name":"Chicken derby"},
             {"contract":"0x8b8407c6184f1f0fd1082e83d6a3b8349caced12", "name":"Emblem vault"},
             // {"contract":"", "name":""},

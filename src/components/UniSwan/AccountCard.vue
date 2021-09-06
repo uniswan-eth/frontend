@@ -1,20 +1,24 @@
 <template>
-  <div class="">
-    <nft-card
-      v-for="(n,idx) in bundle"
-      :key="'id'+idx"
-      :root="root"
-      :nft="n"/>
-  </div>
+  <span class="">
+    <!-- {{address.substr(0,6)}} -->
+    <router-link :to="'/account/'+address">
+      <i>{{
+        address === root.signeraddr ?
+        'Me'
+        :
+        address.substr(0,6)
+      }}</i>
+    </router-link>
+  </span>
 </template>
 <script>
   // import { Table, TableColumn, DropdownMenu, DropdownItem, Dropdown} from 'element-ui'
-  import NftCard from '@/components/UniSwan/NftCard';
+  // import NftCard from '@/components/UniSwan/NftCard';
   export default {
-    name: 'bundle',
-    props: ["bundle", "root"],
+    name: 'account-card',
+    props: ["address", "root"],
     components: {
-      NftCard
+      // NftCard
       // [Table.name]: Table,
       // [TableColumn.name]: TableColumn,
       // [Dropdown.name]: Dropdown,

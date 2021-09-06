@@ -10,7 +10,7 @@
                        min-width="130px"
                        prop="page">
         <template v-slot="{row}">
-          <nft-card :nft="row"/>
+          <nft-card :nft="row" :root="root"/>
         </template>
       </el-table-column>
     </el-table>
@@ -21,7 +21,7 @@
   import { Table, TableColumn, DropdownMenu, DropdownItem, Dropdown} from 'element-ui'
   export default {
     name: 'nfts-table',
-    props: ["nfts"],
+    props: ["nfts", "root"],
     components: {
       NftCard,
       [Table.name]: Table,

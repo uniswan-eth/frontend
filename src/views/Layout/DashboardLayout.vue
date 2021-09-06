@@ -50,7 +50,7 @@
         ></sidebar-item>
         <sidebar-item
         :link="{
-          name: 'NFT Exlorer',
+          name: 'NFT Explorer',
           path: '/explorer',
           icon: 'ni ni-world-2 text-warning',
           }"
@@ -167,6 +167,12 @@
   import ERC721ABI from "@/abis/erc721.json";
   import UNISWANABI from "@/abis/uniswan.json";
 
+  import { gql } from "apollo-boost";
+  import { ApolloClient } from "apollo-client";
+  import { createHttpLink } from "apollo-link-http";
+  import { InMemoryCache } from "apollo-cache-inmemory";
+  // const DB_BASE_URL = "https://uns-backend.vercel.app/api/";
+
   import { assetDataUtils, orderHashUtils } from "@0x/order-utils";
   import { BigNumber } from "@0x/utils";
   import EXCHANGEABI from "@/abis/Exchange.json";
@@ -175,6 +181,9 @@
   /* eslint-disable no-new */
   import PerfectScrollbar from 'perfect-scrollbar';
   import 'perfect-scrollbar/css/perfect-scrollbar.css';
+
+  const SUBGRAPH_URL =
+  "https://api.thegraph.com/subgraphs/name/zapaz/eip721-matic";
 
   function hasElement(className) {
     return document.getElementsByClassName(className).length > 0;
@@ -276,13 +285,74 @@
             self.loadNetwork()
           })
       this.loadApp()
+      var test = await this.getUserTokensFromSubGraph(this.signeraddr)
+      console.log(test);
     },
     methods: {
+      async getUserTokensFromSubGraph(userAddress) {
+        const tokensQuery = `
+          query {
+          owners(where:{id:"${userAddress.toLowerCase()}"}) {
+            id
+            tokens {
+              id,
+              contract {
+                id
+              },
+              owner {
+                id
+              }
+              tokenID
+              metadata
+            }
+          }
+        }
+        `; // HTTP connection to the API
+        const httpLink = createHttpLink({
+          // You should use an absolute URL here
+          uri: SUBGRAPH_URL,
+        });
+        const client = new ApolloClient({
+          link: httpLink,
+          cache: new InMemoryCache(),
+        });
+        const data = await client.query({
+          query: gql(tokensQuery),
+        });
+        var bundle = [];
+        const tokenData = data.data.owners[0].tokens;
+        console.log('kkk', tokenData, tokensQuery, userAddress.toLowerCase());
+        // await Promise.all(
+          for (let i = 0; i < tokenData.length; i++) {
+            var collection = new ethers.Contract(
+              tokenData[i].contract.id,
+              ERC721ABI,
+              this.signer
+            );
+            var signerApprovedForCollection = await collection.isApprovedForAll(
+              this.signeraddr,
+              this.ERC721_PROXY_ADDRESS
+            );
+            console.log();
+            const nft = {
+              contract: tokenData[i].contract.id,
+              tokenID: tokenData[i].tokenID,
+              owner: tokenData[i].owner.id,
+              tokenJSON: tokenData[i].metadata ? JSON.parse(tokenData[i].metadata) : null,
+              signerApprovedForCollection: signerApprovedForCollection,
+            };
+            bundle.push(nft);
+          }
+        // )
+        return bundle;
+      },
       async loadApp() {
         this.access = false;
         this.signer = this.provider.getSigner();
         this.signeraddr = await this.signer.getAddress();
 
+        console.log(this.signeraddr);
+        var test = await this.getUserTokensFromSubGraph(this.signeraddr)
         if (this.acl.includes(this.signeraddr)) {
           this.access = true;
         }
@@ -314,6 +384,88 @@
         this.blockNumber = await this.provider.getBlockNumber()
       },
       async getSwapOptions(NFTs) {
+       let wantAssetData = [];
+       let wantAssetAmounts = [];
+       for (let i = 0; i < NFTs.length; i++) {
+         let assetData = assetDataUtils.encodeERC721AssetData(
+           NFTs[i].contract,
+           NFTs[i].tokenID
+         );
+         wantAssetData.push(assetData);
+         wantAssetAmounts.push(new BigNumber(1));
+       }
+       var encodedData = assetDataUtils.encodeMultiAssetData(
+         wantAssetAmounts,
+         wantAssetData
+       );
+       var bundlesDBURI = DB_BASE_URL + "options/" + encodedData;
+       var res = await fetch(bundlesDBURI);
+       var options = await res.json();
+       const exchange = new ethers.Contract(
+         "0x2682798109c35310B76db070b98Fc21833DCAA61",
+         EXCHANGEABI,
+         this.signer
+       );
+       // TODO: This should check that the maker of deal still owns everything they are offering.
+       var newChains = [];
+       await Promise.all(
+         options.map(async (chain) => {
+           var preferences = [];
+           for (let i = 0; i < chain.length; i++) {
+             // Check that the order is valid.
+             // This should really be checked by the backend, but it doesn't have an Ethereum node to get on-chain data.
+             const orderHashHex = orderHashUtils.getOrderHashHex(chain[i].order);
+             const cancelled = await exchange.cancelled(orderHashHex);
+             const filledStatus = await exchange.filled(orderHashHex);
+             if (filledStatus.toNumber() > 0 || cancelled) return;
+             var inter = assetDataUtils.decodeMultiAssetData(
+               chain[i].order.makerAssetData
+             );
+             const exchangeBundle = [];
+             for (let i = 0; i < inter.nestedAssetData.length; i++) {
+               var bytes = assetDataUtils.decodeERC721AssetData(
+                 inter.nestedAssetData[i]
+               );
+               exchangeBundle.push(
+                 await this.getNFT(bytes.tokenAddress, bytes.tokenId.toNumber())
+               );
+             }
+             inter = assetDataUtils.decodeMultiAssetData(
+               chain[i].order.takerAssetData
+             );
+             const wishBundle = [];
+             for (let i = 0; i < inter.nestedAssetData.length; i++) {
+               bytes = assetDataUtils.decodeERC721AssetData(
+                 inter.nestedAssetData[i]
+               );
+               wishBundle.push(
+                 await this.getNFT(bytes.tokenAddress, bytes.tokenId.toNumber())
+               );
+             }
+             preferences.push({
+               wisher: chain[i].order.makerAddress,
+               exchangeBundle: exchangeBundle,
+               wishBundle: wishBundle,
+               makerAssetData: chain[i].order.makerAssetData,
+               takerAssetData: chain[i].order.takerAssetData,
+               signedOrder: chain[i],
+             });
+           }
+           newChains.push(preferences);
+         })
+       );
+       return newChains;
+     },
+     async approveTransfers(collectionAddress) {
+       var collection = new ethers.Contract(
+         collectionAddress,
+         ERC721ABI,
+         this.signer
+       );
+
+       collection.setApprovalForAll(this.ERC721_PROXY_ADDRESS, true);
+     },
+      async XXXgetSwapOptions(NFTs) {
         var options = [];
         for (let i = 0; i < NFTs.length; i++) {
           const bundle = [NFTs[i]];
@@ -456,6 +608,7 @@
           image_preview_url: nft.tokenJSON.image,
           name: nft.tokenJSON.name,
           description: nft.tokenJSON.description,
+          signerApprovedForCollection: nft.signerApprovedForCollection,
           asset_contract: {
             address: nft.contract,
           },

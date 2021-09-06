@@ -1,46 +1,42 @@
 <template>
-  <div class="nftcard">
-    <b-media no-body class="align-items-center">
+  <!-- :style="{background: (nft.owner === root.signeraddr) ? '#ccc' : '#fff'}" -->
+  <div
+
+    class="nftcard"
+    >
+    <b-media no-body class="text-left">
       <a :href="'/#/nft/'+nft.contract+'/'+nft.tokenID" class="avatar avatar-sm rounded-circle">
-        <!-- <img alt="Image placeholder" :src="nft.tokenJSON.image"> -->
         <img class="bgim smallim" :style="{backgroundImage: 'url('+nft.tokenJSON.image+')'}" alt=""/>
       </a>&nbsp;
       <b-media-body>
-          <span class="font-weight-400 name mb-0 text-sm">
+          <span
+            :style="{fontWeight: (nft.owner === root.signeraddr) ? 900 : 400}"
+            class="name mb-0 text-sm">
             {{nft.tokenJSON.name}}
           </span>
+          <br>
+          <account-card :address="nft.owner" :root="root"/>
+          <!-- <router-link :to="'/account/'+nft.owner">
+            <i>{{
+              nft.owner === root.signeraddr ?
+              'Me'
+              :
+              nft.owner.substr(0,6)
+            }}</i>
+          </router-link> -->
           <!-- <pre>{{nft}}</pre> -->
       </b-media-body>
     </b-media>
-    <!-- <a :href="'/#/nft/'+nft.contract+'/'+nft.tokenID"
-      v-b-popover.hover.bottom="nft.tokenJSON.name"
-      class="avatar avatar-md rounded-circle"
-      data-toggle="tooltip"
-       data-original-title="Ryan Tompson">
-        <img class="bgim smallim" :style="{backgroundImage: 'url('+nft.tokenJSON.image+')'}" alt=""/>
-    </a>
-    {{nft.tokenJSON.name}} -->
-  <!-- <b-avatar variant="info"></b-avatar> -->
-  <!-- <div class="nftcard">
-    <b-media no-body class="align-items-center">
-      <a href="#" class="avatar avatar-sm rounded-circle">
-        <img alt="Image placeholder" :src="nft.tokenJSON.image">
-      </a>
-      <b-media-body>
-          <span class="font-weight-600 name mb-0 text-sm">
-            {{nft.tokenJSON.name}}
-          </span>
-      </b-media-body>
-    </b-media> -->
-
   </div>
 </template>
 <script>
   // import { Table, TableColumn, DropdownMenu, DropdownItem, Dropdown} from 'element-ui'
+  import AccountCard from '@/components/UniSwan/AccountCard';
   export default {
     name: 'nft-card',
-    props: ["nft", "display"],
+    props: ["nft", "display", "root"],
     components: {
+      AccountCard
       // [Table.name]: Table,
       // [TableColumn.name]: TableColumn,
       // [Dropdown.name]: Dropdown,
