@@ -316,7 +316,7 @@ export default {
         query: gql(tokensQuery),
       });
       const tokenData = data.data.owners[0].tokens;
-      return constructBundle(tokenData);
+      return this.constructBundle(tokenData);
     },
     async constructBundle(tokenData) {
       var bundle = [];
