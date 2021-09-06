@@ -366,23 +366,26 @@ export default {
       const tokenData = data.data.tokenContracts[0].tokens;
       await Promise.all(
         tokenData.map(async (d) => {
-          var collection = new ethers.Contract(
-            d.contract.id,
-            ERC721ABI,
-            this.signer
-          );
-          var signerApprovedForCollection = await collection.isApprovedForAll(
-            this.signeraddr,
-            this.ERC721_PROXY_ADDRESS
-          );
-          const nft = {
-            contract: d.contract.id,
-            tokenID: d.tokenID,
-            owner: d.owner.id,
-            tokenJSON: d.metadata ? JSON.parse(d.metadata) : null,
-            signerApprovedForCollection: signerApprovedForCollection,
-          };
-          bundle.push(nft);
+          // If there's no metadata, we can't render it
+          if (d.metadata) {
+            var collection = new ethers.Contract(
+              d.contract.id,
+              ERC721ABI,
+              this.signer
+            );
+            var signerApprovedForCollection = await collection.isApprovedForAll(
+              this.signeraddr,
+              this.ERC721_PROXY_ADDRESS
+            );
+            const nft = {
+              contract: d.contract.id,
+              tokenID: d.tokenID,
+              owner: d.owner.id,
+              tokenJSON: JSON.parse(d.metadata),
+              signerApprovedForCollection: signerApprovedForCollection,
+            };
+            bundle.push(nft);
+          }
         })
       );
       return bundle;

@@ -205,17 +205,9 @@ export default {
       }
     },
     async getRndNFTs(collectionAddress) {
-      var hi = await this.$parent.$parent.getContractTokensFromSubGraph(
+      this.nfts = await this.$parent.$parent.getContractTokensFromSubGraph(
         collectionAddress
       );
-      console.log(hi);
-
-      // this.nfts = await this.$parent.$parent.getContractTokensFromSubGraph(
-      //   collectionAddress
-      // );
-      // this.assets = this.nfts.map((nft) =>
-      //   this.$parent.$parent.formatAsset(nft)
-      // );
     },
     async loadOS(offset) {
       if (!this.$route.query.slug) {
