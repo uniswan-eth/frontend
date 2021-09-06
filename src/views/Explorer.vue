@@ -111,7 +111,6 @@
   </div>
 </template>
 <script>
-import ERC721ABI from "@/abis/erc721.json";
 import Vue from "vue";
 import VueClipboard from "vue-clipboard2";
 import BaseHeader from "@/components/BaseHeader";
@@ -123,7 +122,6 @@ import {
   Dropdown,
 } from "element-ui";
 import Collection from "@/components/UniSwan/Collection";
-import { ethers } from "ethers";
 import NftCard from "@/components/UniSwan/NftCard";
 
 Vue.use(VueClipboard);
@@ -208,6 +206,7 @@ export default {
       this.nfts = await this.$parent.$parent.getContractTokensFromSubGraph(
         collectionAddress
       );
+      console.log(this.nfts);
     },
     async loadOS(offset) {
       if (!this.$route.query.slug) {
