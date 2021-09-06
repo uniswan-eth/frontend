@@ -87,7 +87,17 @@
         <b-col lg="12">
           <options-table
             :root="$parent.$parent"
-            :options="swapOptions"></options-table>
+            :options="swapOptions">
+            <template v-slot:unsHeader>
+              <b-row align-v="center">
+                <b-col>
+                  <h3 class="mb-0">Swap options</h3>
+                </b-col>
+                <b-col class="text-right">
+                </b-col>
+              </b-row>
+            </template>
+          </options-table>
 
           <!-- <pre>{{swapOptions}}</pre> -->
           <!-- <offers-table :offers="swapOptions"></offers-table> -->

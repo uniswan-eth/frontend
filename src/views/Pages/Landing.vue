@@ -118,7 +118,7 @@
             no-body class="bg-secondary border-0 mb-0">
             <b-card-header class="bg-transparent"  >
               <h2>How it works</h2>
-              <p>Some explainer.</p>
+              <!-- <p>Some explainer.</p> -->
             </b-card-header>
             <b-card-body class="px-lg-5 py-lg-5">
               <b-tabs pills style="zzbackground:#ccc;">
@@ -147,7 +147,7 @@
                   <p class="p-3">
                     Consider your options.
                   </p>
-                  <b-img src="img/screenshots/screendash.png" fluid/>
+                  <b-img src="img/screenshots/screenoptions.png" fluid/>
                 </b-tab>
                 <b-tab>
                   <template v-slot:title>

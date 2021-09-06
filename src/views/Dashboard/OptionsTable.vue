@@ -6,6 +6,7 @@
     <template v-slot:header>
       <slot name="unsHeader"></slot>
     </template>
+    <!-- <pre>{{options}}</pre> -->
     <div
       style="border-bottom:1px solid red;margin-bottom:10px;"
       v-for="(nftOptions, id) in options"
