@@ -319,10 +319,10 @@
           const bundle = [NFTs[i]];
           let wantAssetData = [];
           let wantAssetAmounts = [];
-          for (let i = 0; i < bundle.length; i++) {
+          for (let j = 0; j < bundle.length; j++) {
             let assetData = assetDataUtils.encodeERC721AssetData(
-              bundle[i].contract,
-              bundle[i].tokenID
+              bundle[j].contract,
+              bundle[j].tokenID
             );
             wantAssetData.push(assetData);
             wantAssetAmounts.push(new BigNumber(1));

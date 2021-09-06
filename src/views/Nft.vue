@@ -358,7 +358,7 @@
         // Swap Options
         // this.validSwaps = this.$parent.$parent.nftSwapOptions(nft);
         this.validSwaps = await this.$parent.$parent.getSwapOptions([nft]);
-        // console.log('Yohoo Swaps', this.validSwaps);
+        console.log('Yohoo Swaps', this.validSwaps);
 
 
         // Owner Assets - Matic / OpenSea?
