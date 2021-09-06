@@ -1,32 +1,6 @@
 <template>
   <div>
     <base-header class="pb-6 pb-8 pt-5 pt-md-8 bg-gradient-warning">
-      <!-- <b-row>
-        <b-col xl="6" md="6">
-          <stats-card title="Featured"
-            type="gradient-red"
-            sub-title="Punks"
-            icon="ni ni-active-40"
-            class="mb-4">
-
-            <template slot="footer">
-              <a :href="'/#/explorer/?slug=cryptoanarchists'" class="btn btn-sm btn-warning">See collection</a>
-            </template>
-          </stats-card>
-        </b-col>
-        <b-col xl="6" md="6">
-          <stats-card title="Featured"
-            type="gradient-orange"
-            sub-title="HashMasks"
-            icon="ni ni-chart-pie-35"
-            class="mb-4">
-
-            <template slot="footer">
-              <a :href="'/#/explorer/?slug=hashmasks'" class="btn btn-sm btn-warning">See collection</a>
-            </template>
-          </stats-card>
-        </b-col>
-      </b-row> -->
     </base-header>
     <b-container fluid class="mt--7">
       <b-row class="justify-content-center">
@@ -137,7 +111,6 @@
   </div>
 </template>
 <script>
-import ERC721ABI from "@/abis/erc721.json";
 import Vue from "vue";
 import VueClipboard from "vue-clipboard2";
 import BaseHeader from "@/components/BaseHeader";
@@ -149,8 +122,8 @@ import {
   Dropdown,
 } from "element-ui";
 import Collection from "@/components/UniSwan/Collection";
-import { ethers } from "ethers";
 import NftCard from "@/components/UniSwan/NftCard";
+import ERC721ABI from "@/abis/erc721.json";
 
 Vue.use(VueClipboard);
 export default {
@@ -193,11 +166,9 @@ export default {
     async loadPage() {
       this.assets = [];
       this.nfts = [];
-      console.log(this.$parent.$parent.network);
       if (this.$parent.$parent.network.chainId === 137) {
         // Matic
         this.featuredCollections = [
-          // {"contract":"0x2db4acdd606fa4677e472083eeb0c91e6585a5de", "name":"Lode Runner 001"},
           {
             contract: "0x36a8377e2bb3ec7d6b0f1675e243e542eb6a4764",
             name: "Non-Fungible Matic V2",
@@ -214,13 +185,8 @@ export default {
             contract: "0x8b8407c6184f1f0fd1082e83d6a3b8349caced12",
             name: "Emblem vault",
           },
-          // {"contract":"", "name":""},
-          // {"contract":"", "name":""},
         ];
-        this.getRndNFTs(
-          this.featuredCollections[0].contract
-          // this.$parent.$parent.rnd(this.featuredCollections.length)
-        );
+        this.getRndNFTs(this.featuredCollections[0].contract);
       } else if (this.$parent.$parent.network.chainId === 1) {
         // Main net
         this.featuredCollections = [
@@ -238,8 +204,9 @@ export default {
       }
     },
     async getRndNFTs(collectionAddress) {
-      this.assets = [];
-      this.nfts = [];
+      this.nfts = await this.$parent.$parent.getContractTokensFromSubGraph(
+        collectionAddress
+      );
       this.currentContract = collectionAddress;
       var collection = new ethers.Contract(
         collectionAddress,
@@ -247,24 +214,11 @@ export default {
         this.$parent.$parent.signer
       );
       var collectionName = await collection.name();
-      // var number = await collection.name();
       this.collection = {
         name: collectionName,
       };
-      var rndNFTs = [];
-      for (var i = 0; i < 3; i++) {
-        rndNFTs.push([collectionAddress, this.$parent.$parent.rnd(10000)]);
-        // rndNFTs.push([collectionAddress, this.$parent.$parent.rnd(5) ])
-      }
-      for (i = 0; i < rndNFTs.length; i++) {
-        var nft = await this.$parent.$parent.getNFT(
-          rndNFTs[i][0],
-          rndNFTs[i][1]
-        );
-        console.log("Rnd", nft);
-        this.assets.push(this.$parent.$parent.formatAsset(nft));
-        this.nfts.push(nft);
-      }
+
+      console.log(this.nfts);
     },
     async loadOS(offset) {
       if (!this.$route.query.slug) {
