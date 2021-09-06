@@ -66,7 +66,27 @@
           </card>
         </b-col>
         <b-col lg="6">
-          <card header-classes="bg-transparent">
+          <!-- <pre>{{validSwaps}}</pre> -->
+          <options-table
+            :root="$parent.$parent"
+            :options="validSwaps">
+            <template v-slot:unsHeader>
+              <b-row align-v="center">
+                <b-col>
+                  <h3 class="mb-0">Offers</h3>
+                </b-col>
+                <b-col class="text-right">
+                  <b-button
+                    :disabled="$parent.$parent.signeraddr === asset.owner.address"
+                    @click="$parent.$parent.createOrder(asset, ownerAssets)"
+                    v-b-modal.modalCreateOffer size="lg" variant="success">
+                    Make offer
+                  </b-button>
+                </b-col>
+              </b-row>
+            </template>
+          </options-table>
+          <!-- <card header-classes="bg-transparent">
             <template v-slot:header>
               <b-row align-v="center">
                 <b-col>
@@ -82,7 +102,6 @@
                 </b-col>
               </b-row>
             </template>
-            <!-- Needs to be here? -->
             <div class="">
             </div>
             <div v-for="(chain, idx) in validSwaps" :key="'chain' + idx">
@@ -96,7 +115,7 @@
               </div>
               <hr>
             </div>
-          </card>
+          </card> -->
           <br>
           <card header-classes="bg-transparent">
             <h3 slot="header" class="mb-0">
@@ -150,6 +169,7 @@
   import BaseHeader from '@/components/BaseHeader';
   import Collection from '@/components/UniSwan/Collection';
   import NftsTable from './Dashboard/NftsTable';
+  import OptionsTable from './Dashboard/OptionsTable';
   import NftCard from '@/components/UniSwan/NftCard';
   import Bundle from '@/components/UniSwan/Bundle';
 
@@ -158,6 +178,7 @@
   export default {
     name: 'nft',
     components: {
+      OptionsTable,
       Bundle,
       NftCard,
       NftsTable,
@@ -336,7 +357,8 @@
 
         // Swap Options
         // this.validSwaps = this.$parent.$parent.nftSwapOptions(nft);
-        // console.log('Yohoo Swaps', this.validSwaps);
+        this.validSwaps = await this.$parent.$parent.getSwapOptions([nft]);
+        console.log('Yohoo Swaps', this.validSwaps);
 
 
         // Owner Assets - Matic / OpenSea?

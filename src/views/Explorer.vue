@@ -105,7 +105,7 @@
             </el-table>
             <br>
             <div class="p-4 bg-secondary">
-              <form @submit="navNFT()">
+              <form @submit="navNFT($event)">
                 <b-input
                   v-model="currentTokenID"
                   placeholder="Enter Token ID"
@@ -160,7 +160,8 @@
       this.loadPage()
     },
     methods: {
-      navNFT() {
+      navNFT(ev) {
+        if (ev) {ev.preventDefault();}
         this.$router.push('/nft/'+this.currentContract+'/'+this.currentTokenID)
       },
       async loadPage() {
