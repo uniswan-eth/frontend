@@ -366,6 +366,12 @@ export default {
       const tokenData = data.data.tokenContracts[0].tokens;
       await Promise.all(
         tokenData.map(async (d) => {
+          var collection = new ethers.Contract(
+            d.contract.id,
+            ERC721ABI,
+            this.signer
+          );
+
           // If the subgraph doesn't give us the metadata, retrieve it manually
           var tokenJSON;
           if (d.metadata) {
@@ -375,11 +381,6 @@ export default {
             var res = await fetch(tokenURI);
             tokenJSON = await res.json();
           }
-          var collection = new ethers.Contract(
-            d.contract.id,
-            ERC721ABI,
-            this.signer
-          );
           var signerApprovedForCollection = await collection.isApprovedForAll(
             this.signeraddr,
             this.ERC721_PROXY_ADDRESS
