@@ -376,7 +376,7 @@ export default {
         query: gql(tokensQuery),
       });
       const tokenData = data.data.tokenContracts[0].tokens;
-      return constructBundle(tokenData);
+      return this.constructBundle(tokenData);
     },
     async getTokenByName(name) {
       const tokensQuery = `
@@ -397,7 +397,7 @@ export default {
         query: gql(tokensQuery),
       });
       const tokenData = data.data.tokens;
-      return constructBundle(tokenData);
+      return this.constructBundle(tokenData);
     },
     async loadApp() {
       this.access = false;
