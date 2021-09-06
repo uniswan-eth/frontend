@@ -294,8 +294,6 @@ export default {
       self.loadNetwork();
     });
     this.loadApp();
-    var test = await this.getUserTokensFromSubGraph(this.signeraddr);
-    console.log(test);
   },
   methods: {
     async getUserTokensFromSubGraph(userAddress) {
@@ -352,7 +350,6 @@ export default {
       this.signeraddr = await this.signer.getAddress();
 
       console.log(this.signeraddr);
-      var test = await this.getUserTokensFromSubGraph(this.signeraddr);
       if (this.acl.includes(this.signeraddr)) {
         this.access = true;
       }
@@ -364,10 +361,8 @@ export default {
       }
     },
     async loadUser() {
-      this.usernfts = await this.getUserNFTsByCollection(
-        this.nonFungibleMaticV2Address,
-        this.signeraddr
-      );
+      this.usernfts = await this.getUserTokensFromSubGraph(this.signeraddr);
+
       this.userprefs = await this.getPreferences(this.signeraddr);
       this.userSwapOptions = await this.getSwapOptions(this.usernfts);
       // console.log(this.userprefs);
