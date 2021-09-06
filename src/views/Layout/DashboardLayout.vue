@@ -366,7 +366,7 @@ export default {
         query: gql(tokensQuery),
       });
       var bundle = [];
-      const tokenData = data.data.owners[0].tokens;
+      const tokenData = data.data.tokenContracts[0].tokens;
       await Promise.all(
         tokenData.map(async (d) => {
           var collection = new ethers.Contract(
@@ -391,7 +391,7 @@ export default {
       return bundle;
     },
     async loadApp() {
-      var hi = await getContractTokensFromSubGraph(
+      var hi = await this.getContractTokensFromSubGraph(
         this.nonFungibleMaticV2Address
       );
       console.log(hi);
