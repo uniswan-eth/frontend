@@ -199,6 +199,14 @@ export default {
     this.loadApp();
   },
   methods: {
+    async signerIsApproved(contract) {
+      var collection = new ethers.Contract(contract, ERC721ABI, this.signer);
+
+      return await collection.isApprovedForAll(
+        this.signeraddr,
+        this.ERC721_PROXY_ADDRESS
+      );
+    },
     async constructBundle(tokenData) {
       var bundle = [];
       await Promise.all(
@@ -218,16 +226,11 @@ export default {
             var res = await fetch(tokenURI);
             tokenJSON = await res.json();
           }
-          var signerApprovedForCollection = await collection.isApprovedForAll(
-            this.signeraddr,
-            this.ERC721_PROXY_ADDRESS
-          );
           const nft = {
             contract: d.contract.id,
             tokenID: d.tokenID,
             owner: d.owner.id,
             tokenJSON: tokenJSON,
-            signerApprovedForCollection: signerApprovedForCollection,
           };
           bundle.push(nft);
         })
@@ -256,7 +259,6 @@ export default {
       const data = await client.query({
         query: gql(tokensQuery),
       });
-      console.log(data);
       const tokenData = data.data.owners[0].tokens;
       const output = await this.constructBundle(tokenData);
       return output;
@@ -283,7 +285,6 @@ export default {
       const data = await client.query({
         query: gql(tokensQuery),
       });
-      console.log(data);
       const tokenData = data.data.tokenContracts[0].tokens;
       const output = await this.constructBundle(tokenData);
       return output;
@@ -308,7 +309,6 @@ export default {
       const data = await client.query({
         query: gql(tokensQuery),
       });
-      console.log(data);
       const tokenData = data.data.tokens;
       const output = await this.constructBundle(tokenData);
       return output[0];
@@ -463,7 +463,6 @@ export default {
         image_preview_url: nft.tokenJSON.image,
         name: nft.tokenJSON.name,
         description: nft.tokenJSON.description,
-        signerApprovedForCollection: nft.signerApprovedForCollection,
         asset_contract: {
           address: nft.contract,
         },

@@ -25,7 +25,7 @@
             <b-button
               v-if="
                 $parent.$parent.signeraddr === asset.owner.address &&
-                !asset.signerApprovedForCollection
+                !signerApproved
               "
               @click="
                 $parent.$parent.approveTransfers(asset.asset_contract.address)
@@ -38,7 +38,7 @@
             <b-button
               v-if="
                 $parent.$parent.signeraddr === asset.owner.address &&
-                asset.signerApprovedForCollection
+                signerApproved
               "
               @click="
                 $parent.$parent.unApproveTransfers(asset.asset_contract.address)
@@ -182,6 +182,7 @@ export default {
       asset: null,
       ownerAssets: [],
       validSwaps: [],
+      signerApproved: false,
     };
   },
   async mounted() {
@@ -190,6 +191,10 @@ export default {
   },
   methods: {
     async loadPage() {
+      this.signerApproved = await this.$parent.$parent.signerIsApproved(
+        this.$route.params.contract
+      );
+
       this.ownerAssets = [];
       this.asset = null;
       var nft = await this.$parent.$parent.getTokenFromSubgraph(
