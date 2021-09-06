@@ -306,6 +306,7 @@ export default {
       const data = await client.query({
         query: gql(tokensQuery),
       });
+      console.log(data);
       const tokenData = data.data.tokens;
       const output = await this.constructBundle(tokenData);
       return output[0];
@@ -485,7 +486,6 @@ export default {
         ringswap.map((b) => b.signedOrder.signature)
       );
       console.log("Notify and refresh user NFTs", exchange);
-      // this.$parent.currentRingSwap = null;
     },
     viewOrder(order) {
       console.log("Modal", order);
@@ -501,38 +501,6 @@ export default {
       if (isWindows) {
         initScrollbar("sidenav");
       }
-    },
-    async getNFT(collectionAddress, tokenId) {
-      // See if we have in temp
-      var toret = this.tempnfts.filter((x) => {
-        // FIXME: Does properly compare tokenIDs!!
-        return x.contract === collectionAddress && x.tokenID === tokenId;
-      })[0];
-      if (!toret) {
-        var prov = this.signer ? this.signer : this.provider;
-        var collection = new ethers.Contract(
-          collectionAddress,
-          ERC721ABI,
-          prov
-        );
-        var owner = await collection.ownerOf(tokenId);
-        var signerApprovedForCollection = await collection.isApprovedForAll(
-          this.signeraddr,
-          this.ERC721_PROXY_ADDRESS
-        );
-        var tokenURI = await collection.tokenURI(tokenId);
-        var res = await fetch(tokenURI);
-        var tokenJSON = await res.json();
-        toret = {
-          contract: collectionAddress,
-          tokenID: tokenId,
-          owner: owner,
-          tokenJSON: tokenJSON,
-          signerApprovedForCollection: signerApprovedForCollection,
-        };
-        this.tempnfts.push(toret);
-      }
-      return toret;
     },
     async getPreferences(user) {
       var bundlesDBURI = DB_BASE_URL + "orders";
@@ -585,12 +553,9 @@ export default {
               );
             }
             preferences.push({
-              wisher: preference.order.makerAddress,
+              signedOrder: preference,
               exchangeBundle: exchangeBundle,
               wishBundle: wishBundle,
-              makerAssetData: preference.order.makerAssetData,
-              takerAssetData: preference.order.takerAssetData,
-              signedOrder: preference,
             });
           }
         })
