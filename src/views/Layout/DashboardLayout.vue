@@ -211,17 +211,17 @@ export default {
       var bundle = [];
       await Promise.all(
         tokenData.map(async (d) => {
-          var collection = new ethers.Contract(
-            d.contract.id,
-            ERC721ABI,
-            this.signer
-          );
-
           // If the subgraph doesn't give us the metadata, retrieve it manually
           var tokenJSON;
           if (d.metadata) {
             tokenJSON = JSON.parse(d.metadata);
           } else {
+            var collection = new ethers.Contract(
+              d.contract.id,
+              ERC721ABI,
+              this.signer
+            );
+
             var tokenURI = await collection.tokenURI(d.tokenID);
             var res = await fetch(tokenURI);
             tokenJSON = await res.json();
@@ -289,6 +289,33 @@ export default {
       const output = await this.constructBundle(tokenData);
       return output;
     },
+    async getTokensFromSubgraph(contractAddresses, tokenIds) {
+      var ids = [];
+      for (let i = 0; i < contractAddresses.length; i++) {
+        ids.push(contractAddresses[i].toLowerCase() + "_" + tokenIds[i]);
+      }
+      const tokensQuery = `
+          query {
+  tokens(where:{id:${ids}}) {
+    id
+    contract {
+      id
+    }
+    owner {
+      id
+    }
+    tokenID
+    metadata
+  }
+}
+        `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      const tokenData = data.data.tokens;
+      const output = await this.constructBundle(tokenData);
+      return output;
+    },
     async getTokenFromSubgraph(contractAddress, tokenId) {
       const id = contractAddress.toLowerCase() + "_" + tokenId;
       const tokensQuery = `
@@ -344,6 +371,15 @@ export default {
       if (access) {
         await this.loadNetwork();
         await this.loadUser();
+
+        const op = await this.getTokensFromSubgraph(
+          [
+            "0x36a8377e2bb3ec7d6b0f1675e243e542eb6a4764",
+            "0x36a8377e2bb3ec7d6b0f1675e243e542eb6a4764",
+          ],
+          ["3027", "4116"]
+        );
+        console.log(op);
 
         this.pageloaded = true;
       }
