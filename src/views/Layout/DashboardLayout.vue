@@ -487,19 +487,6 @@ export default {
         },
       };
     },
-    async buildSwapChain(chain) {
-      for (let i = 0; i < this.preferences.length; i++) {
-        if (
-          this.preferences[i].signedOrder.order.takerAssetData ===
-          chain[chain.length - 1].signedOrder.order.makerAssetData
-        ) {
-          var newChain = [...chain, this.preferences[i]];
-          this.currentNftSwapOptions.push(chain);
-          // this.userSwapOptions.push(newChain);
-          if (newChain.length <= 4) this.buildSwapChain(newChain);
-        }
-      }
-    },
     viewSwapChain(chain) {
       console.log("Modal chin", chain);
       this.currentSwapChain = chain;
