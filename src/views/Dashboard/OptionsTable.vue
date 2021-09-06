@@ -7,33 +7,34 @@
       <slot name="unsHeader"></slot>
     </template>
     <div
-      style="border-bottom:1px solid red;"
+      style="border-bottom:1px solid red;margin-bottom:10px;"
       v-for="(nftOptions, id) in options"
       :key="'nftchain' + id">
         <!-- <pre>{{nftOptions}}</pre> -->
+        <b-button
+          @click="root.viewSwapChain(nftOptions)"
+          v-b-modal.modalSwapChain size="sm" variant="success">
+          Swap details
+        </b-button>
+        <br>
+        <br>
         <el-table class="table-responsive table"
           :data="nftOptions"
           header-row-class-name="thead-light">
-          <el-table-column label=""
+          <!-- <el-table-column label=""
             min-width="130px"
             prop="page">
             <template v-slot="{row}">
-              <!-- @click="root.viewSwapChain([row])" -->
-              <b-button
-                @click="root.viewSwapChain(nftOptions)"
-                v-b-modal.modalSwapChain size="sm" variant="success">
-                Details
-              </b-button>
             </template>
-          </el-table-column>
-          <el-table-column label="Exchange"
+          </el-table-column> -->
+          <el-table-column label="To receive"
             min-width="130px"
             prop="page">
             <template v-slot="{row}">
               <bundle :bundle="row.exchangeBundle"/>
             </template>
           </el-table-column>
-          <el-table-column label="Wish"
+          <el-table-column label="Give away"
              min-width="130px"
              prop="page">
             <template v-slot="{row}">

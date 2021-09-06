@@ -9,8 +9,21 @@
       <h4 class="heading mt-4">Swap chain</h4>
       <p>The owner of the wish bundle can execute this order.</p>
     </div>
+    <options-table
+      :root="$parent.$parent"
+      :options="[chain]">
+      <template v-slot:unsHeader>
+        <b-row align-v="center">
+          <b-col>
+            <h3 class="mb-0">Ring swaps</h3>
+          </b-col>
+          <b-col class="text-right">
+          </b-col>
+        </b-row>
+      </template>
+    </options-table>
     <!-- <pre>{{chain}}</pre> -->
-    <el-table class="table-responsive table"
+    <!-- <el-table class="table-responsive table"
       :data="chain"
       header-row-class-name="thead-light">
 
@@ -40,7 +53,7 @@
           <bundle :bundle="row.wishBundle"/>
         </template>
       </el-table-column>
-    </el-table>
+    </el-table> -->
     <template slot="modal-footer">
       <base-button
         @click="$parent.executeSwap(chain)"
@@ -50,12 +63,15 @@
 </template>
 <script>
   import Bundle from '@/components/UniSwan/Bundle';
+  import OptionsTable from '@/views/Dashboard/OptionsTable';
+
   import { Table, TableColumn, DropdownMenu, DropdownItem, Dropdown} from 'element-ui'
 
   export default {
     name: 'swap-chain-modal',
     props: ["chain"],
     components: {
+      OptionsTable,
       Bundle,
       [Table.name]: Table,
       [TableColumn.name]: TableColumn,
