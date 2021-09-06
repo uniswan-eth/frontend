@@ -206,7 +206,9 @@ export default {
     },
     async getRndNFTs(collectionAddress) {
       this.nfts = await this.$parent.$parent.getContractTokensFromSubGraph(
-        collectionAddress
+        collectionAddress,
+        0,
+        6
       );
       this.currentContract = collectionAddress;
       var collection = new ethers.Contract(

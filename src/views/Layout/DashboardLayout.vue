@@ -353,12 +353,12 @@ export default {
       const tokenData = data.data.owners[0].tokens;
       return this.constructBundle(tokenData);
     },
-    async getContractTokensFromSubGraph(contractAddress) {
+    async getContractTokensFromSubGraph(contractAddress, startIndex, amount) {
       const tokensQuery = `
           query {
           tokenContracts(where:{id:"${contractAddress.toLowerCase()}"}) {
             id
-            tokens(first:5) {
+            tokens(first:${amount}, skip:${startIndex}) {
               id,
               contract {
                 id
