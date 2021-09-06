@@ -233,10 +233,9 @@ export default {
   data() {
     return {
       ERC721_PROXY_ADDRESS: "0x7931459d633a9639F26e851c9E63D30388957B60",
-      UniSwanContractAddressV2: "0x451A66fe66495A36973Bb8FA181AE1214Cac492f",
       nonFungibleMaticV2Address: "0x36a8377e2bb3ec7d6b0f1675e243e542eb6a4764",
       access: false,
-      acl: [
+      allowList: [
         "0x51e8d87A76c4A2528b2500c5a757157E577CcDCF",
         "0xF0f85AcE70e9a3a20ec9825eFc1C9da8B1Ee391A",
         "0x0CC1ff47849C626Fce6946eb9Ecb1eF4ab8dE728",
@@ -392,22 +391,23 @@ export default {
       return bundle;
     },
     async loadApp() {
-      var hi = await this.getContractTokensFromSubGraph(
-        this.nonFungibleMaticV2Address
-      );
-      console.log(hi);
-
       this.access = false;
       this.signer = this.provider.getSigner();
       this.signeraddr = await this.signer.getAddress();
 
-      if (this.acl.includes(this.signeraddr)) {
+      if (this.allowList.includes(this.signeraddr)) {
         this.access = true;
       }
       console.log(this.access);
       if (this.access) {
         await this.loadNetwork();
         await this.loadUser();
+
+        var hi = await this.getContractTokensFromSubGraph(
+          this.nonFungibleMaticV2Address
+        );
+        console.log(hi);
+
         this.pageloaded = true;
       }
     },
