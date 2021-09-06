@@ -293,31 +293,6 @@ export default {
     this.loadApp();
   },
   methods: {
-    async getUserTokensFromSubGraph(userAddress) {
-      const tokensQuery = `
-          query {
-          owners(where:{id:"${userAddress.toLowerCase()}"}) {
-            id
-            tokens {
-              id,
-              contract {
-                id
-              },
-              owner {
-                id
-              }
-              tokenID
-              metadata
-            }
-          }
-        }
-        `;
-      const data = await client.query({
-        query: gql(tokensQuery),
-      });
-      const tokenData = data.data.owners[0].tokens;
-      return this.constructBundle(tokenData);
-    },
     async constructBundle(tokenData) {
       var bundle = [];
       await Promise.all(
@@ -352,6 +327,31 @@ export default {
         })
       );
       return bundle;
+    },
+    async getUserTokensFromSubGraph(userAddress) {
+      const tokensQuery = `
+          query {
+          owners(where:{id:"${userAddress.toLowerCase()}"}) {
+            id
+            tokens {
+              id,
+              contract {
+                id
+              },
+              owner {
+                id
+              }
+              tokenID
+              metadata
+            }
+          }
+        }
+        `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      const tokenData = data.data.owners[0].tokens;
+      return this.constructBundle(tokenData);
     },
     async getContractTokensFromSubGraph(contractAddress) {
       const tokensQuery = `
