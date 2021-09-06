@@ -608,9 +608,8 @@ export default {
           ERC721ABI,
           prov
         );
-        var signerApprovedForCollection;
         var owner = await collection.ownerOf(tokenId);
-        signerApprovedForCollection = await collection.isApprovedForAll(
+        var signerApprovedForCollection = await collection.isApprovedForAll(
           this.signeraddr,
           this.ERC721_PROXY_ADDRESS
         );
@@ -627,32 +626,6 @@ export default {
         this.tempnfts.push(toret);
       }
       return toret;
-    },
-    async getUserNFTsByCollection(contractAddress, user) {
-      this.userNFTs = [];
-
-      var collection = new ethers.Contract(
-        contractAddress,
-        ERC721ABI,
-        this.signer
-      );
-
-      var nfts = [];
-      var tokenIndexes = await collection.balanceOf(user);
-      var results = tokenIndexes > 19 ? 20 : tokenIndexes;
-      var loop = [];
-      for (var i = 0; i < results; i++) {
-        loop.push(i);
-      }
-
-      await Promise.all(
-        loop.map(async (x) => {
-          var tokenId = await collection.tokenOfOwnerByIndex(user, x);
-          nfts.push(await this.getNFT(contractAddress, tokenId));
-        })
-      );
-
-      return nfts;
     },
     async getPreferences(user) {
       var bundlesDBURI = DB_BASE_URL + "orders";
