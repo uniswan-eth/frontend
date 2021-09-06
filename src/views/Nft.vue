@@ -180,174 +180,8 @@ export default {
   data() {
     return {
       asset: null,
-      ownerAssets: null,
+      ownerAssets: [],
       validSwaps: [],
-      swapOptions: [],
-      wwasset: {
-        id: 41672780,
-        token_id:
-          "14116440693855325289559048931953562559472802221804805915629551086540188286977",
-        num_sales: 1,
-        background_color: null,
-        image_url:
-          "https://lh3.googleusercontent.com/PAXYtMG63n9xeZJyXv9UCQO0KQluKu9iBo9plA_d38D3ZoVxVWE0k2tnNgUHYcyorAAyxKVCMVRhPN-JBnajZX_CXaYYTUxjMaEqfw",
-        image_preview_url:
-          "https://lh3.googleusercontent.com/PAXYtMG63n9xeZJyXv9UCQO0KQluKu9iBo9plA_d38D3ZoVxVWE0k2tnNgUHYcyorAAyxKVCMVRhPN-JBnajZX_CXaYYTUxjMaEqfw=s250",
-        image_thumbnail_url:
-          "https://lh3.googleusercontent.com/PAXYtMG63n9xeZJyXv9UCQO0KQluKu9iBo9plA_d38D3ZoVxVWE0k2tnNgUHYcyorAAyxKVCMVRhPN-JBnajZX_CXaYYTUxjMaEqfw=s128",
-        image_original_url: null,
-        animation_url: null,
-        animation_original_url: null,
-        name: "CryptoAnarchists #219/250",
-        description:
-          "Beneath this mask there is an idea... and ideas are bulletproof.\n\nCryptoAnarchists #219/250\n\nSupply for each Anarchists 1/1\n\nTotal Supply 250 Anarchists",
-        external_link: null,
-        asset_contract: {
-          address: "0x495f947276749ce646f68ac8c248420045cb7b5e",
-          asset_contract_type: "semi-fungible",
-          created_date: "2020-12-02T17:40:53.232025",
-          name: "OpenSea Collection",
-          nft_version: null,
-          opensea_version: "2.0.0",
-          owner: 102384,
-          schema_name: "ERC1155",
-          symbol: "OPENSTORE",
-          total_supply: null,
-          description: "",
-          external_link: null,
-          image_url: null,
-          default_to_fiat: false,
-          dev_buyer_fee_basis_points: 0,
-          dev_seller_fee_basis_points: 0,
-          only_proxied_transfers: false,
-          opensea_buyer_fee_basis_points: 0,
-          opensea_seller_fee_basis_points: 250,
-          buyer_fee_basis_points: 0,
-          seller_fee_basis_points: 250,
-          payout_address: null,
-        },
-        permalink:
-          "https://opensea.io/assets/0x495f947276749ce646f68ac8c248420045cb7b5e/14116440693855325289559048931953562559472802221804805915629551086540188286977",
-        collection: {
-          banner_image_url:
-            "https://lh3.googleusercontent.com/cIhK-b_H9M1VyXHs7cB5bA3suprUI5swCLoYbKsq1M1babZJhYU4PO5NegPKfOV2lCoA4CXopbjsLwdI9Vd_y8g0BjZs8H4H8WBNZg=s2500",
-          chat_url: null,
-          created_date: "2021-03-17T20:04:59.242063",
-          default_to_fiat: false,
-          description:
-            " All CryptoAnarchists are unique 3D model, 1/1 rare collectibles. Only 250 different will be available.\n\n___________\n\nEvery 50th CryptoAnarchists are LEGENDARY #50 #100 #150 #200 #250 = Ξ0.5",
-          dev_buyer_fee_basis_points: "0",
-          dev_seller_fee_basis_points: "1000",
-          discord_url: "https://discord.gg/VfXc3gw3vW",
-          display_data: {
-            card_display_style: "contain",
-          },
-          external_url: "https://xn--h4h6120on8a2yfda.y.at",
-          featured: false,
-          featured_image_url:
-            "https://lh3.googleusercontent.com/DIZ1MYntu9Th1eIcqlTpzNADiJz6GF82t85qjtp4B0ZEI5JGn5EOkFjY61UDaHFJDBR0P-nhyPBUxU4vI6qPBAwTUgx0uy1SCr4_=s300",
-          hidden: false,
-          safelist_request_status: "not_requested",
-          image_url:
-            "https://lh3.googleusercontent.com/0sC00RRcuDmu8yz4KPZkUregqTbSKJ5YAE7tV4m-mC6Vwa1lM02fSGZsQZRDNhwOJTJKzjP5-naj_opFksh-ao5eKWVC4ozpWad4=s120",
-          is_subject_to_whitelist: false,
-          large_image_url:
-            "https://lh3.googleusercontent.com/DIZ1MYntu9Th1eIcqlTpzNADiJz6GF82t85qjtp4B0ZEI5JGn5EOkFjY61UDaHFJDBR0P-nhyPBUxU4vI6qPBAwTUgx0uy1SCr4_=s300",
-          medium_username: null,
-          name: "CryptoAnarchists",
-          only_proxied_transfers: false,
-          opensea_buyer_fee_basis_points: "0",
-          opensea_seller_fee_basis_points: "250",
-          payout_address: "0x1f359f4e7980f283a6c5b018915447ce782927eb",
-          require_email: false,
-          short_description: null,
-          slug: "cryptoanarchists",
-          telegram_url: null,
-          twitter_username: "anarhysts",
-          instagram_username: null,
-          wiki_url: null,
-        },
-        decimals: null,
-        token_metadata: null,
-        owner: {
-          user: {
-            username: "NullAddress",
-          },
-          profile_img_url:
-            "https://storage.googleapis.com/opensea-static/opensea-profile/1.png",
-          address: "0x0000000000000000000000000000000000000000",
-          config: "",
-        },
-        sell_orders: null,
-        creator: {
-          user: {
-            username: "CryptoAnarchists",
-          },
-          profile_img_url:
-            "https://storage.googleapis.com/opensea-static/opensea-profile/18.png",
-          address: "0x1f359f4e7980f283a6c5b018915447ce782927eb",
-          config: "",
-        },
-        traits: [],
-        last_sale: {
-          asset: {
-            token_id:
-              "14116440693855325289559048931953562559472802221804805915629551086540188286977",
-            decimals: null,
-          },
-          asset_bundle: null,
-          event_type: "successful",
-          event_timestamp: "2021-08-29T18:17:44",
-          auction_type: null,
-          total_price: "264600000000000000",
-          payment_token: {
-            id: 2,
-            symbol: "WETH",
-            address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-            image_url:
-              "https://storage.opensea.io/files/accae6b6fb3888cbff27a013729c22dc.svg",
-            name: "Wrapped Ether",
-            decimals: 18,
-            eth_price: "1.000000000000000",
-            usd_price: "3774.969999999999800000",
-          },
-          transaction: {
-            block_hash:
-              "0x2095a288816518115751837e519de7bbb30266c14e6f5bae901cca889fac1179",
-            block_number: "13121949",
-            from_account: {
-              user: {
-                username: "CryptoAnarchists",
-              },
-              profile_img_url:
-                "https://storage.googleapis.com/opensea-static/opensea-profile/18.png",
-              address: "0x1f359f4e7980f283a6c5b018915447ce782927eb",
-              config: "",
-            },
-            id: 155653233,
-            timestamp: "2021-08-29T18:17:44",
-            to_account: {
-              user: {
-                username: "OpenSea-Orders",
-              },
-              profile_img_url:
-                "https://storage.googleapis.com/opensea-static/opensea-profile/22.png",
-              address: "0x7be8076f4ea4a4ad08075c2508e481d6c946d12b",
-              config: "verified",
-            },
-            transaction_hash:
-              "0xe72d1cc7ef0d94908835a307dcd409d6514984391bd2cf8ef2b3654d5bc5659e",
-            transaction_index: "127",
-          },
-          created_date: "2021-08-29T18:18:07.804147",
-          quantity: "1",
-        },
-        top_bid: null,
-        listing_date: null,
-        is_presale: true,
-        transfer_fee_payment_token: null,
-        transfer_fee: null,
-      },
     };
   },
   async mounted() {
@@ -363,15 +197,14 @@ export default {
         this.$route.params.tokenid.toString()
       );
 
-      // Use same fromat as OpenSea API
+      // Use same format as OpenSea API
       this.asset = this.$parent.$parent.formatAsset(nft);
 
       // Swap Options
-      // this.validSwaps = this.$parent.$parent.nftSwapOptions(nft);
       this.validSwaps = await this.$parent.$parent.getSwapOptions([nft]);
-      console.log("Yohoo Swaps", this.validSwaps);
 
-      // Owner Assets - Matic / OpenSea?
+      // Owners Assets
+      // FIXME: this will fail on Mainnet
       this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph(
         nft.owner
       );
