@@ -369,6 +369,7 @@ export default {
       const tokenData = data.data.tokenContracts[0].tokens;
       await Promise.all(
         tokenData.map(async (d) => {
+          console.log(d);
           var collection = new ethers.Contract(
             d.contract.id,
             ERC721ABI,
