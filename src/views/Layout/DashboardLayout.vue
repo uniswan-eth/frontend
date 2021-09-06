@@ -464,7 +464,6 @@ export default {
       };
     },
     viewSwapChain(chain) {
-      console.log("Modal chin", chain);
       this.currentSwapChain = chain;
     },
     async executeSwap(ringswap) {
@@ -549,7 +548,7 @@ export default {
             filledStatus.toNumber() === 0 &&
             !cancelled
           ) {
-            var inter = await assetDataUtils.decodeMultiAssetData(
+            var inter = assetDataUtils.decodeMultiAssetData(
               preference.order.makerAssetData
             );
             const exchangeBundle = [];
@@ -558,10 +557,13 @@ export default {
                 inter.nestedAssetData[i]
               );
               exchangeBundle.push(
-                await this.getNFT(bytes.tokenAddress, bytes.tokenId.toNumber())
+                await this.getUserTokensFromSubGraph(
+                  bytes.tokenAddress,
+                  bytes.tokenId.toNumber().toString()
+                )
               );
             }
-            inter = await assetDataUtils.decodeMultiAssetData(
+            inter = assetDataUtils.decodeMultiAssetData(
               preference.order.takerAssetData
             );
             const wishBundle = [];
@@ -570,7 +572,10 @@ export default {
                 inter.nestedAssetData[i]
               );
               wishBundle.push(
-                await this.getNFT(bytes.tokenAddress, bytes.tokenId.toNumber())
+                await this.getUserTokensFromSubGraph(
+                  bytes.tokenAddress,
+                  bytes.tokenId.toNumber().toString()
+                )
               );
             }
             preferences.push({

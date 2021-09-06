@@ -9,7 +9,7 @@
       :key="'nftchain' + id"
     >
       <b-button
-        @click="$props.root.viewSwapChain(nftOptions)"
+        @click="root.viewSwapChain(nftOptions)"
         v-b-modal.modalSwapChain
         size="sm"
         variant="secondary"
