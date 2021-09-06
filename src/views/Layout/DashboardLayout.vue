@@ -292,13 +292,12 @@ export default {
     async getTokensFromSubgraph(contractAddresses, tokenIds) {
       var ids = [];
       for (let i = 0; i < contractAddresses.length; i++) {
-        ids.push(
-          `"` + contractAddresses[i].toLowerCase() + "_" + tokenIds[i] + `"`
-        );
+        ids.push(contractAddresses[i].toLowerCase() + "_" + tokenIds[i]);
       }
+      console.log(ids.toString());
       const tokensQuery = `
           query {
-  tokens(where:{id:${ids}}) {
+  tokens(where:{id:${ids.toString()}}) {
     id
     contract {
       id
