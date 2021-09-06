@@ -2,33 +2,8 @@
   <div v-if="asset">
     <base-header class="pb-6 pb-8 pt-5 pt-md-8 bg-gradient-success">
       <b-row>
-        <b-col xl="6" md="6">
-          <!-- Image -->
-          <!-- <stats-card title="Featured"
-                      type="gradient-red"
-                      sub-title="Punks"
-                      icon="ni ni-active-40"
-                      class="mb-4">
-
-            <template slot="footer">
-              <span class="text-success mr-2">3.48%</span>
-              <span class="text-nowrap">Since last month</span>
-            </template>
-          </stats-card> -->
-        </b-col>
-        <b-col xl="6" md="6">
-          <!-- <stats-card title="Featured"
-                      type="gradient-orange"
-                      sub-title="HashMask"
-                      icon="ni ni-chart-pie-35"
-                      class="mb-4">
-
-            <template slot="footer">
-              <span class="text-success mr-2">12.18%</span>
-              <span class="text-nowrap">Since last month</span>
-            </template>
-          </stats-card> -->
-        </b-col>
+        <b-col xl="6" md="6"> </b-col>
+        <b-col xl="6" md="6"> </b-col>
       </b-row>
     </base-header>
 
@@ -60,36 +35,19 @@
             >
               Approve transfers
             </b-button>
-            <!-- @click="$parent.$parent.approveTransfers(asset.asset_contract.address)" -->
             <b-button
               v-if="
                 $parent.$parent.signeraddr === asset.owner.address &&
                 asset.signerApprovedForCollection
+              "
+              @click="
+                $parent.$parent.unApproveTransfers(asset.asset_contract.address)
               "
               size="sm"
               variant="secondary"
             >
               Remove approval
             </b-button>
-
-            <!-- <pre>{{asset}}</pre> -->
-            <!-- <div
-              class="btn purple"
-              @click="$parent.$parent.approveTransfers(asset.asset_contract.address)"
-            >
-              Approve transfers
-            </div>
-            <div
-              class="btn"
-              v-if="
-                $parent.$parent.signeraddr === asset.owner &&
-                asset.signerApprovedForCollection
-              "
-            >
-              Remove approval
-            </div> -->
-
-            <!-- <pre>{{asset}}</pre> -->
           </card>
           <br />
           <card header-classes="bg-transparent">
