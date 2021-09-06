@@ -381,7 +381,7 @@ export default {
       return output;
     },
     async getTokenFromSubgraph(contractAddress, tokenId) {
-      const id = contractAddress.toLowerCase() + tokenId;
+      const id = contractAddress.toLowerCase() + "_" + tokenId;
       const tokensQuery = `
           query {
   tokens(where:{id:"${id}"}) {
