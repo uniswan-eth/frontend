@@ -99,7 +99,7 @@
                 min-width="130px"
                 prop="page">
                 <template v-slot="{row}">
-                  <nft-card :nft="row"/>
+                  <nft-card :nft="row" :root="$parent.$parent"/>
                 </template>
               </el-table-column>
             </el-table>

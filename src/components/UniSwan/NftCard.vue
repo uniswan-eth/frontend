@@ -4,7 +4,7 @@
 
     class="nftcard"
     >
-    <b-media no-body class="">
+    <b-media no-body class="text-left">
       <a :href="'/#/nft/'+nft.contract+'/'+nft.tokenID" class="avatar avatar-sm rounded-circle">
         <img class="bgim smallim" :style="{backgroundImage: 'url('+nft.tokenJSON.image+')'}" alt=""/>
       </a>&nbsp;

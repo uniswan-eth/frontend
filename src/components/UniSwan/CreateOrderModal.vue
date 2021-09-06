@@ -1,5 +1,6 @@
 <template>
   <b-modal id="modalCreateOffer"
+    style="background:#333;"
     v-if="nft"
     size="lg"
     modal-classes="modal-danger"
@@ -56,15 +57,33 @@
           </b-card-group>
         </b-tab>
       </b-tabs>
-
+      <hr>
       <b-row class="mt-5">
         <b-col xl="6" class="mb-5 mb-xl-0">
-          <h4>Wish</h4>
-          <bundle :bundle="currentWishBundle" :root="$parent"/>
+          <card header-classes="bg-transparent">
+            <h3 slot="header" class="mb-0">
+              You receive &nbsp;
+              <b-button
+                @click="clearWishBundle()"
+                size="sm" variant="secondary">
+                Clear
+              </b-button>
+            </h3>
+            <bundle :bundle="currentWishBundle" :root="$parent"/>
+          </card>
         </b-col>
         <b-col xl="6" class="mb-5 mb-xl-0">
-          <h4>Exchange</h4>
-          <bundle :bundle="currentExchangeBundle" :root="$parent"/>
+          <card header-classes="bg-transparent">
+            <h3 slot="header" class="mb-0">
+              You give up&nbsp;
+              <b-button
+                @click="clearExchangeBundle()"
+                size="sm" variant="secondary">
+                Clear
+              </b-button>
+            </h3>
+            <bundle :bundle="currentExchangeBundle" :root="$parent"/>
+          </card>
         </b-col>
       </b-row>
 
@@ -111,6 +130,8 @@
     },
     methods: {
       async loadPage() {
+        this.currentExchangeBundle = []
+        this.currentWishBundle = []
         if (this.initialWish) {
           this.addToWishBundle(this.initialWish.tokenID);
 
@@ -204,10 +225,18 @@
             })
           });
       },
-    }
+    },
+    watch: {
+      nft: function () {
+        this.loadPage();
+      },
+    },
   }
 </script>
 <style>
+#modalCreateOffer .modal-content {
+  background: #eee;
+}
 .btnDisabled {
   background: #333;
 }

@@ -1,12 +1,10 @@
 <template>
   <div class="">
-    <div class="avatar-group">
-      <nft-card
-        v-for="(n,idx) in bundle"
-        :key="'id'+idx"
-        :root="root"
-        :nft="n"/>
-    </div>
+    <nft-card
+      v-for="(n,idx) in bundle"
+      :key="'id'+idx"
+      :root="root"
+      :nft="n"/>
   </div>
 </template>
 <script>
