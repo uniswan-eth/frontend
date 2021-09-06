@@ -9,7 +9,7 @@
       <h4 class="heading mt-4">Swap chain</h4>
       <p>The owner of the wish bundle can execute this order.</p>
     </div>
-
+    <!-- <pre>{{chain}}</pre> -->
     <el-table class="table-responsive table"
       :data="chain"
       header-row-class-name="thead-light">

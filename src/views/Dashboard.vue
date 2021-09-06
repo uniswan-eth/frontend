@@ -73,76 +73,34 @@
               </b-row>
             </template>
           </nfts-table>
+          <br>
+          <offers-table
+          :root="$parent.$parent"
+          :offers="$parent.$parent.userprefs"></offers-table>
         </b-col>
         <b-col xl="6" class="mb-5 mb-xl-0">
-          <offers-table
-            :root="$parent.$parent"
-            :offers="$parent.$parent.userprefs"></offers-table>
+          <options-table
+          :root="$parent.$parent"
+          :options="$parent.$parent.userSwapOptions">
+          <template v-slot:unsHeader>
+            <b-row align-v="center">
+              <b-col>
+                <h3 class="mb-0">My swap options</h3>
+              </b-col>
+              <b-col class="text-right">
+                <!-- <b-button
+                  @click="$parent.$parent.createOrder(asset, ownerAssets)"
+                  v-b-modal.modalCreateOffer size="lg" variant="success">
+                  Swap it
+                </b-button> -->
+              </b-col>
+            </b-row>
+          </template>
+        </options-table>
         </b-col>
       </b-row>
       <b-row class="mt-5">
         <b-col xl="6" class="mb-5 mb-xl-0">
-          <card header-classes="bg-transparent">
-            <h3 slot="header" class="mb-0">
-              Swap options
-            </h3>
-            <div
-              style="border-bottom:1px solid red;"
-              v-for="(nftOptions, id) in $parent.$parent.userSwapOptions"
-              :key="'nftchain' + id">
-              <!-- <pre>{{nftOptions}}</pre> -->
-
-              <!-- <div v-for="(chain, idx) in nftOptions" :key="'chain' + idx"> -->
-                <el-table class="table-responsive table"
-                  :data="nftOptions"
-                  header-row-class-name="thead-light">
-                  <el-table-column label=""
-                    min-width="130px"
-                    prop="page">
-                    <template v-slot="{row}">
-                      <b-button
-                        @click="$parent.$parent.viewSwapChain([row])"
-                        v-b-modal.modalSwapChain size="sm" variant="success">
-                        Swap it!
-                      </b-button>
-                      <!-- <pre>{{row}}</pre> -->
-                      <!-- <bundle :bundle="row.exchangeBundle"/> -->
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="Exchange"
-                    min-width="130px"
-                    prop="page">
-                    <template v-slot="{row}">
-                      <bundle :bundle="row.exchangeBundle"/>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="Wish"
-                     min-width="130px"
-                     prop="page">
-                    <template v-slot="{row}">
-                      <bundle :bundle="row.wishBundle"/>
-                    </template>
-                  </el-table-column>
-                </el-table>
-
-                <!-- <bundle :bundle="chain.exchangeBundle" /> -->
-
-                <!-- <pre>{{chain}}</pre>
-                <div v-for="(n, idy) in chain" :key="'wnft' + idy">
-                  <bundle :bundle="n.exchangeBundle" />
-                </div> -->
-                <!-- <b-button
-                  @click="$parent.$parent.viewSwapChain(chain)"
-                  v-b-modal.modalSwapChain size="sm" variant="secondary">
-                  Details
-                </b-button> -->
-                <!-- <hr>
-              </div> -->
-            </div>
-          </card>
-
-
-          <!-- <pre>{{$parent.$parent.userSwapOptions}}</pre> -->
         </b-col>
       </b-row>
     </b-container>
@@ -161,11 +119,13 @@
   // Tables
   import NftsTable from './Dashboard/NftsTable';
   import OffersTable from './Dashboard/OffersTable';
+  import OptionsTable from './Dashboard/OptionsTable';
   import Bundle from '@/components/UniSwan/Bundle';
   import { Table, TableColumn, DropdownMenu, DropdownItem, Dropdown} from 'element-ui'
 
   export default {
     components: {
+      OptionsTable,
       Bundle,
       NftsTable,
       OffersTable,

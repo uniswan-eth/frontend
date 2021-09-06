@@ -252,6 +252,7 @@
       }
     },
     async mounted() {
+      document.title ="🦢 UniSwan"
       // this.initScrollbar()
       await window.ethereum.enable();
       var self = this

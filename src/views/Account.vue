@@ -85,7 +85,11 @@
       </b-row>
       <b-row v-if="$route.query.tab === 'options'" class="justify-content-center">
         <b-col lg="12">
-          <pre>{{swapOptions}}</pre>
+          <options-table
+            :root="$parent.$parent"
+            :options="swapOptions"></options-table>
+
+          <!-- <pre>{{swapOptions}}</pre> -->
           <!-- <offers-table :offers="swapOptions"></offers-table> -->
         </b-col>
       </b-row>
@@ -98,12 +102,15 @@
   import BaseHeader from '@/components/BaseHeader';
   import NftsTable from '@/views/Dashboard/NftsTable';
   import OffersTable from './Dashboard/OffersTable';
+  import OptionsTable from './Dashboard/OptionsTable';
+
   const DB_BASE_URL = "https://uns-backend.vercel.app/api/";
 
   Vue.use(VueClipboard)
   export default {
     name: 'account',
     components: {
+      OptionsTable,
       OffersTable,
       BaseHeader,
       NftsTable,
