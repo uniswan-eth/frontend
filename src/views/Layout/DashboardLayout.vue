@@ -256,6 +256,7 @@ export default {
       const data = await client.query({
         query: gql(tokensQuery),
       });
+      console.log(data);
       const tokenData = data.data.owners[0].tokens;
       const output = await this.constructBundle(tokenData);
       return output;
@@ -282,6 +283,7 @@ export default {
       const data = await client.query({
         query: gql(tokensQuery),
       });
+      console.log(data);
       const tokenData = data.data.tokenContracts[0].tokens;
       const output = await this.constructBundle(tokenData);
       return output;
