@@ -403,7 +403,7 @@ export default {
                 inter.nestedAssetData[i]
               );
               exchangeBundle.push(
-                await this.getUserTokensFromSubGraph(
+                await this.getTokenFromSubgraph(
                   bytes.tokenAddress,
                   bytes.tokenId.toNumber().toString()
                 )
@@ -418,7 +418,7 @@ export default {
                 inter.nestedAssetData[i]
               );
               wishBundle.push(
-                await this.getUserTokensFromSubGraph(
+                await this.getTokenFromSubgraph(
                   bytes.tokenAddress,
                   bytes.tokenId.toNumber().toString()
                 )
@@ -533,7 +533,7 @@ export default {
                 inter.nestedAssetData[i]
               );
               exchangeBundle.push(
-                await this.getUserTokensFromSubGraph(
+                await this.getTokenFromSubgraph(
                   bytes.tokenAddress,
                   bytes.tokenId.toNumber().toString()
                 )
@@ -548,7 +548,7 @@ export default {
                 inter.nestedAssetData[i]
               );
               wishBundle.push(
-                await this.getUserTokensFromSubGraph(
+                await this.getTokenFromSubgraph(
                   bytes.tokenAddress,
                   bytes.tokenId.toNumber().toString()
                 )
