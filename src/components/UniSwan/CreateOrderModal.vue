@@ -60,11 +60,11 @@
       <b-row class="mt-5">
         <b-col xl="6" class="mb-5 mb-xl-0">
           <h4>Wish</h4>
-          <bundle :bundle="currentWishBundle"/>
+          <bundle :bundle="currentWishBundle" :root="$parent"/>
         </b-col>
         <b-col xl="6" class="mb-5 mb-xl-0">
           <h4>Exchange</h4>
-          <bundle :bundle="currentExchangeBundle"/>
+          <bundle :bundle="currentExchangeBundle" :root="$parent"/>
         </b-col>
       </b-row>
 

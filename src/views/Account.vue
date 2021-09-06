@@ -75,12 +75,12 @@
     <b-container fluid class="mt--7">
       <b-row v-if="!$route.query.tab" class="justify-content-center">
         <b-col lg="12">
-          <nfts-table :nfts="nfts"></nfts-table>
+          <nfts-table :nfts="nfts" :root="$parent.$parent"></nfts-table>
         </b-col>
       </b-row>
       <b-row v-if="$route.query.tab === 'offers'" class="justify-content-center">
         <b-col lg="12">
-          <offers-table :offers="offers"></offers-table>
+          <offers-table :offers="offers" :root="$parent.$parent"></offers-table>
         </b-col>
       </b-row>
       <b-row v-if="$route.query.tab === 'options'" class="justify-content-center">

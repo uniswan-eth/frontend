@@ -144,7 +144,7 @@
             </h3>
           </card>
           <br>
-          <nfts-table :nfts="ownerAssets">
+          <nfts-table :nfts="ownerAssets" :root="$parent.$parent">
             <template v-slot:unsHeader>
               <h3>Owner</h3>
               <br>

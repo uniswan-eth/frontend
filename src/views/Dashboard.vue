@@ -61,7 +61,7 @@
     <b-container fluid class="mt--7">
       <b-row class="mt-5">
         <b-col xl="6" class="mb-5 mb-xl-0">
-          <nfts-table :nfts="$parent.$parent.usernfts">
+          <nfts-table :nfts="$parent.$parent.usernfts" :root="$parent.$parent">
             <template v-slot:unsHeader>
               <b-row align-v="center">
                 <b-col>

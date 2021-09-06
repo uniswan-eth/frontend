@@ -4,6 +4,7 @@
       <nft-card
         v-for="(n,idx) in bundle"
         :key="'id'+idx"
+        :root="root"
         :nft="n"/>
     </div>
   </div>
@@ -13,7 +14,7 @@
   import NftCard from '@/components/UniSwan/NftCard';
   export default {
     name: 'bundle',
-    props: ["bundle"],
+    props: ["bundle", "root"],
     components: {
       NftCard
       // [Table.name]: Table,

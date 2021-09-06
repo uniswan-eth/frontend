@@ -32,14 +32,14 @@
             min-width="130px"
             prop="page">
             <template v-slot="{row}">
-              <bundle :bundle="row.exchangeBundle"/>
+              <bundle :bundle="row.exchangeBundle" :root="root"/>
             </template>
           </el-table-column>
           <el-table-column label="Give away"
              min-width="130px"
              prop="page">
             <template v-slot="{row}">
-              <bundle :bundle="row.wishBundle"/>
+              <bundle :bundle="row.wishBundle" :root="root"/>
             </template>
           </el-table-column>
         </el-table>

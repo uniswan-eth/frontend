@@ -9,7 +9,7 @@
       <h4 class="heading mt-4">Order details</h4>
       <p>The owner of the wish bundle can execute this order.</p>
     </div>
-    <nfts-table :nfts="order.exchangeBundle">
+    <nfts-table :nfts="order.exchangeBundle" :root="$parent">
       <template v-slot:unsHeader>
         <b-row align-v="center">
           <b-col>
@@ -19,7 +19,7 @@
       </template>
     </nfts-table>
     <br>
-    <nfts-table :nfts="order.wishBundle">
+    <nfts-table :nfts="order.wishBundle" :root="$parent">
       <template v-slot:unsHeader>
         <b-row align-v="center">
           <b-col>

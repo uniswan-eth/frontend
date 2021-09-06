@@ -22,6 +22,8 @@
             v-b-modal.modalOffer size="sm" variant="secondary">
             Order
           </b-button>
+          &nbsp;
+          {{row.wisher.substr(0,6)}}
         </template>
       </el-table-column>
 
@@ -29,14 +31,14 @@
                        min-width="130px"
                        prop="page">
         <template v-slot="{row}">
-          <bundle :bundle="row.exchangeBundle"/>
+          <bundle :bundle="row.exchangeBundle" :root="root"/>
         </template>
       </el-table-column>
       <el-table-column label="Wish"
                        min-width="130px"
                        prop="page">
         <template v-slot="{row}">
-          <bundle :bundle="row.wishBundle"/>
+          <bundle :bundle="row.wishBundle" :root="root"/>
         </template>
       </el-table-column>
     </el-table>
