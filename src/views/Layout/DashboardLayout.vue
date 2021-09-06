@@ -212,6 +212,14 @@ import OrderModal from "@/components/UniSwan/OrderModal";
 import CreateOrderModal from "@/components/UniSwan/CreateOrderModal";
 import SwapChainModal from "@/components/UniSwan/SwapChainModal";
 
+const httpLink = createHttpLink({
+  uri: SUBGRAPH_URL,
+});
+const client = new ApolloClient({
+  link: httpLink,
+  cache: new InMemoryCache(),
+});
+
 export default {
   components: {
     SwapChainModal,
@@ -308,45 +316,34 @@ export default {
             }
           }
         }
-        `; // HTTP connection to the API
-      const httpLink = createHttpLink({
-        // You should use an absolute URL here
-        uri: SUBGRAPH_URL,
-      });
-      const client = new ApolloClient({
-        link: httpLink,
-        cache: new InMemoryCache(),
-      });
+        `;
       const data = await client.query({
         query: gql(tokensQuery),
       });
       var bundle = [];
       const tokenData = data.data.owners[0].tokens;
-      console.log("kkk", tokenData, tokensQuery, userAddress.toLowerCase());
-      // await Promise.all(
-      for (let i = 0; i < tokenData.length; i++) {
-        var collection = new ethers.Contract(
-          tokenData[i].contract.id,
-          ERC721ABI,
-          this.signer
-        );
-        var signerApprovedForCollection = await collection.isApprovedForAll(
-          this.signeraddr,
-          this.ERC721_PROXY_ADDRESS
-        );
-        console.log();
-        const nft = {
-          contract: tokenData[i].contract.id,
-          tokenID: tokenData[i].tokenID,
-          owner: tokenData[i].owner.id,
-          tokenJSON: tokenData[i].metadata
-            ? JSON.parse(tokenData[i].metadata)
-            : null,
-          signerApprovedForCollection: signerApprovedForCollection,
-        };
-        bundle.push(nft);
-      }
-      // )
+      await Promise.all(
+        tokenData.map(async (d) => {
+          var collection = new ethers.Contract(
+            d.contract.id,
+            ERC721ABI,
+            this.signer
+          );
+          var signerApprovedForCollection = await collection.isApprovedForAll(
+            this.signeraddr,
+            this.ERC721_PROXY_ADDRESS
+          );
+          console.log();
+          const nft = {
+            contract: d.contract.id,
+            tokenID: d.tokenID,
+            owner: d.owner.id,
+            tokenJSON: d.metadata ? JSON.parse(d.metadata) : null,
+            signerApprovedForCollection: signerApprovedForCollection,
+          };
+          bundle.push(nft);
+        })
+      );
       return bundle;
     },
     async loadApp() {
@@ -361,21 +358,12 @@ export default {
       }
       console.log(this.access);
       if (this.access) {
-        // this.preferences = await this.getPreferences()
         await this.loadNetwork();
         await this.loadUser();
         this.pageloaded = true;
       }
     },
     async loadUser() {
-      // this.signerblockie = makeBlockie("0x4f5F6D3c7e8aDef6be8e51288F098d440bAc12ec")
-
-      // this.UniSwanContractV2 = new ethers.Contract(
-      //   this.UniSwanContractAddressV2,
-      //   UNISWANABI,
-      //   this.signer
-      // );
-
       this.usernfts = await this.getUserNFTsByCollection(
         this.nonFungibleMaticV2Address,
         this.signeraddr
