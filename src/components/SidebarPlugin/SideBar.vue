@@ -6,7 +6,7 @@
             <navbar-toggle-button @click.native="showSidebar">
 
             </navbar-toggle-button>
-            <router-link class="navbar-brand" to="/">
+            <router-link class="navbar-brand" to="/dashboard">
               <span style="font-size:48px;">
                 🦢
               </span>

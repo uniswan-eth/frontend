@@ -5,9 +5,6 @@
         <b-col>
           <h3 class="mb-0">Offers</h3>
         </b-col>
-        <!-- <b-col class="text-right">
-          <a href="#!" class="btn btn-sm btn-primary">See all</a>
-        </b-col> -->
       </b-row>
     </template>
     <el-table
@@ -28,14 +25,22 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="Exchange" min-width="130px" prop="page">
-        <template v-slot="{ row }">
-          <bundle :bundle="row.exchangeBundle" :root="root" />
-        </template>
-      </el-table-column>
       <el-table-column label="Wish" min-width="130px" prop="page">
         <template v-slot="{ row }">
-          <bundle :bundle="row.wishBundle" :root="root" />
+          <bundle :display="display" :bundle="row.wishBundle" :root="root">
+            <template v-slot:bundleHeader>
+              &nbsp;
+            </template>
+          </bundle>
+        </template>
+      </el-table-column>
+      <el-table-column label="Exchange" min-width="130px" prop="page">
+        <template v-slot="{ row }">
+          <bundle :display="display" :bundle="row.exchangeBundle" :root="root">
+            <template v-slot:bundleHeader>
+              &nbsp;
+            </template>
+          </bundle>
         </template>
       </el-table-column>
     </el-table>
@@ -53,7 +58,7 @@ import Bundle from "@/components/UniSwan/Bundle";
 
 export default {
   name: "offers-table",
-  props: ["offers", "root"],
+  props: ["offers", "root", "display"],
   components: {
     Bundle,
     [Table.name]: Table,

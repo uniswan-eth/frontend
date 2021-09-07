@@ -293,18 +293,18 @@ export default {
       const id = contractAddress.toLowerCase() + "_" + tokenId;
       const tokensQuery = `
           query {
-  tokens(where:{id:"${id}"}) {
-    id
-    contract {
-      id
-    }
-    owner {
-      id
-    }
-    tokenID
-    metadata
-  }
-}
+            tokens(where:{id:"${id}"}) {
+              id
+              contract {
+                id
+              }
+              owner {
+                id
+              }
+              tokenID
+              metadata
+            }
+          }
         `;
       const data = await client.query({
         query: gql(tokensQuery),
@@ -316,18 +316,18 @@ export default {
     async getTokenByName(name) {
       const tokensQuery = `
           query {
-  tokens(where:{name:"${name}"}) {
-    id
-    contract {
-      id
-    }
-    owner {
-      id
-    }
-    tokenID
-    metadata
-  }
-}
+          tokens(where:{name:"${name}"}) {
+            id
+            contract {
+              id
+            }
+            owner {
+              id
+            }
+            tokenID
+            metadata
+          }
+        }
         `;
       const data = await client.query({
         query: gql(tokensQuery),
@@ -512,6 +512,7 @@ export default {
         EXCHANGEABI,
         this.signer
       );
+      console.log('Prefs', bundlesDBURI, json);
       var preferences = [];
       await Promise.all(
         json.map(async (preference) => {
@@ -519,7 +520,8 @@ export default {
           const cancelled = await exchange.cancelled(orderHashHex);
           const filledStatus = await exchange.filled(orderHashHex);
           if (
-            (!user || user === preference.order.makerAddress) &&
+            // (!user || user === preference.order.makerAddress) &&
+            (!user || user.toLowerCase() === preference.order.makerAddress.toLowerCase()) &&
             filledStatus.toNumber() === 0 &&
             !cancelled
           ) {

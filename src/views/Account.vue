@@ -131,6 +131,7 @@
       >
         <b-col lg="12">
           <options-table
+            display="simple"
             :root="$parent.$parent"
             :options="swapOptions">
             <template v-slot:unsHeader>

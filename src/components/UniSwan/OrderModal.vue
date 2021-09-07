@@ -18,6 +18,15 @@
         />
       </p>
     </div>
+    <nfts-table :nfts="order.wishBundle" :root="$parent">
+      <template v-slot:unsHeader>
+        <b-row align-v="center">
+          <b-col>
+            <h3 class="mb-0">Wish</h3>
+          </b-col>
+        </b-row>
+      </template>
+    </nfts-table>
     <nfts-table :nfts="order.exchangeBundle" :root="$parent">
       <template v-slot:unsHeader>
         <b-row align-v="center">
@@ -28,21 +37,7 @@
       </template>
     </nfts-table>
     <br />
-    <nfts-table :nfts="order.wishBundle" :root="$parent">
-      <template v-slot:unsHeader>
-        <b-row align-v="center">
-          <b-col>
-            <h3 class="mb-0">Wish</h3>
-          </b-col>
-        </b-row>
-      </template>
-    </nfts-table>
     <template slot="modal-footer">
-      <!-- <base-button
-        @click="modals.modalOffer = false"
-        type="white">Ok, Got it</base-button>
-      <base-button type="link"
-        >Close</base-button> -->
       <br />
     </template>
   </b-modal>

@@ -11,7 +11,7 @@
       <h4 class="heading mt-4">Swap chain</h4>
       <p>The owner of the wish bundle can execute this order.</p>
     </div>
-    <options-table :root="$parent.$parent" :options="[chain]">
+    <options-table :root="$parent" :options="[chain]">
       <template v-slot:unsHeader>
         <b-row align-v="center">
           <b-col>

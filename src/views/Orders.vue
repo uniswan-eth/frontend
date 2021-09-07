@@ -22,6 +22,7 @@
           <card header-classes="bg-transparent">
             <h3 slot="header" class="mb-0">Latest Orders</h3>
             <offers-table
+              display="medium"
               :root="$parent.$parent"
               :offers="orders"
             ></offers-table>

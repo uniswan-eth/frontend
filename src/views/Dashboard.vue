@@ -67,9 +67,6 @@
                 <b-col>
                   <h3 class="mb-0">NFTs</h3>
                 </b-col>
-                <!-- <b-col class="text-right">
-                  <a href="#!" class="btn btn-sm btn-primary">See all</a>
-                </b-col> -->
               </b-row>
             </template>
           </nfts-table>
@@ -80,23 +77,24 @@
         </b-col>
         <b-col xl="6" class="mb-5 mb-xl-0">
           <options-table
-          :root="$parent.$parent"
-          :options="$parent.$parent.userSwapOptions">
-          <template v-slot:unsHeader>
-            <b-row align-v="center">
-              <b-col>
-                <h3 class="mb-0">My swap options</h3>
-              </b-col>
-              <b-col class="text-right">
-                <!-- <b-button
-                  @click="$parent.$parent.createOrder(asset, ownerAssets)"
-                  v-b-modal.modalCreateOffer size="lg" variant="success">
-                  Swap it
-                </b-button> -->
-              </b-col>
-            </b-row>
-          </template>
-        </options-table>
+            display="simple"
+            :root="$parent.$parent"
+            :options="$parent.$parent.userSwapOptions">
+            <template v-slot:unsHeader>
+              <b-row align-v="center">
+                <b-col>
+                  <h3 class="mb-0">My swap options</h3>
+                </b-col>
+                <b-col class="text-right">
+                  <!-- <b-button
+                    @click="$parent.$parent.createOrder(asset, ownerAssets)"
+                    v-b-modal.modalCreateOffer size="lg" variant="success">
+                    Swap it
+                  </b-button> -->
+                </b-col>
+              </b-row>
+            </template>
+          </options-table>
         </b-col>
       </b-row>
       <b-row class="mt-5">
