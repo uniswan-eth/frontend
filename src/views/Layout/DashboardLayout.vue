@@ -65,98 +65,13 @@
             icon: 'ni ni-atom text-success',
           }"
         ></sidebar-item>
-
-        <!-- <sidebar-item
-            :link="{
-              name: 'Icons',
-              path: '/icons',
-              icon: 'ni ni-planet text-blue'
-              }"
-            >
-        </sidebar-item> -->
-
-        <!-- <sidebar-item
-              :link="{
-                name: 'Maps',
-                path: '/maps',
-                icon: 'ni ni-pin-3 text-orange'
-              }">
-        </sidebar-item>
-
-        <sidebar-item
-              :link="{
-                name: 'User Profile',
-                path: '/profile',
-                icon: 'ni ni-single-02 text-yellow'
-                }">
-        </sidebar-item>
-
-        <sidebar-item
-                :link="{
-                  name: 'Tables',
-                  path: '/tables',
-                  icon: 'ni ni-bullet-list-67 text-red'
-                }">
-        </sidebar-item>
-
-        <sidebar-item
-                  :link="{
-                    name: 'Login',
-                    path: '/login',
-                    icon: 'ni ni-key-25 text-info'
-                  }">
-        </sidebar-item>
-        <sidebar-item
-                  :link="{
-                    name: 'Register',
-                    path: '/register',
-                    icon: 'ni ni-circle-08 text-pink'
-                  }">
-        </sidebar-item> -->
       </template>
-
-      <!-- <template slot="links-after">
-        <hr class="my-3">
-        <h6 class="navbar-heading p-0 text-muted">dfddffdDocumentation</h6>
-
-        <b-nav class="navbar-nav mb-md-3">
-          <b-nav-item>
-            <router-link :to="'/about'">
-              <i class="ni ni-spaceship"></i>
-              <b-nav-text class="p-0">Getting started</b-nav-text>
-            </router-link>
-          </b-nav-item>
-          <b-nav-item>
-            <router-link :to="'/about'">
-              FAQ
-            </router-link>
-          </b-nav-item>
-          <b-nav-item>
-            <router-link :to="'/about'">
-              How it works
-            </router-link>
-          </b-nav-item>
-          <b-nav-item href="https://www.creative-tim.com/learning-lab/bootstrap-vue/colors/argon-dashboard">
-              <i class="ni ni-palette"></i>
-              <b-nav-text class="p-0">Foundation</b-nav-text>
-          </b-nav-item>
-          <b-nav-item href="https://www.creative-tim.com/learning-lab/bootstrap-vue/avatar/argon-dashboard">
-              <i class="ni ni-ui-04"></i>
-              <b-nav-text class="p-0">Components</b-nav-text>
-          </b-nav-item>
-        </b-nav>
-      </template> -->
     </side-bar>
     <div class="main-content">
       <dashboard-navbar :type="$route.meta.navbarType"></dashboard-navbar>
 
       <div @click="$sidebar.displaySidebar(false)">
-        <!-- <div style="background:#ccc;height:200px;">
-          <br><br><br><br>
-          <pre>{{currentOrder}}</pre>
-        </div> -->
         <fade-transition :duration="200" origin="center top" mode="out-in">
-          <!-- your content here -->
           <router-view></router-view>
         </fade-transition>
       </div>
@@ -166,22 +81,21 @@
 </template>
 <script>
 import ERC721ABI from "@/abis/erc721.json";
+import EXCHANGEABI from "@/abis/Exchange.json";
 
 import { gql } from "apollo-boost";
 import { ApolloClient } from "apollo-client";
 import { createHttpLink } from "apollo-link-http";
 import { InMemoryCache } from "apollo-cache-inmemory";
-// const DB_BASE_URL = "https://uns-backend.vercel.app/api/";
 
 import { assetDataUtils, orderHashUtils } from "@0x/order-utils";
 import { BigNumber } from "@0x/utils";
-import EXCHANGEABI from "@/abis/Exchange.json";
-const DB_BASE_URL = "https://uns-backend.vercel.app/api/";
 
 /* eslint-disable no-new */
 import PerfectScrollbar from "perfect-scrollbar";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 
+const DB_BASE_URL = "https://uns-backend.vercel.app/api/";
 const SUBGRAPH_URL =
   "https://api.thegraph.com/subgraphs/name/zapaz/eip721-matic";
 
@@ -252,10 +166,6 @@ export default {
       newOrderNFT: null,
       newOrderOwnerNFTs: null,
       currentSwapChain: null,
-      preferences: [],
-      // dummyMainUser: '0x1ed72df72bbc87406d66659d5f7b8dc3c4dcfb5a',
-
-      currentNftSwapOptions: [],
 
       provider: null,
       network: null,
@@ -269,59 +179,58 @@ export default {
   },
   async mounted() {
     document.title = "🦢 UniSwan";
-    // this.initScrollbar()
     await window.ethereum.enable();
     var self = this;
     this.provider = new ethers.providers.Web3Provider(window.ethereum);
     this.provider.on("block", (blockNumber) => {
       // Emitted on every block change
-      // console.log('New Block', blockNumber);
       this.blockNumber = blockNumber;
     });
     window.ethereum.on("accountsChanged", async function (accounts) {
       // Time to reload your interface with accounts[0]!
-      // console.log('New Account', accounts);
       self.pageloaded = false;
       await self.loadApp();
       self.pageloaded = true;
     });
     window.ethereum.on("networkChanged", function (networkId) {
       // Time to reload your interface with the new networkId
-      // console.log('New Network', networkId);
       self.loadNetwork();
     });
     this.loadApp();
   },
   methods: {
+    async signerIsApproved(contract) {
+      var collection = new ethers.Contract(contract, ERC721ABI, this.signer);
+
+      return await collection.isApprovedForAll(
+        this.signeraddr,
+        this.ERC721_PROXY_ADDRESS
+      );
+    },
     async constructBundle(tokenData) {
       var bundle = [];
       await Promise.all(
         tokenData.map(async (d) => {
-          var collection = new ethers.Contract(
-            d.contract.id,
-            ERC721ABI,
-            this.signer
-          );
-
           // If the subgraph doesn't give us the metadata, retrieve it manually
           var tokenJSON;
           if (d.metadata) {
             tokenJSON = JSON.parse(d.metadata);
           } else {
+            var collection = new ethers.Contract(
+              d.contract.id,
+              ERC721ABI,
+              this.signer
+            );
+
             var tokenURI = await collection.tokenURI(d.tokenID);
             var res = await fetch(tokenURI);
             tokenJSON = await res.json();
           }
-          var signerApprovedForCollection = await collection.isApprovedForAll(
-            this.signeraddr,
-            this.ERC721_PROXY_ADDRESS
-          );
           const nft = {
             contract: d.contract.id,
             tokenID: d.tokenID,
             owner: d.owner.id,
             tokenJSON: tokenJSON,
-            signerApprovedForCollection: signerApprovedForCollection,
           };
           bundle.push(nft);
         })
@@ -351,7 +260,8 @@ export default {
         query: gql(tokensQuery),
       });
       const tokenData = data.data.owners[0].tokens;
-      return this.constructBundle(tokenData);
+      const output = await this.constructBundle(tokenData);
+      return output;
     },
     async getContractTokensFromSubGraph(contractAddress, startIndex, amount) {
       const tokensQuery = `
@@ -376,7 +286,32 @@ export default {
         query: gql(tokensQuery),
       });
       const tokenData = data.data.tokenContracts[0].tokens;
-      return this.constructBundle(tokenData);
+      const output = await this.constructBundle(tokenData);
+      return output;
+    },
+    async getTokenFromSubgraph(contractAddress, tokenId) {
+      const id = contractAddress.toLowerCase() + "_" + tokenId;
+      const tokensQuery = `
+          query {
+  tokens(where:{id:"${id}"}) {
+    id
+    contract {
+      id
+    }
+    owner {
+      id
+    }
+    tokenID
+    metadata
+  }
+}
+        `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      const tokenData = data.data.tokens;
+      const output = await this.constructBundle(tokenData);
+      return output[0];
     },
     async getTokenByName(name) {
       const tokensQuery = `
@@ -398,22 +333,17 @@ export default {
         query: gql(tokensQuery),
       });
       const tokenData = data.data.tokens;
-      return this.constructBundle(tokenData);
+      const output = await this.constructBundle(tokenData);
+      return output;
     },
     async loadApp() {
-      this.access = false;
       this.signer = this.provider.getSigner();
       this.signeraddr = await this.signer.getAddress();
 
-      if (this.allowList.includes(this.signeraddr)) {
-        this.access = true;
-      }
-      console.log(this.access);
-      if (this.access) {
+      var access = this.allowList.includes(this.signeraddr);
+      if (access) {
         await this.loadNetwork();
         await this.loadUser();
-        var hi = await this.getTokenByName("orang");
-        console.log(hi);
 
         this.pageloaded = true;
       }
@@ -423,7 +353,6 @@ export default {
 
       this.userprefs = await this.getPreferences(this.signeraddr);
       this.userSwapOptions = await this.getSwapOptions(this.usernfts);
-      // console.log(this.userprefs);
     },
     async loadNetwork() {
       this.network = await this.provider.getNetwork();
@@ -444,7 +373,7 @@ export default {
         wantAssetAmounts,
         wantAssetData
       );
-      var bundlesDBURI = DB_BASE_URL + "options/" + encodedData;
+      const bundlesDBURI = DB_BASE_URL + "options/" + encodedData;
       var res = await fetch(bundlesDBURI);
       var options = await res.json();
       const exchange = new ethers.Contract(
@@ -464,6 +393,7 @@ export default {
             const cancelled = await exchange.cancelled(orderHashHex);
             const filledStatus = await exchange.filled(orderHashHex);
             if (filledStatus.toNumber() > 0 || cancelled) return;
+
             var inter = assetDataUtils.decodeMultiAssetData(
               chain[i].order.makerAssetData
             );
@@ -473,7 +403,10 @@ export default {
                 inter.nestedAssetData[i]
               );
               exchangeBundle.push(
-                await this.getNFT(bytes.tokenAddress, bytes.tokenId.toNumber())
+                await this.getTokenFromSubgraph(
+                  bytes.tokenAddress,
+                  bytes.tokenId.toNumber().toString()
+                )
               );
             }
             inter = assetDataUtils.decodeMultiAssetData(
@@ -485,7 +418,10 @@ export default {
                 inter.nestedAssetData[i]
               );
               wishBundle.push(
-                await this.getNFT(bytes.tokenAddress, bytes.tokenId.toNumber())
+                await this.getTokenFromSubgraph(
+                  bytes.tokenAddress,
+                  bytes.tokenId.toNumber().toString()
+                )
               );
             }
             preferences.push({
@@ -511,7 +447,15 @@ export default {
 
       collection.setApprovalForAll(this.ERC721_PROXY_ADDRESS, true);
     },
+    async unApproveTransfers(collectionAddress) {
+      var collection = new ethers.Contract(
+        collectionAddress,
+        ERC721ABI,
+        this.signer
+      );
 
+      collection.setApprovalForAll(this.ERC721_PROXY_ADDRESS, false);
+    },
     formatAsset(nft) {
       return {
         token_id: nft.tokenID,
@@ -519,7 +463,6 @@ export default {
         image_preview_url: nft.tokenJSON.image,
         name: nft.tokenJSON.name,
         description: nft.tokenJSON.description,
-        signerApprovedForCollection: nft.signerApprovedForCollection,
         asset_contract: {
           address: nft.contract,
         },
@@ -529,7 +472,6 @@ export default {
       };
     },
     viewSwapChain(chain) {
-      console.log("Modal chin", chain);
       this.currentSwapChain = chain;
     },
     async executeSwap(ringswap) {
@@ -545,7 +487,6 @@ export default {
         ringswap.map((b) => b.signedOrder.signature)
       );
       console.log("Notify and refresh user NFTs", exchange);
-      // this.$parent.currentRingSwap = null;
     },
     viewOrder(order) {
       console.log("Modal", order);
@@ -561,65 +502,6 @@ export default {
       if (isWindows) {
         initScrollbar("sidenav");
       }
-    },
-    async getNFT(collectionAddress, tokenId) {
-      // See if we have in temp
-      var toret = this.tempnfts.filter((x) => {
-        // FIXME: Does properly compare tokenIDs!!
-        return x.contract === collectionAddress && x.tokenID === tokenId;
-      })[0];
-      if (!toret) {
-        var prov = this.signer ? this.signer : this.provider;
-        var collection = new ethers.Contract(
-          collectionAddress,
-          ERC721ABI,
-          prov
-        );
-        var signerApprovedForCollection;
-        var owner = await collection.ownerOf(tokenId);
-        signerApprovedForCollection = await collection.isApprovedForAll(
-          this.signeraddr,
-          this.ERC721_PROXY_ADDRESS
-        );
-        var tokenURI = await collection.tokenURI(tokenId);
-        var res = await fetch(tokenURI);
-        var tokenJSON = await res.json();
-        toret = {
-          contract: collectionAddress,
-          tokenID: tokenId,
-          owner: owner,
-          tokenJSON: tokenJSON,
-          signerApprovedForCollection: signerApprovedForCollection,
-        };
-        this.tempnfts.push(toret);
-      }
-      return toret;
-    },
-    async getUserNFTsByCollection(contractAddress, user) {
-      this.userNFTs = [];
-
-      var collection = new ethers.Contract(
-        contractAddress,
-        ERC721ABI,
-        this.signer
-      );
-
-      var nfts = [];
-      var tokenIndexes = await collection.balanceOf(user);
-      var results = tokenIndexes > 19 ? 20 : tokenIndexes;
-      var loop = [];
-      for (var i = 0; i < results; i++) {
-        loop.push(i);
-      }
-
-      await Promise.all(
-        loop.map(async (x) => {
-          var tokenId = await collection.tokenOfOwnerByIndex(user, x);
-          nfts.push(await this.getNFT(contractAddress, tokenId));
-        })
-      );
-
-      return nfts;
     },
     async getPreferences(user) {
       var bundlesDBURI = DB_BASE_URL + "orders";
@@ -641,7 +523,7 @@ export default {
             filledStatus.toNumber() === 0 &&
             !cancelled
           ) {
-            var inter = await assetDataUtils.decodeMultiAssetData(
+            var inter = assetDataUtils.decodeMultiAssetData(
               preference.order.makerAssetData
             );
             const exchangeBundle = [];
@@ -650,10 +532,13 @@ export default {
                 inter.nestedAssetData[i]
               );
               exchangeBundle.push(
-                await this.getNFT(bytes.tokenAddress, bytes.tokenId.toNumber())
+                await this.getTokenFromSubgraph(
+                  bytes.tokenAddress,
+                  bytes.tokenId.toNumber().toString()
+                )
               );
             }
-            inter = await assetDataUtils.decodeMultiAssetData(
+            inter = assetDataUtils.decodeMultiAssetData(
               preference.order.takerAssetData
             );
             const wishBundle = [];
@@ -662,16 +547,16 @@ export default {
                 inter.nestedAssetData[i]
               );
               wishBundle.push(
-                await this.getNFT(bytes.tokenAddress, bytes.tokenId.toNumber())
+                await this.getTokenFromSubgraph(
+                  bytes.tokenAddress,
+                  bytes.tokenId.toNumber().toString()
+                )
               );
             }
             preferences.push({
-              wisher: preference.order.makerAddress,
+              signedOrder: preference,
               exchangeBundle: exchangeBundle,
               wishBundle: wishBundle,
-              makerAssetData: preference.order.makerAssetData,
-              takerAssetData: preference.order.takerAssetData,
-              signedOrder: preference,
             });
           }
         })
