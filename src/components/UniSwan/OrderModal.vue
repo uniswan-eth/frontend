@@ -1,16 +1,21 @@
 <template>
-  <b-modal id="modalOffer"
+  <b-modal
+    id="modalOffer"
     v-if="order"
     size="lg"
     modal-classes="modal-danger"
-    modal-content-classes="bg-gradient-danger">
+    modal-content-classes="bg-gradient-danger"
+  >
     <div class="py-3 text-center">
       <i class="ni ni-bell-55 ni-3x"></i>
       <h4 class="heading mt-4">Order details</h4>
       <p>The owner of the wish bundle can execute this order.</p>
       <p>
         Wisher:
-        <account-card :address="order.wisher" :root="$parent"/>
+        <account-card
+          :address="order.signedOrder.order.makerAddress"
+          :root="$parent"
+        />
       </p>
     </div>
     <nfts-table :nfts="order.exchangeBundle" :root="$parent">
@@ -22,7 +27,7 @@
         </b-row>
       </template>
     </nfts-table>
-    <br>
+    <br />
     <nfts-table :nfts="order.wishBundle" :root="$parent">
       <template v-slot:unsHeader>
         <b-row align-v="center">
@@ -38,27 +43,25 @@
         type="white">Ok, Got it</base-button>
       <base-button type="link"
         >Close</base-button> -->
-        <br>
+      <br />
     </template>
   </b-modal>
 </template>
 <script>
-  import NftsTable from '@/views/Dashboard/NftsTable';
-  import AccountCard from '@/components/UniSwan/AccountCard';
+import NftsTable from "@/views/Dashboard/NftsTable";
+import AccountCard from "@/components/UniSwan/AccountCard";
 
-  export default {
-    name: 'order-modal',
-    props: ["order"],
-    components: {
-      AccountCard,
-      NftsTable,
-    },
-    data() {
-      return {
-
-      }
-    }
-  }
+export default {
+  name: "order-modal",
+  props: ["order"],
+  components: {
+    AccountCard,
+    NftsTable,
+  },
+  data() {
+    return {};
+  },
+};
 </script>
 <style>
 </style>
