@@ -13,7 +13,7 @@
       <p>
         Wisher:
         <account-card
-          :address="order.signedOrder.order.makerAddress"
+          :address="order.signedOrder.makerAddress"
           :root="$parent"
         />
       </p>
@@ -38,11 +38,6 @@
       </template>
     </nfts-table>
     <template slot="modal-footer">
-      <!-- <base-button
-        @click="modals.modalOffer = false"
-        type="white">Ok, Got it</base-button>
-      <base-button type="link"
-        >Close</base-button> -->
       <br />
     </template>
   </b-modal>

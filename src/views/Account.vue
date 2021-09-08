@@ -130,16 +130,13 @@
         class="justify-content-center"
       >
         <b-col lg="12">
-          <options-table
-            :root="$parent.$parent"
-            :options="swapOptions">
+          <options-table :root="$parent.$parent" :options="swapOptions">
             <template v-slot:unsHeader>
               <b-row align-v="center">
                 <b-col>
                   <h3 class="mb-0">Swap options</h3>
                 </b-col>
-                <b-col class="text-right">
-                </b-col>
+                <b-col class="text-right"> </b-col>
               </b-row>
             </template>
           </options-table>
@@ -158,8 +155,6 @@ import BaseHeader from "@/components/BaseHeader";
 import NftsTable from "@/views/Dashboard/NftsTable";
 import OffersTable from "./Dashboard/OffersTable";
 import OptionsTable from "./Dashboard/OptionsTable";
-
-const DB_BASE_URL = "https://uns-backend.vercel.app/api/";
 
 Vue.use(VueClipboard);
 export default {
@@ -205,15 +200,6 @@ export default {
         }
       } else if (this.$route.query.tab === "options") {
         this.swapOptions = await this.$parent.$parent.getSwapOptions(this.nfts);
-        // var bundlesDBURI = DB_BASE_URL + "options/"+;
-
-        // if (this.$route.params.address === this.$parent.$parent.signeraddr) {
-        //   this.offers = this.$parent.$parent.userprefs
-        // } else {
-        //   this.offers = await this.$parent.$parent.getPreferences(
-        //     this.$route.params.address
-        //   )
-        // }
       }
     },
     onCopy() {
