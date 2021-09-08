@@ -24,7 +24,7 @@
 
     <template slot="modal-footer">
       <base-button
-        v-if="chain[0].wishBundle[0].owner === $parent.signeraddr"
+        v-if="chain[0].wishBundle[0].owner.toLowerCase() === $parent.signeraddr.toLowerCase()"
         @click="$parent.executeSwap(chain)"
         type="success"
         >Execute offer</base-button

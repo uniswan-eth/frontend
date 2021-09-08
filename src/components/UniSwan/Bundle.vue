@@ -1,5 +1,5 @@
 <template>
-  <div class="">
+  <div style="float:left;">
     <nft-card
       :idx="idx"
       :display="display"

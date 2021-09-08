@@ -224,10 +224,12 @@ export default {
         // .post(DB_BASE_URL + "preferences/add", { order, signature })
         .post(DB_BASE_URL + "orders/add", { order, signature })
         .then(async (res) => {
-          self.$parent.userprefs = await self.$parent.getPreferences(
-            self.$parent.signeraddr
-          );
-          console.log(res.data, self.$parent.userprefs);
+          self.$parent.loadApp()
+
+          // self.$parent.userprefs = await self.$parent.getPreferences(
+          //   self.$parent.signeraddr
+          // );
+          console.log('new order', res.data, self.$parent.userprefs);
           this.$bvModal.hide("modalCreateOffer");
           this.$notify({
             type: "danger",

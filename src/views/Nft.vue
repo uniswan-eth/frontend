@@ -83,7 +83,7 @@
             <template v-slot:unsHeader>
               <b-row align-v="center">
                 <b-col>
-                  <h3 class="mb-0">Options</h3>
+                  <h3 class="mb-0">Owners options</h3>
                 </b-col>
                 <b-col class="text-right">
                   <b-button
@@ -120,7 +120,12 @@
                     size="sm"
                     variant="secondary">
                     <span>
-                    Order
+                      {{
+                        order.wishBundle[0].owner.toLowerCase() === $parent.$parent.signeraddr.toLowerCase() ?
+                        'Execute' :
+                        'View'
+                      }}
+                    <!-- Order -->
                   </span>
                 </b-button>
                 </template>
@@ -245,7 +250,8 @@ export default {
         nft.owner
       );
 
-      var orders = await this.$parent.$parent.getPreferences(
+      // var orders = await this.$parent.$parent.getPreferences(
+      var orders = await this.$parent.$parent.queryOrderBook(
         nft.owner
       );
       orders.map(x => {

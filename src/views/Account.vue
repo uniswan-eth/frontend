@@ -187,35 +187,29 @@ export default {
   },
   methods: {
     async loadPage() {
-      if (this.$route.params.address === this.$parent.$parent.signeraddr) {
+      if (this.$route.params.address.toLowerCase() === this.$parent.$parent.signeraddr.toLowerCase()) {
         this.nfts = this.$parent.$parent.usernfts;
+        this.offers = this.$parent.$parent.userprefs;
+        this.swapOptions = this.$parent.$parent.userSwapOptions;
       } else {
-        this.nfts = await this.$parent.$parent.getUserTokensFromSubGraph(
-          this.$route.params.address
-        );
-      }
-
-      if (!this.$route.query.tab) {
-      } else if (this.$route.query.tab === "offers") {
-        if (this.$route.params.address === this.$parent.$parent.signeraddr) {
-          this.offers = this.$parent.$parent.userprefs;
-        } else {
-          this.offers = await this.$parent.$parent.getPreferences(
+        if (!this.$route.query.tab) {
+          this.nfts = await this.$parent.$parent.getUserTokensFromSubGraph(
             this.$route.params.address
           );
+          console.log('Acc NFTs', this.nfts);
+        } else if (this.$route.query.tab === "offers") {
+          this.offers = await this.$parent.$parent.queryOrderBook(
+            this.$route.params.address
+          );
+          console.log('Acc Offers', this.offers);
+        } else if (this.$route.query.tab === "options") {
+          this.swapOptions = await this.$parent.$parent.getSwapOptions(
+            this.nfts
+          );
+          console.log('Acc Optiosn', this.swapOptions);
         }
-      } else if (this.$route.query.tab === "options") {
-        this.swapOptions = await this.$parent.$parent.getSwapOptions(this.nfts);
-        // var bundlesDBURI = DB_BASE_URL + "options/"+;
-
-        // if (this.$route.params.address === this.$parent.$parent.signeraddr) {
-        //   this.offers = this.$parent.$parent.userprefs
-        // } else {
-        //   this.offers = await this.$parent.$parent.getPreferences(
-        //     this.$route.params.address
-        //   )
-        // }
       }
+
     },
     onCopy() {
       this.$notify({

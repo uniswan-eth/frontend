@@ -20,9 +20,18 @@
       <b-row class="justify-content-center">
         <b-col lg="12">
           <card header-classes="bg-transparent">
-            <h3 slot="header" class="mb-0">Latest Orders</h3>
+            <h3 slot="header" class="mb-0">
+              Latest Orders
+              <b-button
+              @click="$parent.$parent.getPreferences()"
+              v-b-modal.modalSwapChain
+              size="sm"
+              variant="secondary">
+              Refresh
+            </b-button>
+            </h3>
             <offers-table
-              display="medium"
+              zzdisplay="medium"
               :root="$parent.$parent"
               :offers="orders"
             ></offers-table>
@@ -73,7 +82,9 @@ export default {
       console.log("Network", this.$parent.$parent.network.chainId);
       if (this.$parent.$parent.network.chainId === 137) {
         // Matic
-        this.orders = await this.$parent.$parent.getPreferences();
+        console.log('LOAD TIMER');
+        // this.orders = await this.$parent.$parent.getPreferences();
+        this.orders = await this.$parent.$parent.orderbook;
         console.log("Orders", this.orders);
       } else if (this.$parent.$parent.network.chainId === 1) {
         // Main net

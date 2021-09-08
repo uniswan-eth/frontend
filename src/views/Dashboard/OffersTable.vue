@@ -12,18 +12,6 @@
       :data="offers"
       header-row-class-name="thead-light"
     >
-      <el-table-column label="" max-width="30px" prop="page">
-        <template v-slot="{ row }">
-          <b-button
-            @click="root.viewOrder(row)"
-            v-b-modal.modalOffer
-            size="sm"
-            variant="secondary"
-          >
-            Order
-          </b-button>
-        </template>
-      </el-table-column>
 
       <el-table-column label="Wish" min-width="130px" prop="page">
         <template v-slot="{ row }">
@@ -43,6 +31,26 @@
           </bundle>
         </template>
       </el-table-column>
+      <el-table-column label="Wisher" max-width="30px" prop="page">
+        <template v-slot="{ row }">
+          <b-button
+          @click="root.viewOrder(row)"
+          v-b-modal.modalOffer
+          size="sm"
+          variant="secondary"
+          >
+          View order
+        </b-button>
+        <!-- <b-badge v-if="row.signedOrder.order.makerAddress !==" variant="danger">Danger</b-badge> -->
+        <br>
+        <account-card :address="row.signedOrder.order.makerAddress" :root="root"/>
+      </template>
+    </el-table-column>
+      <!-- <el-table-column label="Wisher" max-width="30px" prop="page">
+        <template v-slot="{ row }">
+          <account-card :address="row.signedOrder.order.makerAddress" :root="root"/>
+        </template>
+      </el-table-column> -->
     </el-table>
   </b-card>
 </template>
@@ -55,11 +63,13 @@ import {
   Dropdown,
 } from "element-ui";
 import Bundle from "@/components/UniSwan/Bundle";
+import AccountCard from '@/components/UniSwan/AccountCard';
 
 export default {
   name: "offers-table",
   props: ["offers", "root", "display"],
   components: {
+    AccountCard,
     Bundle,
     [Table.name]: Table,
     [TableColumn.name]: TableColumn,

@@ -86,11 +86,6 @@
                   <h3 class="mb-0">My swap options</h3>
                 </b-col>
                 <b-col class="text-right">
-                  <!-- <b-button
-                    @click="$parent.$parent.createOrder(asset, ownerAssets)"
-                    v-b-modal.modalCreateOffer size="lg" variant="success">
-                    Swap it
-                  </b-button> -->
                 </b-col>
               </b-row>
             </template>

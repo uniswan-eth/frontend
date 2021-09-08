@@ -37,6 +37,13 @@
       </template>
     </nfts-table>
     <br />
+    <!-- <pre>{{order}}</pre> -->
+    <base-button
+      v-if="order.signedOrder.order.makerAddress.toLowerCase() === $parent.signeraddr.toLowerCase()"
+      @click="$parent.deleteOrder(order.signedOrder.order)"
+      type="danger"
+      >Delete order</base-button>
+    <br>
     <template slot="modal-footer">
       <br />
     </template>
