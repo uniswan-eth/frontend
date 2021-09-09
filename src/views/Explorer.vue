@@ -36,6 +36,8 @@
             </h1> -->
             <b-card-group deck>
               <nft-card2
+                minWidth="20rem"
+                maxWidth="30rem"
                 display="card"
                 v-for="(n,idx) in nfts"
                 :key="'nft'+idx"
@@ -46,14 +48,18 @@
             <!-- <router-link :to="$router.currentRoute+'&'">
               Next
             </router-link> -->
-            <b-button
+            <br>
+            <div class="text-center">
+              <b-button
               @click="offset += 10;getNFTs(contractData.id, offset)"
               v-b-modal.modalOffer
-              size="sm"
-              variant="secondary"
-            >
+              size="lg"
+              variant="success"
+              >
               More
             </b-button>
+
+            </div>
             <!-- <div
               class="actions">
               <a :href="baselink0 + ''" class="btn btn-sm btn-primary">
@@ -230,6 +236,10 @@ export default {
         // Matic
         this.featuredCollections = [
           {
+            contract: "0x76c52b2c4b2d2666663ce3318a5f35f912bd25c3",
+            name: "MaticPunks",
+          },
+          {
             contract: "0x36a8377e2bb3ec7d6b0f1675e243e542eb6a4764",
             name: "Non-Fungible Matic V2",
           },
@@ -237,10 +247,6 @@ export default {
           //   contract: "0xd35147be6401dcb20811f2104c33de8e97ed6818",
           //   name: "Decentraland Wearables",
           // },
-          {
-            contract: "0x76c52b2c4b2d2666663ce3318a5f35f912bd25c3",
-            name: "MaticPunks",
-          },
           {
             contract: "0xa5f1ea7df861952863df2e8d1312f7305dabf215",
             name: "Zed run",

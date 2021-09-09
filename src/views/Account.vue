@@ -116,6 +116,8 @@
         <b-col lg="12">
           <b-card-group deck>
             <nft-card2
+              minWidth="15rem"
+              maxWidth="25rem"
               display="card"
               v-for="(n,idx) in nfts"
               :key="'nft'+idx"

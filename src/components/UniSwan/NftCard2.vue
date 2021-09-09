@@ -5,10 +5,20 @@
     :img-alt="nft.tokenJSON.name"
     img-top
     tag="article"
-    style="min-width:10rem; max-width: 15rem;"
+    :style="{
+        minWidth: minWidth ? minWidth : '10rem',
+        maxWidth: maxWidth ? maxWidth : '15rem'
+      }
+      "
     class="mb-2"
   >
     <b-card-text>
+      <small class="navbar-heading text-muted text-uppercase">
+        <router-link :to="'/explorer?contract='+nft.contract">
+          {{nft.contract.substr(0,6)}}
+        </router-link>
+      </small>
+      <br>
       <router-link :to="'/nft/'+nft.contract+'/'+nft.tokenID">
         <b>
           {{nft.tokenJSON.name}}
@@ -17,7 +27,14 @@
       <br>
       <i>
         <router-link :to="'/account/'+nft.owner">
-          <account-card :address="nft.owner" :root="root"/>
+          <!-- <account-card :address="nft.owner" :root="root"/> -->
+          <img
+            :title="'Owner: '+nft.owner"
+            class="blockie"
+            :src="
+              root.makeBlockie(nft.owner)
+            "
+          />
         </router-link>
       </i>
 
@@ -29,8 +46,8 @@
 <script>
   import AccountCard from '@/components/UniSwan/AccountCard';
   export default {
-    name: 'nft-card',
-    props: ["nft", "display", "root", "idx"],
+    name: 'nft-card2',
+    props: ["nft", "display", "root", "idx", "minWidth", "maxWidth"],
     components: {
       AccountCard
     },
@@ -53,6 +70,10 @@
   }
 </script>
 <style>
+.blockie {
+  height:20px;
+  border-radius: 50%;
+}
 .bundleHeader {
   margin-left: 7px;
   margin-bottom: -35px;
