@@ -55,6 +55,20 @@
             >
             </b-card>
           </b-card-group>
+          <b-card-group deck>
+            <b-card
+              v-for="(n, idx) in $parent.userERC20s"
+              @click="addToExchangeBundle(n)"
+              :key="'cp' + idx"
+              :title="n.name"
+              img-alt="Image"
+              img-top
+              tag="article"
+              style="max-width: 20rem"
+              class="mb-2"
+            >
+            </b-card>
+          </b-card-group>
         </b-tab>
       </b-tabs>
       <hr />
@@ -148,11 +162,18 @@ export default {
         );
       }
     },
-    async addToExchangeBundle(nft) {
-      var test = this.currentExchangeBundle.filter((x) => {
-        return x.tokenID === nft.tokenID && x.contract === nft.contract;
-      });
-      if (test.length === 0) this.currentExchangeBundle.push(nft);
+    async addToExchangeBundle(asset) {
+      if (asset.tokenJSON) {
+        var alreadyAdded = this.currentExchangeBundle.find(
+          (x) => x.tokenID === asset.tokenID && x.contract === asset.contract
+        );
+        if (!alreadyAdded) this.currentExchangeBundle.push(asset);
+      } else {
+        var alreadyAdded = this.currentExchangeBundle.find(
+          (x) => x.name === asset.name
+        );
+        if (!alreadyAdded) this.currentExchangeBundle.push(asset);
+      }
     },
     async addToWishBundle(nft) {
       var test = this.currentWishBundle.filter((x) => {
@@ -170,10 +191,15 @@ export default {
       let amounts = [];
       let assetDatas = [];
       for (let i = 0; i < bundle.length; i++) {
-        let assetData = assetDataUtils.encodeERC721AssetData(
-          bundle[i].contract,
-          bundle[i].tokenID
-        );
+        let assetData;
+        if (bundle[i].tokenJSON) {
+          assetData = assetDataUtils.encodeERC721AssetData(
+            bundle[i].contract,
+            bundle[i].tokenID
+          );
+        } else {
+          assetData = assetDataUtils.encodeERC20AssetData(bundle[i].address);
+        }
         amounts.push(new BigNumber(1));
         assetDatas.push(assetData);
       }
