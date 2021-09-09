@@ -73,6 +73,7 @@
   </div>
 </template>
 <script>
+import ERC20ABI from "@/abis/erc20.json";
 import ERC721ABI from "@/abis/erc721.json";
 import EXCHANGEABI from "@/abis/Exchange.json";
 
@@ -155,6 +156,7 @@ export default {
       orderbook: [],
       tempnfts: [],
       usernfts: [],
+      userERC20s: [],
       userprefs: [],
       userSwapOptions: [],
       fillEvents: [],
@@ -214,6 +216,7 @@ export default {
       this.blockNumber = await this.provider.getBlockNumber();
     },
     async loadUser() {
+      this.userERC20s = await this.getUserERC20s(this.signeraddr);
       this.usernfts = await this.getUserTokensFromSubGraph(this.signeraddr);
       this.userprefs = this.queryOrderBook(this.signeraddr.toLowerCase());
       this.userSwapOptions = await this.getSwapOptions(this.usernfts);
@@ -301,6 +304,22 @@ export default {
       };
 
       return nft;
+    },
+    async getUserERC20s(userAddress) {
+      var collection = new ethers.Contract(
+        "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619", // WETH
+        ERC20ABI,
+        this.signer
+      );
+
+      return [
+        {
+          address: "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+          name: await collection.name(),
+          decimals: await collection.decimals(),
+          balance: await collection.balanceOf(userAddress),
+        },
+      ];
     },
     async getUserTokensFromSubGraph(userAddress) {
       const tokensQuery = `

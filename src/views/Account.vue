@@ -115,6 +115,10 @@
       <b-row v-if="!$route.query.tab" class="justify-content-center">
         <b-col lg="12">
           <nfts-table :nfts="nfts" :root="$parent.$parent"></nfts-table>
+          <erc-table
+            :nfts="this.$parent.$parent.userERC20s"
+            :root="$parent.$parent"
+          ></erc-table>
         </b-col>
       </b-row>
       <b-row
@@ -168,6 +172,7 @@ import NftsTable from "@/views/Dashboard/NftsTable";
 import HistoryTable from "./Dashboard/HistoryTable";
 import OffersTable from "./Dashboard/OffersTable";
 import OptionsTable from "./Dashboard/OptionsTable";
+import ErcTable from "./Dashboard/ErcTable";
 
 Vue.use(VueClipboard);
 export default {
@@ -178,6 +183,7 @@ export default {
     OffersTable,
     BaseHeader,
     NftsTable,
+    ErcTable,
   },
   data() {
     return {
