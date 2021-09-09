@@ -1,6 +1,8 @@
 <template>
   <div class="contract">
-    <h4 @click="root.showSearch = false">
+    <h4 @click="
+      $parent.$parent.searchQuery = '';
+      root.showSearch = false">
       <router-link :to="'/explorer?contract='+contract.id">
         {{contract.name}}
       </router-link>

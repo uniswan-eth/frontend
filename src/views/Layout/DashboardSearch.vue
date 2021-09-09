@@ -3,8 +3,10 @@
     <div class="searchPopUp">
       <card header-classes="bg-transparent">
         <!-- <h1>ss{{searchQuery}}</h1> -->
+        <h6 class="navbar-heading text-muted text-uppercase">
+          Collections
+        </h6>
         <div v-if="contracts">
-          <h6 class="navbar-heading text-muted text-uppercase">Collections</h6>
           <!-- <h2 slot="header" class="mb-0">Search</h2> -->
           <contract-card
             v-for="(n,idx) in contracts.data.tokenContracts"
@@ -52,7 +54,7 @@ export default {
   },
   watch: {
     searchQuery: function (newVal, oldVal) {
-      if (newVal.length === 0) {contracts = []}
+      if (newVal.length === 0) {this.contracts = []}
       this.root.showSearch = true
       this.search(newVal);
       console.log('GHGHGHGHG', newVal, oldVal);
@@ -65,8 +67,8 @@ export default {
 .searchPopUp {
   // background-color: purple;
   position: absolute;
-  margin-top: 0px;
-  width: 396px;
+  margin-top: 8px;
+  width: 317px;
   margin-left:-15px;
 }
 </style>
