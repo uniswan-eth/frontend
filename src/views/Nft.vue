@@ -73,7 +73,8 @@
           <options-table
             display="simple"
             :root="$parent.$parent"
-            :options="validSwaps">
+            :options="validSwaps"
+          >
             <template v-slot:unsHeader>
               <b-row align-v="center">
                 <b-col>
@@ -82,7 +83,8 @@
                 <b-col class="text-right">
                   <b-button
                     :disabled="
-                      $parent.$parent.signeraddr.toLowerCase() === asset.owner.address.toLowerCase()
+                      $parent.$parent.signeraddr.toLowerCase() ===
+                      asset.owner.address.toLowerCase()
                     "
                     @click="$parent.$parent.createOrder(asset, ownerAssets)"
                     v-b-modal.modalCreateOffer
@@ -99,32 +101,45 @@
           <card header-classes="bg-transparent">
             <h3 slot="header" class="mb-0">
               What
-              <account-card :address="asset.owner.address" :root="$parent.$parent"/>
-              wish in return for {{asset.name}}
+              <account-card
+                :address="asset.owner.address"
+                :root="$parent.$parent"
+              />
+              wish in return for {{ asset.name }}
             </h3>
             <div
               v-for="(order, idx) in ownerOrders"
               :key="'order' + idx"
-              class="">
-              <bundle display="medium" :bundle="order.wishBundle" :root="$parent.$parent">
+              class=""
+            >
+              <bundle
+                display="medium"
+                :bundle="order.wishBundle"
+                :root="$parent.$parent"
+              >
                 <template v-slot:bundleHeader>
                   <b-button
-                    @click="$event.preventDefault();$parent.$parent.viewOrder(order)"
+                    @click="
+                      $event.preventDefault();
+                      $parent.$parent.viewOrder(order);
+                    "
                     v-b-modal.modalOffer
                     size="sm"
-                    variant="secondary">
+                    variant="secondary"
+                  >
                     <span>
                       {{
-                        order.wishBundle[0].owner.toLowerCase() === $parent.$parent.signeraddr.toLowerCase() ?
-                        'Execute' :
-                        'View'
+                        order.wishBundle[0].owner.toLowerCase() ===
+                        $parent.$parent.signeraddr.toLowerCase()
+                          ? "Execute"
+                          : "View"
                       }}
-                    <!-- Order -->
-                  </span>
-                </b-button>
+                      <!-- Order -->
+                    </span>
+                  </b-button>
                 </template>
               </bundle>
-              <br>
+              <br />
             </div>
           </card>
           <br />
@@ -220,8 +235,8 @@ export default {
     async loadPage() {
       this.ownerAssets = [];
       this.asset = null;
-      this.validSwaps = []
-      this.ownerOrders = []
+      this.validSwaps = [];
+      this.ownerOrders = [];
 
       this.signerApproved = await this.$parent.$parent.signerIsApproved(
         this.$route.params.contract
@@ -244,18 +259,19 @@ export default {
         nft.owner
       );
 
-      // var orders = await this.$parent.$parent.getPreferences(
-      var orders = await this.$parent.$parent.queryOrderBook(
-        nft.owner
-      );
-      orders.map(x => {
-        x.exchangeBundle.map(y => {
+      var orders = await this.$parent.$parent.queryOrderBook(nft.owner);
+      orders.map((x) => {
+        x.exchangeBundle.map((y) => {
           if (y.tokenID === nft.tokenID && y.contract === nft.contract)
-          this.ownerOrders.push(x)
-        })
-      })
-      console.log('ddd orders', this.ownerOrders, nft.owner, this.$parent.$parent.signeraddr);
-
+            this.ownerOrders.push(x);
+        });
+      });
+      console.log(
+        "ddd orders",
+        this.ownerOrders,
+        nft.owner,
+        this.$parent.$parent.signeraddr
+      );
     },
     onCopy() {
       this.$notify({

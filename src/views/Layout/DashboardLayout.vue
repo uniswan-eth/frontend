@@ -390,9 +390,9 @@ export default {
 
       return bundle;
     },
-    async getPreferences(makerAddress) {
+    async getPreferences(requestOpts) {
       var client = new HttpClient(DB_BASE_URL);
-      var json = await client.getOrdersAsync();
+      var json = await client.getOrdersAsync(requestOpts);
 
       var orders = [];
       await Promise.all(
@@ -484,11 +484,8 @@ export default {
               );
             }
             orders.push({
-              wisher: chain[i].makerAddress,
               exchangeBundle: exchangeBundle,
               wishBundle: wishBundle,
-              makerAssetData: chain[i].makerAssetData,
-              takerAssetData: chain[i].takerAssetData,
               signedOrder: chain[i],
             });
           }
@@ -531,12 +528,13 @@ export default {
         this.signer
       );
       console.log("Executing", exchange, ringswap);
+      console.log(ringswap);
       exchange.batchFillOrders(
         ringswap.map((b) => b.signedOrder),
         ringswap.map((b) => b.signedOrder.takerAssetAmount),
         ringswap.map((b) => b.signedOrder.signature),
         {
-          gasLimit: 1000000,
+          gasLimit: 10000000,
         }
       );
       console.log("Notify and refresh user NFTs", exchange);

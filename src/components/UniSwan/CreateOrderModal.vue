@@ -234,14 +234,8 @@ export default {
           wantAmounts,
           wantAssetData
         ),
-        makerFeeAssetData: assetDataUtils.encodeMultiAssetData(
-          haveAmounts,
-          haveAssetData
-        ),
-        takerFeeAssetData: assetDataUtils.encodeMultiAssetData(
-          wantAmounts,
-          wantAssetData
-        ),
+        makerFeeAssetData: "0x",
+        takerFeeAssetData: "0x",
       };
       const provider = new MetamaskSubprovider(
         "ethereum" in window ? window["ethereum"] : Web3.givenProvider
@@ -258,9 +252,9 @@ export default {
 
       var c = new HttpClient(DB_BASE_URL);
       await c.submitOrderAsync(signedOrder).then(async (res) => {
-        self.$parent.userprefs = await self.$parent.getPreferences(
-          self.$parent.signeraddr
-        );
+        self.$parent.userprefs = await self.$parent.getPreferences({
+          makerAddress: self.$parent.signeraddr,
+        });
 
         this.$bvModal.hide("modalCreateOffer");
         this.$notify({

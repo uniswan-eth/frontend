@@ -74,7 +74,6 @@ export default {
       if (this.$parent.$parent.network.chainId === 137) {
         // Matic
         console.log("LOAD TIMER");
-        // this.orders = await this.$parent.$parent.getPreferences();
         this.orders = await this.$parent.$parent.orderbook;
         console.log("Orders", this.orders);
       } else if (this.$parent.$parent.network.chainId === 1) {
