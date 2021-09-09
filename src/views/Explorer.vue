@@ -27,62 +27,13 @@
       </b-row>
     </base-header>
     <b-container fluid class="mt--7">
-      <!-- <b-row class="justify-content-center">
-        <b-col lg="12">
-          <card header-classes="bg-transparent">
-            <h3 slot="header" class="mb-0">Featured collections</h3>
-            <form @submit="searchCollections">
-              <b-input
-                v-model="contractSearchWord"
-                placeholder="Seacrh collections"
-                class="form-control-alternative"
-              />
-              <br />
-            </form>
-            <el-table
-              v-if="contracts"
-              class="table-responsive table"
-              :data="contracts.data.tokenContracts"
-              header-row-class-name="thead-light">
-              <el-table-column label="Name" min-width="130px" prop="page">
-                <template v-slot="{ row }">
-                  <h4 :title="row.name">
-                    <b-button
-                      @click="getNFTs(row.id)"
-                      size="sm"
-                      variant="secondary"
-                    >
-                      See collection
-                    </b-button>
-                    &nbsp;
-                    {{ row.name !== '' ? row.name : row.id.substr(0,6) }}
-                  </h4>
-                </template>
-              </el-table-column>
-            </el-table>
-            <br />
-            <div class="p-4 bg-secondary">
-              <p>Enter NFT contract address</p>
-              <form @submit="getRndNFTs(currentContract)">
-                <b-input
-                  v-model="currentContract"
-                  placeholder="Enter NFT contract address"
-                  class="form-control-alternative"
-                />
-                <br />
-              </form>
-            </div>
-          </card>
-        </b-col>
-      </b-row> -->
-      <br />
       <b-row class="justify-content-center">
         <b-col lg="12">
           <!-- <pre>{{nfts}}</pre> -->
-          <card header-classes="bg-transparent" v-if="nfts && contractData">
+          <!-- <card header-classes="bg-transparent" v-if="nfts && contractData">
             <h1 slot="header" class="mb-0">
               {{ contractData.name }}
-            </h1>
+            </h1> -->
             <b-card-group deck>
               <nft-card2
                 display="card"
@@ -151,6 +102,66 @@
                 <br />
               </form>
             </div> -->
+          <!-- </card> -->
+        </b-col>
+      </b-row>
+      <br />
+      <br>
+      <b-row class="justify-content-center">
+        <b-col lg="12">
+          <card header-classes="bg-transparent">
+            <h3 slot="header" class="mb-0">Featured collections</h3>
+            <b-button
+              v-for="(n,idx) in featuredCollections"
+              @click="$router.push('/explorer?contract='+n.contract)"
+              size="sm"
+              variant="secondary">
+              {{n.name}}
+            </b-button>
+            <br><br>
+            <div class="p-4 bg-secondary">
+              <p>Enter NFT contract address</p>
+              <!-- <form @submit="$event.preventDefault;getNFTs(currentContract)"> -->
+              <form @submit="navContract">
+                <b-input
+                v-model="currentContract"
+                placeholder="Enter NFT contract address"
+                class="form-control-alternative"
+                />
+                <br />
+              </form>
+            </div>
+
+            <!-- <form @submit="searchCollections">
+            <b-input
+            v-model="contractSearchWord"
+            placeholder="Seacrh collections"
+            class="form-control-alternative"
+            />
+            <br />
+            </form> -->
+            <!-- <el-table
+            v-if="contracts"
+            class="table-responsive table"
+            :data="contracts.data.tokenContracts"
+            header-row-class-name="thead-light">
+            <el-table-column label="Name" min-width="130px" prop="page">
+              <template v-slot="{ row }">
+                <h4 :title="row.name">
+                  <b-button
+                  @click="getNFTs(row.id)"
+                  size="sm"
+                  variant="secondary"
+                  >
+                  See collection
+                  </b-button>
+                  &nbsp;
+                  {{ row.name !== '' ? row.name : row.id.substr(0,6) }}
+                </h4>
+              </template>
+            </el-table-column>
+          </el-table> -->
+          <br />
           </card>
         </b-col>
       </b-row>
@@ -208,31 +219,48 @@ export default {
     this.loadPage();
   },
   methods: {
+    navContract(ev) {
+      ev.preventDefault;
+      this.$router.push('/explorer?contract='+this.currentContract)
+    },
     async loadPage() {
       this.assets = [];
       this.nfts = [];
       if (this.$parent.$parent.network.chainId === 137) {
-
-        // this.contracts = await this.$parent.$parent.getContractsFromSubGraph('');
-        // console.log('Contracts', this.contracts);
         // Matic
         this.featuredCollections = [
           {
             contract: "0x36a8377e2bb3ec7d6b0f1675e243e542eb6a4764",
             name: "Non-Fungible Matic V2",
           },
+          // {
+          //   contract: "0xd35147be6401dcb20811f2104c33de8e97ed6818",
+          //   name: "Decentraland Wearables",
+          // },
+          {
+            contract: "0x76c52b2c4b2d2666663ce3318a5f35f912bd25c3",
+            name: "MaticPunks",
+          },
           {
             contract: "0xa5f1ea7df861952863df2e8d1312f7305dabf215",
             name: "Zed run",
           },
           {
-            contract: "0x8634666ba15ada4bbc83b9dbf285f73d9e46e4c2",
-            name: "Chicken derby",
+            contract: "0x2cb9c915369747c228d087d6179a8ce7e114c011",
+            name: "Loot",
           },
           {
-            contract: "0x8b8407c6184f1f0fd1082e83d6a3b8349caced12",
-            name: "Emblem vault",
+            contract: "0x7227e371540cf7b8e512544ba6871472031f3335",
+            name: "Neon District Season One",
           },
+          // {
+          //   contract: "0x8634666ba15ada4bbc83b9dbf285f73d9e46e4c2",
+          //   name: "Chicken derby",
+          // },
+          // {
+          //   contract: "0x8b8407c6184f1f0fd1082e83d6a3b8349caced12",
+          //   name: "Emblem vault",
+          // },
         ];
         if (this.$route.query.contract) {
           this.getNFTs(this.$route.query.contract);
@@ -280,17 +308,6 @@ export default {
       this.nfts = res.nfts
       this.contractData = res.raw
       this.$parent.$parent.routeName = this.contractData.name;
-      console.log('HOHO', res);
-      // this.collection = this.nfts.data.tokenContract
-      // var collection = new ethers.Contract(
-      //   collectionAddress,
-      //   ERC721ABI,
-      //   this.$parent.$parent.signer
-      // );
-      // var collectionName = await collection.name();
-      // this.collection = {
-      //   name: collectionName,
-      // };
     },
     async loadOS(offset) {
       if (!this.$route.query.slug) {
@@ -325,7 +342,6 @@ export default {
         this.baselink = "/explorer/?slug=" + slug + "?";
         sea.slug = slug;
       }
-      // console.log(order);
       if (order) {
         this.baselink += "&order=" + order;
       }

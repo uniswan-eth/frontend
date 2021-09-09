@@ -266,7 +266,7 @@ export default {
       const data = await client2.query({
         query: gql(tokensQuery),
       });
-      console.log("NEW", data);
+      console.log("Data: ", data);
       const tokenData = data.data.tokenContract.tokens;
       const nfts = await this.constructBundle2(tokenData);
       return {

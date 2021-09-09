@@ -22,7 +22,7 @@
         id="navbar-search-main">
         <b-form-group class="mb-0">
           <b-input-group class="input-group-alternative input-group-merge">
-            <b-form-input v-model="searchQuery" placeholder="Search" type="text"> </b-form-input>
+            <b-form-input v-model="searchQuery" placeholder="Collection or Account" type="text"> </b-form-input>
             <div class="input-group-append">
               <span class="input-group-text"><i class="fas fa-search"></i></span>
             </div>
