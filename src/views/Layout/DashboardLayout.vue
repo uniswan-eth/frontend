@@ -371,6 +371,23 @@ export default {
       });
       return toret;
     },
+    async yee(assetData) {
+      var inter = assetDataUtils.decodeMultiAssetData(assetData);
+      const bundle = [];
+      Promise.all(
+        inter.nestedAssetData.map(async (x) => {
+          var bytes = assetDataUtils.decodeERC721AssetData(x);
+          bundle.push(
+            await this.getTokenFromSubgraph(
+              bytes.tokenAddress,
+              bytes.tokenId.toNumber().toString()
+            )
+          );
+        })
+      );
+
+      return bundle;
+    },
     async getPreferences(user) {
       var bundlesDBURI = DB_BASE_URL + "/orders";
       var res = await fetch(bundlesDBURI);
@@ -384,36 +401,9 @@ export default {
             !user ||
             user.toLowerCase() === signedOrder.makerAddress.toLowerCase()
           ) {
-            var inter = assetDataUtils.decodeMultiAssetData(
-              signedOrder.makerAssetData
-            );
-            const exchangeBundle = [];
-            for (let i = 0; i < inter.nestedAssetData.length; i++) {
-              var bytes = assetDataUtils.decodeERC721AssetData(
-                inter.nestedAssetData[i]
-              );
-              exchangeBundle.push(
-                await this.getTokenFromSubgraph(
-                  bytes.tokenAddress,
-                  bytes.tokenId.toNumber().toString()
-                )
-              );
-            }
-            inter = assetDataUtils.decodeMultiAssetData(
-              signedOrder.takerAssetData
-            );
-            const wishBundle = [];
-            for (let i = 0; i < inter.nestedAssetData.length; i++) {
-              bytes = assetDataUtils.decodeERC721AssetData(
-                inter.nestedAssetData[i]
-              );
-              wishBundle.push(
-                await this.getTokenFromSubgraph(
-                  bytes.tokenAddress,
-                  bytes.tokenId.toNumber().toString()
-                )
-              );
-            }
+            const exchangeBundle = await this.yee(signedOrder.makerAssetData);
+            const wishBundle = await this.yee(signedOrder.takerAssetData);
+
             preferences.push({
               signedOrder: signedOrder,
               exchangeBundle: exchangeBundle,
