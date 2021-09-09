@@ -388,9 +388,9 @@ export default {
 
       return bundle;
     },
-    async getPreferences(user) {
+    async getPreferences(makerAddress) {
       var bundlesDBURI = DB_BASE_URL + "/orders?";
-      if (user) bundlesDBURI += `makerAddress=${user}`;
+      if (makerAddress) bundlesDBURI += `makerAddress=${makerAddress}`;
       var res = await fetch(bundlesDBURI);
       var json = await res.json();
 
