@@ -93,7 +93,7 @@
               '',
               $route.query.tab === 'history' ? 'tabselected' : 'tabdimmed',
             ]"
-            :sub-title="history.length.toString()"
+            :sub-title="$parent.$parent.fillEvents.length.toString()"
             icon="ni ni-chart-bar-32"
             class="mb-4"
           >
@@ -144,9 +144,17 @@
               </b-row>
             </template>
           </options-table>
-
-          <!-- <pre>{{swapOptions}}</pre> -->
-          <!-- <offers-table :offers="swapOptions"></offers-table> -->
+        </b-col>
+      </b-row>
+      <b-row
+        v-if="$route.query.tab === 'history'"
+        class="justify-content-center"
+      >
+        <b-col lg="12">
+          <history-table
+            :events="$parent.$parent.fillEvents"
+            :root="$parent.$parent"
+          ></history-table>
         </b-col>
       </b-row>
     </b-container>
@@ -157,6 +165,7 @@ import Vue from "vue";
 import VueClipboard from "vue-clipboard2";
 import BaseHeader from "@/components/BaseHeader";
 import NftsTable from "@/views/Dashboard/NftsTable";
+import HistoryTable from "./Dashboard/HistoryTable";
 import OffersTable from "./Dashboard/OffersTable";
 import OptionsTable from "./Dashboard/OptionsTable";
 
@@ -164,6 +173,7 @@ Vue.use(VueClipboard);
 export default {
   name: "account",
   components: {
+    HistoryTable,
     OptionsTable,
     OffersTable,
     BaseHeader,

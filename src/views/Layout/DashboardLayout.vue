@@ -37,13 +37,6 @@
             icon: 'ni ni-ui-04 text-success',
           }"
         ></sidebar-item>
-        <!-- <sidebar-item
-          :link="{
-            name: 'My offers',
-            path: '/account?tab=offers',
-            icon: 'ni ni-planet text-primary',
-          }"
-        ></sidebar-item> -->
         <sidebar-item
           :link="{
             name: 'My swap history',
@@ -164,7 +157,7 @@ export default {
       usernfts: [],
       userprefs: [],
       userSwapOptions: [],
-      userHistory: [],
+      fillEvents: [],
       currentOrder: null,
       newOrderNFT: null,
       newOrderOwnerNFTs: null,
@@ -224,6 +217,18 @@ export default {
       this.usernfts = await this.getUserTokensFromSubGraph(this.signeraddr);
       this.userprefs = this.queryOrderBook(this.signeraddr.toLowerCase());
       this.userSwapOptions = await this.getSwapOptions(this.usernfts);
+
+      const exchange = new ethers.Contract(
+        EXCHANGE_ADDRESS,
+        EXCHANGEABI,
+        this.signer
+      );
+
+      this.fillEvents = await exchange.queryFilter(
+        exchange.filters.Fill(),
+        18900000
+      );
+      console.log(this.fillEvents);
     },
     async getCollectionFromSubGraph(
       contractAddress,
@@ -351,11 +356,7 @@ export default {
       var bundlesDBURI = DB_BASE_URL + "/orders";
       var res = await fetch(bundlesDBURI);
       var json = await res.json();
-      const exchange = new ethers.Contract(
-        EXCHANGE_ADDRESS,
-        EXCHANGEABI,
-        this.signer
-      );
+
       console.log("Prefs", bundlesDBURI, json);
       var preferences = [];
       await Promise.all(
