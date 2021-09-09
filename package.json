@@ -9,7 +9,14 @@
     "dev": "npm run serve"
   },
   "dependencies": {
+    "@0x/contract-wrappers": "^8.0.3",
+    "@0x/order-utils": "^8.4.0",
+    "@0x/subproviders": "^5.0.4",
+    "@0x/orderbook": "^2.2.7",
+    "@0x/utils": "^4.5.2",
+    "@0x/web3-wrapper": "^6.0.13",
     "apollo-boost": "^0.4.9",
+    "axios": "^0.21.1",
     "bootstrap": "4.3.1",
     "bootstrap-vue": "^2.5.0",
     "chart.js": "^2.9.3",
