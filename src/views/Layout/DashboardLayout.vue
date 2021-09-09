@@ -371,7 +371,7 @@ export default {
       });
       return toret;
     },
-    async yee(assetData) {
+    async dataToBundle(assetData) {
       var inter = assetDataUtils.decodeMultiAssetData(assetData);
       const bundle = [];
       Promise.all(
@@ -389,7 +389,8 @@ export default {
       return bundle;
     },
     async getPreferences(user) {
-      var bundlesDBURI = DB_BASE_URL + "/orders";
+      var bundlesDBURI = DB_BASE_URL + "/orders?";
+      if (user) bundlesDBURI += `makerAddress=${user}`;
       var res = await fetch(bundlesDBURI);
       var json = await res.json();
 
@@ -397,19 +398,18 @@ export default {
       var preferences = [];
       await Promise.all(
         json.map(async (signedOrder) => {
-          if (
-            !user ||
-            user.toLowerCase() === signedOrder.makerAddress.toLowerCase()
-          ) {
-            const exchangeBundle = await this.yee(signedOrder.makerAssetData);
-            const wishBundle = await this.yee(signedOrder.takerAssetData);
+          const exchangeBundle = await this.dataToBundle(
+            signedOrder.makerAssetData
+          );
+          const wishBundle = await this.dataToBundle(
+            signedOrder.takerAssetData
+          );
 
-            preferences.push({
-              signedOrder: signedOrder,
-              exchangeBundle: exchangeBundle,
-              wishBundle: wishBundle,
-            });
-          }
+          preferences.push({
+            signedOrder: signedOrder,
+            exchangeBundle: exchangeBundle,
+            wishBundle: wishBundle,
+          });
         })
       );
       console.log("Prefs Done", preferences);
