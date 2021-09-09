@@ -111,15 +111,13 @@ import NftsTable from "@/views/Dashboard/NftsTable";
 import Bundle from "@/components/UniSwan/Bundle";
 
 import Web3 from "web3";
-import {
-  assetDataUtils,
-  signatureUtils,
-  orderHashUtils,
-} from "@0x/order-utils";
+import { assetDataUtils, signatureUtils } from "@0x/order-utils";
 import { BigNumber } from "@0x/utils";
+import { Orderbook } from "@0x/orderbook";
 import { MetamaskSubprovider } from "@0x/subproviders";
-import axios from "axios";
-const DB_BASE_URL = "https://uns-backend.vercel.app/api/";
+
+const DB_BASE_URL = "https://uns-backend.vercel.app/api/v3";
+const EXCHANGE_ADDRESS = "0x1f98206be961f98d0c2d2e5f7d965244b2f2129a";
 
 export default {
   name: "order-modal",
@@ -190,7 +188,8 @@ export default {
       );
       const salt = new BigNumber(new Date().getTime()).toString();
       const order = {
-        exchangeAddress: "0x2682798109c35310B76db070b98Fc21833DCAA61",
+        chainId: 137,
+        exchangeAddress: EXCHANGE_ADDRESS,
         makerAddress: this.$parent.signeraddr,
         takerAddress: "0x0000000000000000000000000000000000000000",
         feeRecipientAddress: "0x0000000000000000000000000000000000000000",
@@ -209,33 +208,43 @@ export default {
           wantAmounts,
           wantAssetData
         ),
+        makerFeeAssetData: assetDataUtils.encodeMultiAssetData(
+          haveAmounts,
+          haveAssetData
+        ),
+        takerFeeAssetData: assetDataUtils.encodeMultiAssetData(
+          wantAmounts,
+          wantAssetData
+        ),
       };
       const provider = new MetamaskSubprovider(
         "ethereum" in window ? window["ethereum"] : Web3.givenProvider
       );
-      const orderHashHex = orderHashUtils.getOrderHashHex(order);
-      const signature = await signatureUtils.ecSignHashAsync(
+      const signedOrder = await signatureUtils.ecSignOrderAsync(
         provider,
-        orderHashHex,
+        order,
         this.$parent.signeraddr
       );
-      var self = this;
-      axios
-        // .post(DB_BASE_URL + "preferences/add", { order, signature })
-        .post(DB_BASE_URL + "orders/add", { order, signature })
-        .then(async (res) => {
-          self.$parent.loadApp()
 
-          // self.$parent.userprefs = await self.$parent.getPreferences(
-          //   self.$parent.signeraddr
-          // );
-          console.log('new order', res.data, self.$parent.userprefs);
-          this.$bvModal.hide("modalCreateOffer");
-          this.$notify({
-            type: "danger",
-            message: "Made new order",
-          });
+      console.log(signedOrder);
+
+      var self = this;
+      const orderbook = Orderbook.getOrderbookForPollingProvider({
+        httpEndpoint: DB_BASE_URL,
+        pollingIntervalMs: 5000,
+      });
+
+      orderbook.addOrdersAsync([signedOrder]).then(async (res) => {
+        self.$parent.userprefs = await self.$parent.getPreferences(
+          self.$parent.signeraddr
+        );
+
+        this.$bvModal.hide("modalCreateOffer");
+        this.$notify({
+          type: "danger",
+          message: "Made new order",
         });
+      });
     },
   },
   watch: {

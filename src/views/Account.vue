@@ -133,14 +133,14 @@
           <options-table
             display="simple"
             :root="$parent.$parent"
-            :options="swapOptions">
+            :options="swapOptions"
+          >
             <template v-slot:unsHeader>
               <b-row align-v="center">
                 <b-col>
                   <h3 class="mb-0">Swap options</h3>
                 </b-col>
-                <b-col class="text-right">
-                </b-col>
+                <b-col class="text-right"> </b-col>
               </b-row>
             </template>
           </options-table>
@@ -159,8 +159,6 @@ import BaseHeader from "@/components/BaseHeader";
 import NftsTable from "@/views/Dashboard/NftsTable";
 import OffersTable from "./Dashboard/OffersTable";
 import OptionsTable from "./Dashboard/OptionsTable";
-
-const DB_BASE_URL = "https://uns-backend.vercel.app/api/";
 
 Vue.use(VueClipboard);
 export default {
@@ -187,7 +185,10 @@ export default {
   },
   methods: {
     async loadPage() {
-      if (this.$route.params.address.toLowerCase() === this.$parent.$parent.signeraddr.toLowerCase()) {
+      if (
+        this.$route.params.address.toLowerCase() ===
+        this.$parent.$parent.signeraddr.toLowerCase()
+      ) {
         this.nfts = this.$parent.$parent.usernfts;
         this.offers = this.$parent.$parent.userprefs;
         this.swapOptions = this.$parent.$parent.userSwapOptions;
@@ -196,20 +197,19 @@ export default {
           this.nfts = await this.$parent.$parent.getUserTokensFromSubGraph(
             this.$route.params.address
           );
-          console.log('Acc NFTs', this.nfts);
+          console.log("Acc NFTs", this.nfts);
         } else if (this.$route.query.tab === "offers") {
           this.offers = await this.$parent.$parent.queryOrderBook(
             this.$route.params.address
           );
-          console.log('Acc Offers', this.offers);
+          console.log("Acc Offers", this.offers);
         } else if (this.$route.query.tab === "options") {
           this.swapOptions = await this.$parent.$parent.getSwapOptions(
             this.nfts
           );
-          console.log('Acc Optiosn', this.swapOptions);
+          console.log("Acc Optiosn", this.swapOptions);
         }
       }
-
     },
     onCopy() {
       this.$notify({

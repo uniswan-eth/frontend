@@ -23,10 +23,7 @@
     </options-table>
 
     <template slot="modal-footer">
-      <base-button
-        v-if="chain[0].wishBundle[0].owner.toLowerCase() === $parent.signeraddr.toLowerCase()"
-        @click="$parent.executeSwap(chain)"
-        type="success"
+      <base-button @click="$parent.executeSwap(chain)" type="success"
         >Execute offer</base-button
       >
       <br />

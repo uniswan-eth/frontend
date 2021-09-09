@@ -13,7 +13,7 @@
       <p>
         Wisher:
         <account-card
-          :address="order.signedOrder.order.makerAddress"
+          :address="order.signedOrder.makerAddress"
           :root="$parent"
         />
       </p>
