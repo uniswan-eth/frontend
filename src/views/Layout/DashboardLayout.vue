@@ -118,7 +118,7 @@ import OrderModal from "@/components/UniSwan/OrderModal";
 import CreateOrderModal from "@/components/UniSwan/CreateOrderModal";
 import SwapChainModal from "@/components/UniSwan/SwapChainModal";
 
-import { HttpClient } from "0x/connect";
+import { HttpClient } from "@0x/connect";
 
 const EXCHANGE_ADDRESS = "0x1f98206be961f98d0c2d2e5f7d965244b2f2129a";
 
@@ -391,6 +391,9 @@ export default {
       return bundle;
     },
     async getPreferences(makerAddress) {
+      var c = new HttpClient(DB_BASE_URL);
+      c.getOrdersAsync();
+
       var bundlesDBURI = DB_BASE_URL + "/orders?";
       if (makerAddress) bundlesDBURI += `makerAddress=${makerAddress}`;
       var res = await fetch(bundlesDBURI);
@@ -398,16 +401,16 @@ export default {
 
       var orders = [];
       await Promise.all(
-        json.map(async (signedOrder) => {
+        json.records.map(async (signedOrder) => {
           const exchangeBundle = await this.dataToBundle(
-            signedOrder.makerAssetData
+            signedOrder.signedOrder.makerAssetData
           );
           const wishBundle = await this.dataToBundle(
-            signedOrder.takerAssetData
+            signedOrder.signedOrder.takerAssetData
           );
 
           orders.push({
-            signedOrder: signedOrder,
+            signedOrder: signedOrder.signedOrder,
             exchangeBundle: exchangeBundle,
             wishBundle: wishBundle,
           });
@@ -417,7 +420,7 @@ export default {
       var validOrders = [];
       orders.map((x) => {
         var isOwnerOfAll = true;
-        console.log("batman", x);
+
         x.exchangeBundle.map((y) => {
           if (x.signedOrder.makerAddress.toLowerCase() !== y.owner)
             isOwnerOfAll = false;
