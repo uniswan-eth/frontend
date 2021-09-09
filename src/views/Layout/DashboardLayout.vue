@@ -97,7 +97,7 @@ import "perfect-scrollbar/css/perfect-scrollbar.css";
 
 const DB_BASE_URL = "https://uns-backend.vercel.app/api/v3";
 const SUBGRAPH_URL =
-  "https://api.thegraph.com/subgraphs/name/zapaz/eip721-matic";
+  "https://api.thegraph.com/subgraphs/name/tranchien2002/eip721-matic";
 
 function hasElement(className) {
   return document.getElementsByClassName(className).length > 0;
@@ -225,37 +225,6 @@ export default {
       this.userprefs = await this.queryOrderBook(this.signeraddr.toLowerCase());
       this.userSwapOptions = await this.getSwapOptions(this.usernfts);
     },
-    async getContractTokensFromSubGraph2(
-      contractAddress,
-      offset = 0,
-      limit = 5
-    ) {
-      const tokensQuery = `
-        {
-          tokens(first: ${limit}, where: {contract.id: ${{ contractAddress }}) {
-            id
-            contract {
-              id
-            }
-            owner {
-              id
-            }
-            tokenID
-            metadata
-            image
-          }
-        }
-      `;
-
-      const data = await client.query({
-        query: gql(tokensQuery),
-      });
-      console.log("res", data);
-      const tokenData = data.data.tokens;
-      // const tokenData = data.data.tokenContracts[0].tokens;
-      const output = await this.constructBundle(tokenData);
-      return output;
-    },
     async getContractTokensFromSubGraph(
       contractAddress,
       startIndex = 0,
@@ -274,22 +243,24 @@ export default {
                 id
               }
               tokenID
-              metadata
+              tokenURI
             }
           }
         }
       `;
-      console.log(tokensQuery);
+
       const data = await client.query({
         query: gql(tokensQuery),
       });
       const tokenData = data.data.tokenContracts[0].tokens;
+
       const output = await this.constructBundle(tokenData);
-      console.log("ggg", output);
+
       return output;
     },
     async getTokenFromSubgraph(contractAddress, tokenId) {
       const id = contractAddress.toLowerCase() + "_" + tokenId;
+
       const tokensQuery = `
           query {
             tokens(where:{id:"${id}"}) {
@@ -300,17 +271,25 @@ export default {
               owner {
                 id
               }
-              tokenID
-              metadata
+              tokenURI
             }
           }
         `;
       const data = await client.query({
         query: gql(tokensQuery),
       });
-      const tokenData = data.data.tokens;
-      const output = await this.constructBundle(tokenData);
-      return output[0];
+      const d = data.data.tokens[0];
+      var res = await fetch(d.tokenURI);
+      var tokenJSON = await res.json();
+
+      const nft = {
+        contract: d.contract.id,
+        tokenID: tokenId,
+        owner: d.owner.id,
+        tokenJSON: tokenJSON,
+      };
+
+      return nft;
     },
     async getUserTokensFromSubGraph(userAddress) {
       const tokensQuery = `
@@ -326,7 +305,7 @@ export default {
                 id
               }
               tokenID
-              metadata
+              tokenURI
             }
           }
         }
@@ -335,29 +314,7 @@ export default {
         query: gql(tokensQuery),
       });
       const tokenData = data.data.owners[0].tokens;
-      const output = await this.constructBundle(tokenData);
-      return output;
-    },
-    async getTokenByName(name) {
-      const tokensQuery = `
-          query {
-          tokens(where:{name:"${name}"}) {
-            id
-            contract {
-              id
-            }
-            owner {
-              id
-            }
-            tokenID
-            metadata
-          }
-        }
-        `;
-      const data = await client.query({
-        query: gql(tokensQuery),
-      });
-      const tokenData = data.data.tokens;
+
       const output = await this.constructBundle(tokenData);
       return output;
     },
@@ -365,21 +322,9 @@ export default {
       var bundle = [];
       await Promise.all(
         tokenData.map(async (d) => {
-          // If the subgraph doesn't give us the metadata, retrieve it manually
-          var tokenJSON;
-          if (d.metadata) {
-            tokenJSON = JSON.parse(d.metadata);
-          } else {
-            var collection = new ethers.Contract(
-              d.contract.id,
-              ERC721ABI,
-              this.signer
-            );
+          var res = await fetch(d.tokenURI);
+          var tokenJSON = await res.json();
 
-            var tokenURI = await collection.tokenURI(d.tokenID);
-            var res = await fetch(tokenURI);
-            tokenJSON = await res.json();
-          }
           const nft = {
             contract: d.contract.id,
             tokenID: d.tokenID,
@@ -459,7 +404,6 @@ export default {
       preferences.map((x) => {
         var isOwnerOfAll = true;
         x.exchangeBundle.map((y) => {
-          // console.log('Order test', x.signedOrder.order.makerAddress, y.owner);
           if (x.signedOrder.makerAddress.toLowerCase() !== y.owner)
             isOwnerOfAll = false;
         });
