@@ -464,12 +464,12 @@ export default {
       console.log(tokensQuery);
       return output;
     },
-    async getUserTokensFromSubGraph(userAddress) {
+    async getUserTokensFromSubGraph(userAddress, limit=20, offset=0) {
       const tokensQuery = `
           query {
           owners(where:{id:"${userAddress.toLowerCase()}"}) {
             id
-            tokens {
+            tokens(first:${limit}, skip:${offset}) {
               id,
               contract {
                 id
