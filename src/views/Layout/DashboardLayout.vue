@@ -391,26 +391,21 @@ export default {
       return bundle;
     },
     async getPreferences(makerAddress) {
-      var c = new HttpClient(DB_BASE_URL);
-      c.getOrdersAsync();
-
-      var bundlesDBURI = DB_BASE_URL + "/orders?";
-      if (makerAddress) bundlesDBURI += `makerAddress=${makerAddress}`;
-      var res = await fetch(bundlesDBURI);
-      var json = await res.json();
+      var client = new HttpClient(DB_BASE_URL);
+      var json = await client.getOrdersAsync();
 
       var orders = [];
       await Promise.all(
         json.records.map(async (signedOrder) => {
           const exchangeBundle = await this.dataToBundle(
-            signedOrder.signedOrder.makerAssetData
+            signedOrder.order.makerAssetData
           );
           const wishBundle = await this.dataToBundle(
-            signedOrder.signedOrder.takerAssetData
+            signedOrder.order.takerAssetData
           );
 
           orders.push({
-            signedOrder: signedOrder.signedOrder,
+            signedOrder: signedOrder.order,
             exchangeBundle: exchangeBundle,
             wishBundle: wishBundle,
           });
@@ -422,7 +417,7 @@ export default {
         var isOwnerOfAll = true;
 
         x.exchangeBundle.map((y) => {
-          if (x.signedOrder.makerAddress.toLowerCase() !== y.owner)
+          if (x.order.makerAddress.toLowerCase() !== y.owner)
             isOwnerOfAll = false;
         });
 
