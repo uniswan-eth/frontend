@@ -225,7 +225,7 @@ export default {
       );
 
       this.fillEvents = await exchange.queryFilter(
-        exchange.filters.Fill(),
+        exchange.filters.Fill(this.signeraddr),
         18900000
       );
       console.log(this.fillEvents);
