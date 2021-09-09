@@ -497,7 +497,7 @@ export default {
       }
     },
     async getPreferences(user) {
-      var bundlesDBURI = DB_BASE_URL + "orders";
+      var bundlesDBURI = DB_BASE_URL + "/orders";
       var res = await fetch(bundlesDBURI);
       var json = await res.json();
 
