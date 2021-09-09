@@ -116,7 +116,7 @@ import { BigNumber } from "@0x/utils";
 import { Orderbook } from "@0x/orderbook";
 import { MetamaskSubprovider } from "@0x/subproviders";
 
-const DB_BASE_URL = "https://uns-backend.vercel.app/api/v2";
+const DB_BASE_URL = "https://uns-backend.vercel.app/api/v3";
 const EXCHANGE_ADDRESS = "0x1f98206be961f98d0c2d2e5f7d965244b2f2129a";
 
 export default {

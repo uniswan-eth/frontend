@@ -95,7 +95,7 @@ import { BigNumber } from "@0x/utils";
 import PerfectScrollbar from "perfect-scrollbar";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 
-const DB_BASE_URL = "https://uns-backend.vercel.app/api/v2/";
+const DB_BASE_URL = "https://uns-backend.vercel.app/api/v3";
 const SUBGRAPH_URL =
   "https://api.thegraph.com/subgraphs/name/zapaz/eip721-matic";
 
@@ -375,7 +375,7 @@ export default {
         wantAssetAmounts,
         wantAssetData
       );
-      const bundlesDBURI = DB_BASE_URL + "options/" + encodedData;
+      const bundlesDBURI = DB_BASE_URL + "/options/" + encodedData;
       var res = await fetch(bundlesDBURI);
       var options = await res.json();
 
