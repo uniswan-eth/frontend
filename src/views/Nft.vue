@@ -22,37 +22,37 @@
               {{ asset.description }}
             </p>
             <br />
-            <b-button
-              v-if="!signerApproved"
-              @click="
-                $parent.$parent.approveTransfers(asset.asset_contract.address)
-              "
-              size="lg"
-              variant="success"
-            >
-              Approve transfers
-            </b-button>
-            <b-button
-              v-if="signerApproved"
-              @click="
-                $parent.$parent.unApproveTransfers(asset.asset_contract.address)
-              "
-              size="sm"
-              variant="secondary"
-            >
-              Remove approval
-            </b-button>
+            <div v-if="asset.owner.address.toLowerCase() === $parent.$parent.signeraddr.toLowerCase()">
+              <b-button
+                v-if="!signerApproved"
+                @click="
+                  $parent.$parent.approveTransfers(asset.asset_contract.address)
+                "
+                size="lg"
+                variant="success">
+                Approve transfers
+              </b-button>
+              <b-button
+                v-if="signerApproved"
+                @click="$parent.$parent.unApproveTransfers(asset.asset_contract.address)"
+                size="sm"
+                variant="secondary">
+                Remove approval
+              </b-button>
+            </div>
           </card>
           <br />
           <card header-classes="bg-transparent">
             <h2 slot="header" class="mb-0">Chain Info</h2>
+            <pre>{{contract}}</pre>
             <div>
               Address:
+              <!-- target="_blank" -->
               <a
-                target="_blank"
                 rel="noreferrer"
                 :href="
-                  'https://etherscan.io/address/' + asset.asset_contract.address
+                  /* 'https://etherscan.io/address/' + asset.asset_contract.address */
+                  '/#/explorer?contract=' + asset.asset_contract.address
                 "
               >
                 {{ asset.asset_contract.address }}
@@ -205,6 +205,7 @@ export default {
   },
   data() {
     return {
+      contract: null,
       asset: null,
       ownerAssets: [],
       validSwaps: [],
@@ -223,6 +224,8 @@ export default {
       this.validSwaps = []
       this.ownerOrders = []
 
+      this.contract = await this.$parent.$parent.getContract(this.$route.params.contract)
+
       this.signerApproved = await this.$parent.$parent.signerIsApproved(
         this.$route.params.contract
       );
@@ -233,7 +236,10 @@ export default {
       );
 
       // Use same format as OpenSea API
+      console.log(nft, this.$route.params.contract,
+      this.$route.params.tokenid.toString());
       this.asset = this.$parent.$parent.formatAsset(nft);
+      // this.asset = this.$parent.$parent.formatAsset2(nft);
 
       // Swap Options
       this.validSwaps = await this.$parent.$parent.getSwapOptions([nft]);

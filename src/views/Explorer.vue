@@ -1,29 +1,61 @@
 <template>
   <div>
     <base-header class="pb-6 pb-8 pt-5 pt-md-8 bg-gradient-warning">
+      <b-row v-if="contractData">
+        <b-col xl="3" md="6">
+          <stats-card title="Owners"
+            type="gradient-red"
+            :sub-title="contractData.numOwners"
+            icon="ni ni-active-40"
+            class="mb-4">
+
+            <template slot="footer">
+            </template>
+          </stats-card>
+        </b-col>
+        <b-col xl="3" md="6">
+          <stats-card title="Tokens"
+            type="gradient-orange"
+            :sub-title="contractData.numTokens"
+            icon="ni ni-chart-pie-35"
+            class="mb-4">
+
+            <template slot="footer">
+            </template>
+          </stats-card>
+        </b-col>
+      </b-row>
     </base-header>
     <b-container fluid class="mt--7">
-      <b-row class="justify-content-center">
+      <!-- <b-row class="justify-content-center">
         <b-col lg="12">
           <card header-classes="bg-transparent">
             <h3 slot="header" class="mb-0">Featured collections</h3>
+            <form @submit="searchCollections">
+              <b-input
+                v-model="contractSearchWord"
+                placeholder="Seacrh collections"
+                class="form-control-alternative"
+              />
+              <br />
+            </form>
             <el-table
+              v-if="contracts"
               class="table-responsive table"
-              :data="featuredCollections"
-              header-row-class-name="thead-light"
-            >
+              :data="contracts.data.tokenContracts"
+              header-row-class-name="thead-light">
               <el-table-column label="Name" min-width="130px" prop="page">
                 <template v-slot="{ row }">
-                  <h4>
+                  <h4 :title="row.name">
                     <b-button
-                      @click="getRndNFTs(row.contract)"
+                      @click="getNFTs(row.id)"
                       size="sm"
                       variant="secondary"
                     >
                       See collection
                     </b-button>
                     &nbsp;
-                    {{ row.name }}
+                    {{ row.name !== '' ? row.name : row.id.substr(0,6) }}
                   </h4>
                 </template>
               </el-table-column>
@@ -42,47 +74,62 @@
             </div>
           </card>
         </b-col>
-      </b-row>
+      </b-row> -->
       <br />
       <b-row class="justify-content-center">
         <b-col lg="12">
-          <card header-classes="bg-transparent" v-if="collection">
+          <!-- <pre>{{nfts}}</pre> -->
+          <card header-classes="bg-transparent" v-if="nfts && contractData">
             <h1 slot="header" class="mb-0">
-              {{ collection.name }}
+              {{ contractData.name }}
             </h1>
-            <div
-              class="actions"
-              v-if="collection && this.$parent.$parent.network.chainId === 1"
+            <b-card-group deck>
+              <nft-card2
+                display="card"
+                v-for="(n,idx) in nfts"
+                :key="'nft'+idx"
+                :nft="n"
+                :root="$parent.$parent"
+                />
+            </b-card-group>
+            <!-- <router-link :to="$router.currentRoute+'&'">
+              Next
+            </router-link> -->
+            <b-button
+              @click="offset += 10;getNFTs(contractData.id, offset)"
+              v-b-modal.modalOffer
+              size="sm"
+              variant="secondary"
             >
+              More
+            </b-button>
+            <!-- <div
+              class="actions">
               <a :href="baselink0 + ''" class="btn btn-sm btn-primary">
                 Default
               </a>
               <a
                 :href="baselink0 + '&order=sale_date'"
-                class="btn btn-sm btn-primary"
-              >
+                class="btn btn-sm btn-primary">
                 Last sale
               </a>
               <a
                 :href="baselink0 + '' + 'order=visitor_count'"
-                class="btn btn-sm btn-primary"
-              >
+                class="btn btn-sm btn-primary">
                 Most viewed
               </a>
               <a
                 :href="baselink0 + '&order=sale_price'"
-                class="btn btn-sm btn-primary"
-              >
+                class="btn btn-sm btn-primary">
                 Buy Now
               </a>
               <a
                 :href="baselink0 + '&auction=1'"
-                class="btn btn-sm btn-primary"
-              >
+                class="btn btn-sm btn-primary">
                 On auction
               </a>
-            </div>
-            <el-table
+            </div> -->
+            <!-- <el-table
               class="table-responsive table"
               :data="nfts"
               header-row-class-name="thead-light"
@@ -93,8 +140,8 @@
                 </template>
               </el-table-column>
             </el-table>
-            <br />
-            <div class="p-4 bg-secondary">
+            <br /> -->
+            <!-- <div class="p-4 bg-secondary">
               <form @submit="navNFT($event)">
                 <b-input
                   v-model="currentTokenID"
@@ -103,7 +150,7 @@
                 />
                 <br />
               </form>
-            </div>
+            </div> -->
           </card>
         </b-col>
       </b-row>
@@ -122,7 +169,7 @@ import {
   Dropdown,
 } from "element-ui";
 import Collection from "@/components/UniSwan/Collection";
-import NftCard from "@/components/UniSwan/NftCard";
+import NftCard2 from "@/components/UniSwan/NftCard2";
 import ERC721ABI from "@/abis/erc721.json";
 import { ethers } from "ethers";
 
@@ -130,7 +177,7 @@ Vue.use(VueClipboard);
 export default {
   name: "explorer",
   components: {
-    NftCard,
+    NftCard2,
     Collection,
     [Table.name]: Table,
     [TableColumn.name]: TableColumn,
@@ -141,6 +188,10 @@ export default {
   },
   data() {
     return {
+      offset:0,
+      contractData: null,
+      baselink0: '',
+      contractSearchWord:'',
       currentTokenID: null,
       currentContract: null,
       nfts: [], // Uniswan format
@@ -149,6 +200,7 @@ export default {
       collection: null,
 
       featuredCollections: [],
+      contracts:null,
     };
   },
   async mounted() {
@@ -156,18 +208,13 @@ export default {
     this.loadPage();
   },
   methods: {
-    navNFT(ev) {
-      if (ev) {
-        ev.preventDefault();
-      }
-      this.$router.push(
-        "/nft/" + this.currentContract + "/" + this.currentTokenID
-      );
-    },
     async loadPage() {
       this.assets = [];
       this.nfts = [];
       if (this.$parent.$parent.network.chainId === 137) {
+
+        // this.contracts = await this.$parent.$parent.getContractsFromSubGraph('');
+        // console.log('Contracts', this.contracts);
         // Matic
         this.featuredCollections = [
           {
@@ -187,7 +234,11 @@ export default {
             name: "Emblem vault",
           },
         ];
-        this.getRndNFTs(this.featuredCollections[0].contract);
+        if (this.$route.query.contract) {
+          this.getNFTs(this.$route.query.contract);
+        } else {
+          this.getNFTs(this.featuredCollections[0].contract);
+        }
       } else if (this.$parent.$parent.network.chainId === 1) {
         // Main net
         this.featuredCollections = [
@@ -204,22 +255,42 @@ export default {
         this.loadOS(0);
       }
     },
-    async getRndNFTs(collectionAddress) {
-      this.nfts = await this.$parent.$parent.getContractTokensFromSubGraph(
-        collectionAddress,
-        0,
-        6
+    async searchCollections(ev) {
+      ev.preventDefault()
+      this.contracts = await this.$parent.$parent.getContractsFromSubGraph(this.contractSearchWord);
+    },
+    navNFT(ev) {
+      if (ev) {
+        ev.preventDefault();
+      }
+      this.$router.push(
+        "/nft/" + this.currentContract + "/" + this.currentTokenID
       );
+    },
+    async getNFTs(collectionAddress, offset = 0) {
+      this.nfts = null
+      this.contractData = null
+
       this.currentContract = collectionAddress;
-      var collection = new ethers.Contract(
+      var res = await this.$parent.$parent.getContractTokensFromSubGraph2(
         collectionAddress,
-        ERC721ABI,
-        this.$parent.$parent.signer
+        10,
+        offset
       );
-      var collectionName = await collection.name();
-      this.collection = {
-        name: collectionName,
-      };
+      this.nfts = res.nfts
+      this.contractData = res.raw
+      this.$parent.$parent.routeName = this.contractData.name;
+      console.log('HOHO', res);
+      // this.collection = this.nfts.data.tokenContract
+      // var collection = new ethers.Contract(
+      //   collectionAddress,
+      //   ERC721ABI,
+      //   this.$parent.$parent.signer
+      // );
+      // var collectionName = await collection.name();
+      // this.collection = {
+      //   name: collectionName,
+      // };
     },
     async loadOS(offset) {
       if (!this.$route.query.slug) {
