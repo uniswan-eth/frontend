@@ -548,7 +548,24 @@ export default {
         EXCHANGEABI,
         this.signer
       );
-      await exchange.cancelOrder(order);
+      const newOrder = {
+        exchangeAddress: order.exchangeAddress,
+        makerAddress: order.makerAddress,
+        takerAddress: order.takerAddress,
+        feeRecipientAddress: order.feeRecipientAddress,
+        senderAddress: order.senderAddress,
+        makerAssetAmount: order.makerAssetAmount.toNumber(),
+        takerAssetAmount: order.takerAssetAmount.toNumber(),
+        makerFee: order.makerFee.toNumber(),
+        takerFee: order.takerFee.toNumber(),
+        expirationTimeSeconds: order.expirationTimeSeconds.toNumber(),
+        salt: order.salt.toNumber(),
+        makerAssetData: order.makerAssetData,
+        takerAssetData: order.takerAssetData,
+        makerFeeAssetData: order.makerFeeAssetData,
+        takerFeeAssetData: order.takerFeeAssetData,
+      };
+      await exchange.cancelOrder(newOrder);
       this.$notify({
         type: "danger",
         message: "Deleted order",

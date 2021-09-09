@@ -214,7 +214,7 @@ export default {
       );
       const salt = new BigNumber(new Date().getTime()).toString();
       const order = {
-        chainId: "137",
+        chainId: 137,
         exchangeAddress: EXCHANGE_ADDRESS,
         makerAddress: this.$parent.signeraddr,
         takerAddress: "0x0000000000000000000000000000000000000000",
