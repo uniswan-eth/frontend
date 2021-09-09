@@ -445,7 +445,7 @@ export default {
         wantAssetData
       );
       const bundlesDBURI = DB_BASE_URL + "/options/" + encodedData;
-      console.log(bundlesDBURI);
+
       var res = await fetch(bundlesDBURI);
       var options = await res.json();
 
@@ -529,7 +529,7 @@ export default {
         this.signer
       );
       console.log("Executing", exchange, ringswap);
-      console.log(ringswap);
+
       exchange.batchFillOrders(
         ringswap.map((b) => b.signedOrder),
         ringswap.map((b) => b.signedOrder.takerAssetAmount),
