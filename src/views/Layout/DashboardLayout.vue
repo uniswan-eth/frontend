@@ -222,7 +222,7 @@ export default {
     },
     async loadUser() {
       this.usernfts = await this.getUserTokensFromSubGraph(this.signeraddr);
-      this.userprefs = await this.queryOrderBook(this.signeraddr.toLowerCase());
+      this.userprefs = this.queryOrderBook(this.signeraddr.toLowerCase());
       this.userSwapOptions = await this.getSwapOptions(this.usernfts);
     },
     async getCollectionFromSubGraph(
@@ -319,10 +319,8 @@ export default {
       const data = await client.query({
         query: gql(tokensQuery),
       });
-      const tokenData = data.data.owners[0].tokens;
 
-      const output = await this.constructBundle(tokenData);
-      return output;
+      return await this.constructBundle(data.data.owners[0].tokens);
     },
     async constructBundle(tokenData) {
       var bundle = [];
