@@ -9,7 +9,7 @@
     "dev": "npm run serve"
   },
   "dependencies": {
-    "@0x/connect": "^6.0.9",
+    "@0x/connect": "^5.0.19",
     "@0x/order-utils": "^8.4.0",
     "@0x/subproviders": "^5.0.4",
     "@0x/utils": "^4.5.2",
