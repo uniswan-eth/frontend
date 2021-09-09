@@ -118,6 +118,8 @@ import OrderModal from "@/components/UniSwan/OrderModal";
 import CreateOrderModal from "@/components/UniSwan/CreateOrderModal";
 import SwapChainModal from "@/components/UniSwan/SwapChainModal";
 
+import { HttpClient } from "0x/connect";
+
 const EXCHANGE_ADDRESS = "0x1f98206be961f98d0c2d2e5f7d965244b2f2129a";
 
 const httpLink = createHttpLink({
@@ -394,8 +396,7 @@ export default {
       var res = await fetch(bundlesDBURI);
       var json = await res.json();
 
-      console.log("Prefs", bundlesDBURI, json);
-      var preferences = [];
+      var orders = [];
       await Promise.all(
         json.map(async (signedOrder) => {
           const exchangeBundle = await this.dataToBundle(
@@ -405,24 +406,23 @@ export default {
             signedOrder.takerAssetData
           );
 
-          preferences.push({
+          orders.push({
             signedOrder: signedOrder,
             exchangeBundle: exchangeBundle,
             wishBundle: wishBundle,
           });
         })
       );
-      console.log("Prefs Done", preferences);
 
       var validOrders = [];
-      preferences.map((x) => {
+      orders.map((x) => {
         var isOwnerOfAll = true;
+        console.log("batman", x);
         x.exchangeBundle.map((y) => {
           if (x.signedOrder.makerAddress.toLowerCase() !== y.owner)
             isOwnerOfAll = false;
         });
 
-        // validOrders.push(x)
         if (isOwnerOfAll) {
           validOrders.push(x);
         } else {
@@ -430,7 +430,6 @@ export default {
         }
       });
       return validOrders;
-      // return preferences;
     },
     async getSwapOptions(NFTs) {
       let wantAssetData = [];
