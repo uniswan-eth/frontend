@@ -445,6 +445,7 @@ export default {
         wantAssetData
       );
       const bundlesDBURI = DB_BASE_URL + "/options/" + encodedData;
+      console.log(bundlesDBURI);
       var res = await fetch(bundlesDBURI);
       var options = await res.json();
 
