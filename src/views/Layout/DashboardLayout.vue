@@ -589,7 +589,7 @@ export default {
     },
     async deleteOrder(order) {
       const exchange = new ethers.Contract(
-        "0x2682798109c35310B76db070b98Fc21833DCAA61",
+        EXCHANGE_ADDRESS,
         EXCHANGEABI,
         this.signer
       );
