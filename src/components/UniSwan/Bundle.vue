@@ -1,25 +1,29 @@
 <template>
-  <div class="">
+  <div style="float:left;">
     <nft-card
+      :idx="idx"
+      :display="display"
       v-for="(n,idx) in bundle"
       :key="'id'+idx"
       :root="root"
-      :nft="n"/>
+      :nft="n">
+      <template v-slot:nftHeader>
+        <slot name="bundleHeader"></slot>
+
+        <!-- {{idx}} -->
+      </template>
+    </nft-card>
+    <div class="cb"/>
+
   </div>
 </template>
 <script>
-  // import { Table, TableColumn, DropdownMenu, DropdownItem, Dropdown} from 'element-ui'
   import NftCard from '@/components/UniSwan/NftCard';
   export default {
     name: 'bundle',
-    props: ["bundle", "root"],
+    props: ["bundle", "root", "display"],
     components: {
       NftCard
-      // [Table.name]: Table,
-      // [TableColumn.name]: TableColumn,
-      // [Dropdown.name]: Dropdown,
-      // [DropdownItem.name]: DropdownItem,
-      // [DropdownMenu.name]: DropdownMenu,
     },
     data() {
       return {

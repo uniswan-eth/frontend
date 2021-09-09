@@ -1,9 +1,9 @@
 <template>
-  <span class="">
+  <span class="" v-if="address">
     <!-- {{address.substr(0,6)}} -->
     <router-link :to="'/account/'+address">
       <i>{{
-        address === root.signeraddr ?
+        address.toLowerCase() === root.signeraddr.toLowerCase() ?
         'Me'
         :
         address.substr(0,6)

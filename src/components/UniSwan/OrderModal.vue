@@ -18,6 +18,15 @@
         />
       </p>
     </div>
+    <nfts-table :nfts="order.wishBundle" :root="$parent">
+      <template v-slot:unsHeader>
+        <b-row align-v="center">
+          <b-col>
+            <h3 class="mb-0">Wish</h3>
+          </b-col>
+        </b-row>
+      </template>
+    </nfts-table>
     <nfts-table :nfts="order.exchangeBundle" :root="$parent">
       <template v-slot:unsHeader>
         <b-row align-v="center">
@@ -28,15 +37,17 @@
       </template>
     </nfts-table>
     <br />
-    <nfts-table :nfts="order.wishBundle" :root="$parent">
-      <template v-slot:unsHeader>
-        <b-row align-v="center">
-          <b-col>
-            <h3 class="mb-0">Wish</h3>
-          </b-col>
-        </b-row>
-      </template>
-    </nfts-table>
+    <!-- <pre>{{order}}</pre> -->
+    <base-button
+      v-if="
+        order.signedOrder.makerAddress.toLowerCase() ===
+        $parent.signeraddr.toLowerCase()
+      "
+      @click="$parent.deleteOrder(order.signedOrder)"
+      type="danger"
+      >Delete order</base-button
+    >
+    <br />
     <template slot="modal-footer">
       <br />
     </template>

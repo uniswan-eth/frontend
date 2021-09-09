@@ -1,47 +1,53 @@
 <template>
-  <!-- :style="{background: (nft.owner === root.signeraddr) ? '#ccc' : '#fff'}" -->
-  <div
-
-    class="nftcard"
-    >
-    <b-media no-body class="text-left">
-      <a :href="'/#/nft/'+nft.contract+'/'+nft.tokenID" class="avatar avatar-sm rounded-circle">
-        <img class="bgim smallim" :style="{backgroundImage: 'url('+nft.tokenJSON.image+')'}" alt=""/>
-      </a>&nbsp;
-      <b-media-body>
-          <span
-            :style="{fontWeight: (nft.owner === root.signeraddr) ? 900 : 400}"
-            class="name mb-0 text-sm">
-            {{nft.tokenJSON.name}}
-          </span>
-          <br>
-          <account-card :address="nft.owner" :root="root"/>
-          <!-- <router-link :to="'/account/'+nft.owner">
-            <i>{{
-              nft.owner === root.signeraddr ?
-              'Me'
-              :
-              nft.owner.substr(0,6)
-            }}</i>
-          </router-link> -->
-          <!-- <pre>{{nft}}</pre> -->
-      </b-media-body>
-    </b-media>
+  <div class="">
+    <div class="nftHolder" v-if="display === 'medium'">
+      <div v-if="!idx || idx === 0" class="" style="font-size:12px;padding-bottom:10px;padding-left:5px;">
+        {{nft.tokenJSON.name}}
+      </div>
+      <div
+        v-if="!idx || idx === 0"
+        class="bundleHeader">
+        <slot v-if="!idx || idx === 0" name="nftHeader"></slot>
+      </div>
+      <router-link :to="'/nft/'+nft.contract+'/'+nft.tokenID">
+        <div
+          :style="{
+            marginLeft: (idx > 1) ? (idx - 1) * 30 + 'px' : (idx === 1) ? '5px' : '0px',
+            backgroundImage: 'url('+nft.tokenJSON.image+')'
+            }"
+          :class="['imgHolder', 'bgim', idx > 0 ? 'small' : '']">
+        </div>
+      </router-link>
+      <div v-if="!idx || idx === 0" class="" style="font-size:12px;padding-top:3px;padding-left:5px;">
+        <account-card :address="nft.owner" :root="root"/>
+      </div>
+      <!-- <pre>{{nft}}</pre> -->
+    </div>
+    <div v-if="!display" class="nftcard">
+      <b-media no-body class="text-left">
+        <a :href="'/#/nft/'+nft.contract+'/'+nft.tokenID" class="avatar avatar-sm rounded-circle">
+          <img class="bgim smallim" :style="{backgroundImage: 'url('+nft.tokenJSON.image+')'}" alt=""/>
+        </a>&nbsp;
+        <b-media-body>
+            <span
+              :style="{fontWeight: (nft.owner === root.signeraddr) ? 900 : 400}"
+              class="name mb-0 text-sm">
+              {{nft.tokenJSON.name}}
+            </span>
+            <br>
+            <account-card :address="nft.owner" :root="root"/>
+        </b-media-body>
+      </b-media>
+    </div>
   </div>
 </template>
 <script>
-  // import { Table, TableColumn, DropdownMenu, DropdownItem, Dropdown} from 'element-ui'
   import AccountCard from '@/components/UniSwan/AccountCard';
   export default {
     name: 'nft-card',
-    props: ["nft", "display", "root"],
+    props: ["nft", "display", "root", "idx"],
     components: {
       AccountCard
-      // [Table.name]: Table,
-      // [TableColumn.name]: TableColumn,
-      // [Dropdown.name]: Dropdown,
-      // [DropdownItem.name]: DropdownItem,
-      // [DropdownMenu.name]: DropdownMenu,
     },
     data() {
       return {
@@ -62,6 +68,28 @@
   }
 </script>
 <style>
+.bundleHeader {
+  margin-left: 7px;
+  margin-bottom: -35px;
+}
+.nftHolder {
+
+}
+.imgHolder {
+  height:150px;
+  width:150px;
+  border-radius: 10px;
+  padding: 5px;
+}
+.imgHolder.small {
+  /* position: absolute; */
+  height:50px;
+  width:50px;
+  float:left;
+  margin-top: -76px;
+  border: 2px solid #eee;
+  /* margin-right: 5px; */
+}
 .nftcard {
   margin-bottom: 5px;
   white-space: nowrap;

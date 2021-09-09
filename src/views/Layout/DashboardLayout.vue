@@ -159,6 +159,7 @@ export default {
         "0x7b358DE6237deDf79ad102f3d55a1cC8EaD89677",
       ],
 
+      orderbook: [],
       tempnfts: [],
       usernfts: [],
       userprefs: [],
@@ -201,13 +202,164 @@ export default {
     this.loadApp();
   },
   methods: {
-    async signerIsApproved(contract) {
-      var collection = new ethers.Contract(contract, ERC721ABI, this.signer);
+    async loadApp() {
+      this.signer = this.provider.getSigner();
+      this.signeraddr = await this.signer.getAddress();
 
-      return await collection.isApprovedForAll(
-        this.signeraddr,
-        this.ERC721_PROXY_ADDRESS
-      );
+      var access = this.allowList.includes(this.signeraddr);
+      if (access) {
+        await this.loadNetwork();
+        this.orderbook = await this.getPreferences();
+        console.log("Load: Orderbook", this.orderbook);
+        await this.loadUser();
+        console.log("Load: User", this.userprefs);
+        this.pageloaded = true;
+      }
+    },
+    async loadNetwork() {
+      this.network = await this.provider.getNetwork();
+      this.blockNumber = await this.provider.getBlockNumber();
+    },
+    async loadUser() {
+      this.usernfts = await this.getUserTokensFromSubGraph(this.signeraddr);
+      this.userprefs = await this.queryOrderBook(this.signeraddr.toLowerCase());
+      this.userSwapOptions = await this.getSwapOptions(this.usernfts);
+    },
+    async getContractTokensFromSubGraph2(
+      contractAddress,
+      offset = 0,
+      limit = 5
+    ) {
+      const tokensQuery = `
+        {
+          tokens(first: ${limit}, where: {contract.id: ${{ contractAddress }}) {
+            id
+            contract {
+              id
+            }
+            owner {
+              id
+            }
+            tokenID
+            metadata
+            image
+          }
+        }
+      `;
+
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      console.log("res", data);
+      const tokenData = data.data.tokens;
+      // const tokenData = data.data.tokenContracts[0].tokens;
+      const output = await this.constructBundle(tokenData);
+      return output;
+    },
+    async getContractTokensFromSubGraph(
+      contractAddress,
+      startIndex = 0,
+      amount = 5
+    ) {
+      const tokensQuery = `
+          query {
+          tokenContracts(where:{id:"${contractAddress.toLowerCase()}"}) {
+            id
+            tokens(first:${amount}) {
+              id,
+              contract {
+                id
+              },
+              owner {
+                id
+              }
+              tokenID
+              metadata
+            }
+          }
+        }
+      `;
+      console.log(tokensQuery);
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      const tokenData = data.data.tokenContracts[0].tokens;
+      const output = await this.constructBundle(tokenData);
+      console.log("ggg", output);
+      return output;
+    },
+    async getTokenFromSubgraph(contractAddress, tokenId) {
+      const id = contractAddress.toLowerCase() + "_" + tokenId;
+      const tokensQuery = `
+          query {
+            tokens(where:{id:"${id}"}) {
+              id
+              contract {
+                id
+              }
+              owner {
+                id
+              }
+              tokenID
+              metadata
+            }
+          }
+        `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      const tokenData = data.data.tokens;
+      const output = await this.constructBundle(tokenData);
+      return output[0];
+    },
+    async getUserTokensFromSubGraph(userAddress) {
+      const tokensQuery = `
+          query {
+          owners(where:{id:"${userAddress.toLowerCase()}"}) {
+            id
+            tokens {
+              id,
+              contract {
+                id
+              },
+              owner {
+                id
+              }
+              tokenID
+              metadata
+            }
+          }
+        }
+        `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      const tokenData = data.data.owners[0].tokens;
+      const output = await this.constructBundle(tokenData);
+      return output;
+    },
+    async getTokenByName(name) {
+      const tokensQuery = `
+          query {
+          tokens(where:{name:"${name}"}) {
+            id
+            contract {
+              id
+            }
+            owner {
+              id
+            }
+            tokenID
+            metadata
+          }
+        }
+        `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      const tokenData = data.data.tokens;
+      const output = await this.constructBundle(tokenData);
+      return output;
     },
     async constructBundle(tokenData) {
       var bundle = [];
@@ -239,126 +391,88 @@ export default {
       );
       return bundle;
     },
-    async getUserTokensFromSubGraph(userAddress) {
-      const tokensQuery = `
-          query {
-          owners(where:{id:"${userAddress.toLowerCase()}"}) {
-            id
-            tokens {
-              id,
-              contract {
-                id
-              },
-              owner {
-                id
-              }
-              tokenID
-              metadata
+
+    queryOrderBook(owner) {
+      var toret = this.orderbook.filter((x) => {
+        return x.signedOrder.makerAddress.toLowerCase() === owner;
+      });
+      return toret;
+    },
+    async getPreferences(user) {
+      var bundlesDBURI = DB_BASE_URL + "/orders";
+      var res = await fetch(bundlesDBURI);
+      var json = await res.json();
+      const exchange = new ethers.Contract(
+        EXCHANGE_ADDRESS,
+        EXCHANGEABI,
+        this.signer
+      );
+      console.log("Prefs", bundlesDBURI, json);
+      var preferences = [];
+      await Promise.all(
+        json.map(async (signedOrder) => {
+          if (
+            !user ||
+            user.toLowerCase() === signedOrder.makerAddress.toLowerCase()
+          ) {
+            var inter = assetDataUtils.decodeMultiAssetData(
+              signedOrder.makerAssetData
+            );
+            const exchangeBundle = [];
+            for (let i = 0; i < inter.nestedAssetData.length; i++) {
+              var bytes = assetDataUtils.decodeERC721AssetData(
+                inter.nestedAssetData[i]
+              );
+              exchangeBundle.push(
+                await this.getTokenFromSubgraph(
+                  bytes.tokenAddress,
+                  bytes.tokenId.toNumber().toString()
+                )
+              );
             }
-          }
-        }
-        `;
-      const data = await client.query({
-        query: gql(tokensQuery),
-      });
-      const tokenData = data.data.owners[0].tokens;
-      const output = await this.constructBundle(tokenData);
-      return output;
-    },
-    async getContractTokensFromSubGraph(contractAddress, startIndex, amount) {
-      const tokensQuery = `
-          query {
-          tokenContracts(where:{id:"${contractAddress.toLowerCase()}"}) {
-            id
-            tokens(first:${amount}, skip:${startIndex}) {
-              id,
-              contract {
-                id
-              },
-              owner {
-                id
-              }
-              tokenID
-              metadata
+            inter = assetDataUtils.decodeMultiAssetData(
+              signedOrder.takerAssetData
+            );
+            const wishBundle = [];
+            for (let i = 0; i < inter.nestedAssetData.length; i++) {
+              bytes = assetDataUtils.decodeERC721AssetData(
+                inter.nestedAssetData[i]
+              );
+              wishBundle.push(
+                await this.getTokenFromSubgraph(
+                  bytes.tokenAddress,
+                  bytes.tokenId.toNumber().toString()
+                )
+              );
             }
+            preferences.push({
+              signedOrder: signedOrder,
+              exchangeBundle: exchangeBundle,
+              wishBundle: wishBundle,
+            });
           }
+        })
+      );
+      console.log("Prefs Done", preferences);
+
+      var validOrders = [];
+      preferences.map((x) => {
+        var isOwnerOfAll = true;
+        x.exchangeBundle.map((y) => {
+          // console.log('Order test', x.signedOrder.order.makerAddress, y.owner);
+          if (x.signedOrder.makerAddress.toLowerCase() !== y.owner)
+            isOwnerOfAll = false;
+        });
+
+        // validOrders.push(x)
+        if (isOwnerOfAll) {
+          validOrders.push(x);
+        } else {
+          console.log("Invalid Order", isOwnerOfAll, x);
         }
-        `;
-      const data = await client.query({
-        query: gql(tokensQuery),
       });
-      const tokenData = data.data.tokenContracts[0].tokens;
-      const output = await this.constructBundle(tokenData);
-      return output;
-    },
-    async getTokenFromSubgraph(contractAddress, tokenId) {
-      const id = contractAddress.toLowerCase() + "_" + tokenId;
-      const tokensQuery = `
-          query {
-  tokens(where:{id:"${id}"}) {
-    id
-    contract {
-      id
-    }
-    owner {
-      id
-    }
-    tokenID
-    metadata
-  }
-}
-        `;
-      const data = await client.query({
-        query: gql(tokensQuery),
-      });
-      const tokenData = data.data.tokens;
-      const output = await this.constructBundle(tokenData);
-      return output[0];
-    },
-    async getTokenByName(name) {
-      const tokensQuery = `
-          query {
-  tokens(where:{name:"${name}"}) {
-    id
-    contract {
-      id
-    }
-    owner {
-      id
-    }
-    tokenID
-    metadata
-  }
-}
-        `;
-      const data = await client.query({
-        query: gql(tokensQuery),
-      });
-      const tokenData = data.data.tokens;
-      const output = await this.constructBundle(tokenData);
-      return output;
-    },
-    async loadApp() {
-      this.signer = this.provider.getSigner();
-      this.signeraddr = await this.signer.getAddress();
-
-      var access = this.allowList.includes(this.signeraddr);
-      if (access) {
-        await this.loadNetwork();
-        await this.loadUser();
-
-        this.pageloaded = true;
-      }
-    },
-    async loadUser() {
-      this.usernfts = await this.getUserTokensFromSubGraph(this.signeraddr);
-
-      this.userprefs = await this.getPreferences(this.signeraddr);
-      this.userSwapOptions = await this.getSwapOptions(this.usernfts);
-    },
-    async loadNetwork() {
-      this.network = await this.provider.getNetwork();
-      this.blockNumber = await this.provider.getBlockNumber();
+      return validOrders;
+      // return preferences;
     },
     async getSwapOptions(NFTs) {
       let wantAssetData = [];
@@ -428,6 +542,15 @@ export default {
       );
       return newChains;
     },
+
+    async signerIsApproved(contract) {
+      var collection = new ethers.Contract(contract, ERC721ABI, this.signer);
+
+      return await collection.isApprovedForAll(
+        this.signeraddr,
+        this.ERC721_PROXY_ADDRESS
+      );
+    },
     async approveTransfers(collectionAddress) {
       var collection = new ethers.Contract(
         collectionAddress,
@@ -446,24 +569,6 @@ export default {
 
       collection.setApprovalForAll(this.ERC721_PROXY_ADDRESS, false);
     },
-    formatAsset(nft) {
-      return {
-        token_id: nft.tokenID,
-        image_url: nft.tokenJSON.image,
-        image_preview_url: nft.tokenJSON.image,
-        name: nft.tokenJSON.name,
-        description: nft.tokenJSON.description,
-        asset_contract: {
-          address: nft.contract,
-        },
-        owner: {
-          address: nft.owner,
-        },
-      };
-    },
-    viewSwapChain(chain) {
-      this.currentSwapChain = chain;
-    },
     async executeSwap(ringswap) {
       const exchange = new ethers.Contract(
         EXCHANGE_ADDRESS,
@@ -480,6 +585,25 @@ export default {
         }
       );
       console.log("Notify and refresh user NFTs", exchange);
+      this.loadApp();
+    },
+    async deleteOrder(order) {
+      const exchange = new ethers.Contract(
+        EXCHANGE_ADDRESS,
+        EXCHANGEABI,
+        this.signer
+      );
+      await exchange.cancelOrder(order);
+      this.$notify({
+        type: "danger",
+        message: "Deleted order",
+      });
+      this.$bvModal.hide("modalOffer");
+      this.loadApp();
+    },
+
+    viewSwapChain(chain) {
+      this.currentSwapChain = chain;
     },
     viewOrder(order) {
       console.log("Modal", order);
@@ -489,70 +613,6 @@ export default {
       console.log("Modal", nft);
       this.newOrderNFT = nft;
       this.newOrderOwnerNFTs = ownerNFTs;
-    },
-    initScrollbar() {
-      let isWindows = navigator.platform.startsWith("Win");
-      if (isWindows) {
-        initScrollbar("sidenav");
-      }
-    },
-    async getPreferences(user) {
-      var bundlesDBURI = DB_BASE_URL + "/orders";
-      var res = await fetch(bundlesDBURI);
-      var json = await res.json();
-
-      var orders = [];
-      await Promise.all(
-        json.map(async (signedOrder) => {
-          if (!user || user === signedOrder.makerAddress) {
-            var inter = assetDataUtils.decodeMultiAssetData(
-              signedOrder.makerAssetData
-            );
-            const exchangeBundle = [];
-            for (let i = 0; i < inter.nestedAssetData.length; i++) {
-              var bytes = assetDataUtils.decodeERC721AssetData(
-                inter.nestedAssetData[i]
-              );
-              exchangeBundle.push(
-                await this.getTokenFromSubgraph(
-                  bytes.tokenAddress,
-                  bytes.tokenId.toNumber().toString()
-                )
-              );
-            }
-            inter = assetDataUtils.decodeMultiAssetData(
-              signedOrder.takerAssetData
-            );
-            const wishBundle = [];
-            for (let i = 0; i < inter.nestedAssetData.length; i++) {
-              bytes = assetDataUtils.decodeERC721AssetData(
-                inter.nestedAssetData[i]
-              );
-              wishBundle.push(
-                await this.getTokenFromSubgraph(
-                  bytes.tokenAddress,
-                  bytes.tokenId.toNumber().toString()
-                )
-              );
-            }
-            orders.push({
-              signedOrder: signedOrder,
-              exchangeBundle: exchangeBundle,
-              wishBundle: wishBundle,
-            });
-          }
-        })
-      );
-      return orders;
-    },
-
-    formatNum(num, leading = 2) {
-      return this.formatNumberWithCommas(
-        Number.parseFloat(num).toFixed(leading)
-      );
-    },
-    formatNumberWithCommas(x) {
-      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     },
     async fetchOpenSea(searchObj) {
       // if (searchObj.offset === -1) {searchObj.offset = this.currentOSOffSet + searchObj.limit} // Next
@@ -626,8 +686,38 @@ export default {
       // console.log('OpenSea', res);
       return res;
     },
+
+    formatAsset(nft) {
+      return {
+        token_id: nft.tokenID,
+        image_url: nft.tokenJSON.image,
+        image_preview_url: nft.tokenJSON.image,
+        name: nft.tokenJSON.name,
+        description: nft.tokenJSON.description,
+        asset_contract: {
+          address: nft.contract,
+        },
+        owner: {
+          address: nft.owner,
+        },
+      };
+    },
+    formatNum(num, leading = 2) {
+      return this.formatNumberWithCommas(
+        Number.parseFloat(num).toFixed(leading)
+      );
+    },
+    formatNumberWithCommas(x) {
+      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    },
     rnd(n) {
       return Math.floor(Math.random() * n);
+    },
+    initScrollbar() {
+      let isWindows = navigator.platform.startsWith("Win");
+      if (isWindows) {
+        initScrollbar("sidenav");
+      }
     },
   },
 };

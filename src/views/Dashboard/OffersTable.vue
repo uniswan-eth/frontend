@@ -5,9 +5,6 @@
         <b-col>
           <h3 class="mb-0">Offers</h3>
         </b-col>
-        <!-- <b-col class="text-right">
-          <a href="#!" class="btn btn-sm btn-primary">See all</a>
-        </b-col> -->
       </b-row>
     </template>
     <el-table
@@ -15,7 +12,21 @@
       :data="offers"
       header-row-class-name="thead-light"
     >
-      <el-table-column label="" max-width="30px" prop="page">
+      <el-table-column label="Wish" min-width="130px" prop="page">
+        <template v-slot="{ row }">
+          <bundle :display="display" :bundle="row.wishBundle" :root="root">
+            <template v-slot:bundleHeader> &nbsp; </template>
+          </bundle>
+        </template>
+      </el-table-column>
+      <el-table-column label="Exchange" min-width="130px" prop="page">
+        <template v-slot="{ row }">
+          <bundle :display="display" :bundle="row.exchangeBundle" :root="root">
+            <template v-slot:bundleHeader> &nbsp; </template>
+          </bundle>
+        </template>
+      </el-table-column>
+      <el-table-column label="Wisher" max-width="30px" prop="page">
         <template v-slot="{ row }">
           <b-button
             @click="root.viewOrder(row)"
@@ -23,19 +34,10 @@
             size="sm"
             variant="secondary"
           >
-            Order
+            View order
           </b-button>
-        </template>
-      </el-table-column>
-
-      <el-table-column label="Exchange" min-width="130px" prop="page">
-        <template v-slot="{ row }">
-          <bundle :bundle="row.exchangeBundle" :root="root" />
-        </template>
-      </el-table-column>
-      <el-table-column label="Wish" min-width="130px" prop="page">
-        <template v-slot="{ row }">
-          <bundle :bundle="row.wishBundle" :root="root" />
+          <br />
+          <account-card :address="row.signedOrder.makerAddress" :root="root" />
         </template>
       </el-table-column>
     </el-table>
@@ -50,11 +52,13 @@ import {
   Dropdown,
 } from "element-ui";
 import Bundle from "@/components/UniSwan/Bundle";
+import AccountCard from "@/components/UniSwan/AccountCard";
 
 export default {
   name: "offers-table",
-  props: ["offers", "root"],
+  props: ["offers", "root", "display"],
   components: {
+    AccountCard,
     Bundle,
     [Table.name]: Table,
     [TableColumn.name]: TableColumn,
