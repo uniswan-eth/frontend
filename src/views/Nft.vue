@@ -23,10 +23,7 @@
             </p>
             <br />
             <b-button
-              v-if="
-                $parent.$parent.signeraddr === asset.owner.address &&
-                !signerApproved
-              "
+              v-if="!signerApproved"
               @click="
                 $parent.$parent.approveTransfers(asset.asset_contract.address)
               "
@@ -36,10 +33,7 @@
               Approve transfers
             </b-button>
             <b-button
-              v-if="
-                $parent.$parent.signeraddr === asset.owner.address &&
-                signerApproved
-              "
+              v-if="signerApproved"
               @click="
                 $parent.$parent.unApproveTransfers(asset.asset_contract.address)
               "
