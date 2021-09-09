@@ -236,7 +236,7 @@ export default {
             id
             name
             symbol
-            tokens(first:${amount}) {
+            tokens(first:${amount}, skip:${startIndex}) {
               id,
               contract {
                 id
