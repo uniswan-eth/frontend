@@ -234,8 +234,14 @@ export default {
           wantAmounts,
           wantAssetData
         ),
-        makerFeeAssetData: "0x",
-        takerFeeAssetData: "0x",
+        makerFeeAssetData: assetDataUtils.encodeMultiAssetData(
+          haveAmounts,
+          haveAssetData
+        ),
+        takerFeeAssetData: assetDataUtils.encodeMultiAssetData(
+          wantAmounts,
+          wantAssetData
+        ),
       };
       const provider = new MetamaskSubprovider(
         "ethereum" in window ? window["ethereum"] : Web3.givenProvider
