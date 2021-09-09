@@ -1,8 +1,7 @@
 <template>
   <div class="contract">
-    <h4 @click="
-      $parent.$parent.searchQuery = '';
-      root.showSearch = false">
+    <!-- @click="$parent.closeSearch();" -->
+    <h4 >
       <router-link :to="'/explorer?contract='+contract.id">
         {{contract.name}}
       </router-link>
@@ -14,7 +13,7 @@
   // import { Table, TableColumn, DropdownMenu, DropdownItem, Dropdown} from 'element-ui'
   // import NftCard from '@/components/UniSwan/NftCard';
   export default {
-    name: 'account-card',
+    name: 'contract-card',
     props: ["contract", "root"],
     components: {
       // NftCard

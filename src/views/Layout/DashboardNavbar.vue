@@ -95,6 +95,9 @@ export default {
     };
   },
   methods: {
+    closeSearch() {
+      this.searchQuery = ''
+    },
     capitalizeFirstLetter(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
     },

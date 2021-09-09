@@ -101,6 +101,8 @@ import CreateOrderModal from "@/components/UniSwan/CreateOrderModal";
 import SwapChainModal from "@/components/UniSwan/SwapChainModal";
 import makeBlockie from "ethereum-blockies-base64";
 
+import Datastore from 'nedb'
+
 import { FadeTransition } from "vue2-transitions";
 import { ethers } from "ethers";
 import PerfectScrollbar from "perfect-scrollbar";
@@ -150,6 +152,7 @@ export default {
   },
   data() {
     return {
+      nedbNFTs:null,
       routeName: null,
       showSearch: false,
 
@@ -189,6 +192,10 @@ export default {
   },
   async mounted() {
     document.title = "🦢 UniSwan";
+
+    this.buildNEDB()
+    console.log(this.nedbNFTs);
+
     await window.ethereum.enable();
     var self = this;
     this.provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -209,6 +216,108 @@ export default {
     this.loadApp();
   },
   methods: {
+    buildNEDB() {
+      this.nedbNFTs = new Datastore({ filename: 'NFTs', autoload: true })
+    },
+    insertNEDB(x) {
+      var self = this
+      return new Promise(function(resolve) {
+        self.nedbNFTs.update(
+          {_id: x._id},
+          x,
+          { upsert: true }, () => {resolve(true)});
+      });
+    },
+    queryNEDB(sea) {
+      var self = this
+      return new Promise(function(resolve) {
+        // console.log('SEA', sea);
+        self.nedbNFTs.find(sea).sort().skip(0).limit(100).exec(function (err, docs) {
+          resolve(docs)
+        });
+
+      });
+    },
+    async getContractTokensFromSubGraph2(
+      contractAddress,
+      limit = 10,
+      offset = 0
+      ) {
+      const tokensQuery = `
+        {
+          tokenContract(id:"${contractAddress.toLowerCase()}") {
+            id
+            name
+            numTokens
+            numOwners
+            tokens(first:${limit}, skip:${offset}) {
+              id,
+              contract {id}
+              tokenID
+              owner {id, numTokens}
+              tokenURI
+              mintTime
+            }
+          }
+        }
+      `;
+
+      console.log(tokensQuery);
+      const data = await client2.query({
+        query: gql(tokensQuery),
+      });
+      console.log("NEW", data);
+      const tokenData = data.data.tokenContract.tokens;
+      const nfts = await this.constructBundle2(tokenData);
+      return {
+        nfts: nfts,
+        raw: data.data.tokenContract
+      };
+    },
+    async constructBundle2(tokenData) {
+      var bundle = [];
+      await Promise.all(
+        tokenData.map(async (d) => {
+          var nft
+          // Check If we have it in cach
+          var test = await this.queryNEDB({tokenID: d.tokenID, contract: d.contract.id})
+          if (test.length > 0) {
+            nft = {
+              contract: d.contract.id,
+              tokenID: d.tokenID,
+              owner: d.owner.id,
+              tokenJSON: test[0].tokenJSON,
+            };
+          } else {
+            console.log('New JSON Look Up');
+            // If the subgraph doesn't give us the metadata, retrieve it manually
+            var tokenJSON;
+            var collection = new ethers.Contract(
+              d.contract.id,
+              ERC721ABI,
+              this.signer
+            );
+
+            var tokenURI = await collection.tokenURI(d.tokenID);
+            var res = await fetch(tokenURI);
+            tokenJSON = await res.json();
+
+            nft = {
+              contract: d.contract.id,
+              tokenID: d.tokenID,
+              owner: d.owner.id,
+              tokenJSON: tokenJSON,
+            };
+            var toInsert = {...nft}
+            toInsert._id = ethers.utils.id(nft.contract+'/'+nft.tokenID)
+            this.insertNEDB(toInsert)
+          }
+          bundle.push(nft);
+        })
+      );
+      return bundle;
+    },
+
     async getContract(collectionAddress) {
       // console.log('hello', );
       var collection = new ethers.Contract(
@@ -271,42 +380,6 @@ export default {
       // // const tokenData = data.data.tokenContracts[0].tokens;
       // const output = await this.constructBundle(tokenData);
       return data;
-    },
-    async getContractTokensFromSubGraph2(
-      contractAddress,
-      limit = 10,
-      offset = 0
-      ) {
-      const tokensQuery = `
-        {
-          tokenContract(id:"${contractAddress.toLowerCase()}") {
-            id
-            name
-            numTokens
-            numOwners
-            tokens(first:${limit}, skip:${offset}) {
-              id,
-              contract {id}
-              tokenID
-              owner {id, numTokens}
-              tokenURI
-              mintTime
-            }
-          }
-        }
-      `;
-
-      console.log(tokensQuery);
-      const data = await client2.query({
-        query: gql(tokensQuery),
-      });
-      console.log("NEW", data);
-      const tokenData = data.data.tokenContract.tokens;
-      const nfts = await this.constructBundle(tokenData);
-      return {
-        nfts: nfts,
-        raw: data.data.tokenContract
-      };
     },
     async getContractTokensFromSubGraph(
       contractAddress,
