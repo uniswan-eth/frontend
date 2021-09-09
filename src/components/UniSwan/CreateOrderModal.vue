@@ -131,7 +131,7 @@ import { MetamaskSubprovider } from "@0x/subproviders";
 import { HttpClient } from "@0x/connect";
 
 const DB_BASE_URL = "https://uns-backend.vercel.app/api/v3";
-const EXCHANGE_ADDRESS = "0x1f98206be961f98d0c2d2e5f7d965244b2f2129a";
+const EXCHANGE_ADDRESS = "0x1f98206bE961f98d0c2d2e5f7d965244B2f2129A";
 
 export default {
   name: "order-modal",
@@ -246,7 +246,7 @@ export default {
         this.$parent.signeraddr
       );
 
-      console.log(signedOrder);
+      console.log("order", signedOrder);
 
       var self = this;
 
