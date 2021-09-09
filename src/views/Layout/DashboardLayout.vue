@@ -394,7 +394,7 @@ export default {
 
     queryOrderBook(owner) {
       var toret = this.orderbook.filter((x) => {
-        return x.signedOrder.order.makerAddress.toLowerCase() === owner;
+        return x.signedOrder.makerAddress.toLowerCase() === owner;
       });
       return toret;
     },
@@ -410,21 +410,13 @@ export default {
       console.log("Prefs", bundlesDBURI, json);
       var preferences = [];
       await Promise.all(
-        json.map(async (preference) => {
-          const orderHashHex = orderHashUtils.getOrderHashHex(preference.order);
-          // FIXME: Reinstate
-          const cancelled = await exchange.cancelled(orderHashHex);
-          const filledStatus = await exchange.filled(orderHashHex);
+        json.map(async (signedOrder) => {
           if (
-            // (!user || user === preference.order.makerAddress) &&
-            (!user ||
-              user.toLowerCase() ===
-                preference.order.makerAddress.toLowerCase()) &&
-            // filledStatus.toNumber() === 0 &&
-            !cancelled
+            !user ||
+            user.toLowerCase() === signedOrder.makerAddress.toLowerCase()
           ) {
             var inter = assetDataUtils.decodeMultiAssetData(
-              preference.order.makerAssetData
+              signedOrder.makerAssetData
             );
             const exchangeBundle = [];
             for (let i = 0; i < inter.nestedAssetData.length; i++) {
@@ -439,7 +431,7 @@ export default {
               );
             }
             inter = assetDataUtils.decodeMultiAssetData(
-              preference.order.takerAssetData
+              signedOrder.takerAssetData
             );
             const wishBundle = [];
             for (let i = 0; i < inter.nestedAssetData.length; i++) {
@@ -454,7 +446,7 @@ export default {
               );
             }
             preferences.push({
-              signedOrder: preference,
+              signedOrder: signedOrder,
               exchangeBundle: exchangeBundle,
               wishBundle: wishBundle,
             });
@@ -468,7 +460,7 @@ export default {
         var isOwnerOfAll = true;
         x.exchangeBundle.map((y) => {
           // console.log('Order test', x.signedOrder.order.makerAddress, y.owner);
-          if (x.signedOrder.order.makerAddress.toLowerCase() !== y.owner)
+          if (x.signedOrder.makerAddress.toLowerCase() !== y.owner)
             isOwnerOfAll = false;
         });
 
@@ -506,14 +498,6 @@ export default {
         options.map(async (chain) => {
           var orders = [];
           for (let i = 0; i < chain.length; i++) {
-            // Check that the order is valid.
-            // // This should really be checked by the backend, but it doesn't have an Ethereum node to get on-chain data.
-            // const orderHashHex = orderHashUtils.getOrderHashHex(chain[i].order);
-            // // FIXME: Reinstate
-            // const cancelled = await exchange.cancelled(orderHashHex);
-            // const filledStatus = await exchange.filled(orderHashHex);
-            // if (filledStatus.toNumber() > 0 || cancelled) return;
-
             var inter = assetDataUtils.decodeMultiAssetData(
               chain[i].makerAssetData
             );

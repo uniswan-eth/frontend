@@ -12,45 +12,34 @@
       :data="offers"
       header-row-class-name="thead-light"
     >
-
       <el-table-column label="Wish" min-width="130px" prop="page">
         <template v-slot="{ row }">
           <bundle :display="display" :bundle="row.wishBundle" :root="root">
-            <template v-slot:bundleHeader>
-              &nbsp;
-            </template>
+            <template v-slot:bundleHeader> &nbsp; </template>
           </bundle>
         </template>
       </el-table-column>
       <el-table-column label="Exchange" min-width="130px" prop="page">
         <template v-slot="{ row }">
           <bundle :display="display" :bundle="row.exchangeBundle" :root="root">
-            <template v-slot:bundleHeader>
-              &nbsp;
-            </template>
+            <template v-slot:bundleHeader> &nbsp; </template>
           </bundle>
         </template>
       </el-table-column>
       <el-table-column label="Wisher" max-width="30px" prop="page">
         <template v-slot="{ row }">
           <b-button
-          @click="root.viewOrder(row)"
-          v-b-modal.modalOffer
-          size="sm"
-          variant="secondary"
+            @click="root.viewOrder(row)"
+            v-b-modal.modalOffer
+            size="sm"
+            variant="secondary"
           >
-          View order
-        </b-button>
-        <!-- <b-badge v-if="row.signedOrder.order.makerAddress !==" variant="danger">Danger</b-badge> -->
-        <br>
-        <account-card :address="row.signedOrder.order.makerAddress" :root="root"/>
-      </template>
-    </el-table-column>
-      <!-- <el-table-column label="Wisher" max-width="30px" prop="page">
-        <template v-slot="{ row }">
-          <account-card :address="row.signedOrder.order.makerAddress" :root="root"/>
+            View order
+          </b-button>
+          <br />
+          <account-card :address="row.signedOrder.makerAddress" :root="root" />
         </template>
-      </el-table-column> -->
+      </el-table-column>
     </el-table>
   </b-card>
 </template>
@@ -63,7 +52,7 @@ import {
   Dropdown,
 } from "element-ui";
 import Bundle from "@/components/UniSwan/Bundle";
-import AccountCard from '@/components/UniSwan/AccountCard';
+import AccountCard from "@/components/UniSwan/AccountCard";
 
 export default {
   name: "offers-table",

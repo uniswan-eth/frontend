@@ -39,11 +39,15 @@
     <br />
     <!-- <pre>{{order}}</pre> -->
     <base-button
-      v-if="order.signedOrder.order.makerAddress.toLowerCase() === $parent.signeraddr.toLowerCase()"
-      @click="$parent.deleteOrder(order.signedOrder.order)"
+      v-if="
+        order.signedOrder.makerAddress.toLowerCase() ===
+        $parent.signeraddr.toLowerCase()
+      "
+      @click="$parent.deleteOrder(order.signedOrder)"
       type="danger"
-      >Delete order</base-button>
-    <br>
+      >Delete order</base-button
+    >
+    <br />
     <template slot="modal-footer">
       <br />
     </template>
