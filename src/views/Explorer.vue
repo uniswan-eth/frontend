@@ -205,21 +205,13 @@ export default {
       }
     },
     async getRndNFTs(collectionAddress) {
-      this.nfts = await this.$parent.$parent.getContractTokensFromSubGraph(
+      this.collection = await this.$parent.$parent.getCollectionFromSubGraph(
         collectionAddress,
         0,
         6
       );
+      this.nfts = this.collection.tokens;
       this.currentContract = collectionAddress;
-      var collection = new ethers.Contract(
-        collectionAddress,
-        ERC721ABI,
-        this.$parent.$parent.signer
-      );
-      var collectionName = await collection.name();
-      this.collection = {
-        name: collectionName,
-      };
     },
     async loadOS(offset) {
       if (!this.$route.query.slug) {

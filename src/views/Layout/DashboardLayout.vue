@@ -225,7 +225,7 @@ export default {
       this.userprefs = await this.queryOrderBook(this.signeraddr.toLowerCase());
       this.userSwapOptions = await this.getSwapOptions(this.usernfts);
     },
-    async getContractTokensFromSubGraph(
+    async getCollectionFromSubGraph(
       contractAddress,
       startIndex = 0,
       amount = 5
@@ -234,6 +234,8 @@ export default {
           query {
           tokenContracts(where:{id:"${contractAddress.toLowerCase()}"}) {
             id
+            name
+            symbol
             tokens(first:${amount}) {
               id,
               contract {
@@ -256,7 +258,11 @@ export default {
 
       const output = await this.constructBundle(tokenData);
 
-      return output;
+      return {
+        name: data.data.tokenContracts[0].name,
+        symbol: data.data.tokenContracts[0].symbol,
+        tokens: output,
+      };
     },
     async getTokenFromSubgraph(contractAddress, tokenId) {
       const id = contractAddress.toLowerCase() + "_" + tokenId;
