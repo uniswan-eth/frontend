@@ -9,10 +9,6 @@
     "dev": "npm run serve"
   },
   "dependencies": {
-    "@0x/orderbook": "^2.2.7",
-    "@0x/order-utils": "^9.0.0",
-    "@0x/subproviders": "^6.0.0",
-    "@0x/utils": "^5.0.0",
     "apollo-boost": "^0.4.9",
     "bootstrap": "4.3.1",
     "bootstrap-vue": "^2.5.0",
