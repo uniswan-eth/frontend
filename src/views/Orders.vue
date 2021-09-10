@@ -13,7 +13,7 @@
             <h3 slot="header" class="mb-0">
               Latest Orders
               <b-button
-                @click="$parent.$parent.getPreferences()"
+                @click="$parent.$parent.getOrdersFromDB()"
                 v-b-modal.modalSwapChain
                 size="sm"
                 variant="secondary"

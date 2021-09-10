@@ -3,7 +3,7 @@
     <template v-slot:header>
       <b-row align-v="center">
         <b-col>
-          <h3 class="mb-0">My orders that have been filled</h3>
+          <h3 class="mb-0">All orders filled by anyone ever</h3>
         </b-col>
       </b-row>
     </template>
@@ -17,14 +17,20 @@
           {{ row.blockNumber }}
         </template>
       </el-table-column>
-      <el-table-column label="I sold my" min-width="130px" prop="page">
+      <el-table-column label="Maker" min-width="130px" prop="page">
+        <template v-slot="{ row }">{{ row.makerAddress }} </template>
+      </el-table-column>
+      <el-table-column label="Taker" min-width="130px" prop="page">
+        <template v-slot="{ row }">{{ row.takerAddress }} </template>
+      </el-table-column>
+      <el-table-column label="Maker bundle" min-width="130px" prop="page">
         <template v-slot="{ row }">
           <bundle :display="display" :bundle="row.exchangeBundle" :root="root">
             <template v-slot:bundleHeader> &nbsp; </template>
           </bundle>
         </template>
       </el-table-column>
-      <el-table-column label="I received" min-width="130px" prop="page">
+      <el-table-column label="Taker bundle" min-width="130px" prop="page">
         <template v-slot="{ row }">
           <bundle :display="display" :bundle="row.wishBundle" :root="root">
             <template v-slot:bundleHeader> &nbsp; </template>
@@ -76,14 +82,12 @@ export default {
 
           await Promise.all(
             assetDataUtils
-              .decodeMultiAssetData(e.args[2])
+              .decodeMultiAssetDataRecursively(e.args[2])
               .nestedAssetData.map(async (x) => {
-                var data721 = assetDataUtils.decodeERC721AssetData(x);
-
                 exchangeBundle.push(
                   await this.$props.root.getTokenFromSubgraph(
-                    data721.tokenAddress,
-                    data721.tokenId.toNumber()
+                    x.tokenAddress,
+                    x.tokenId.toNumber()
                   )
                 );
               })
@@ -91,19 +95,19 @@ export default {
 
           await Promise.all(
             assetDataUtils
-              .decodeMultiAssetData(e.args[3])
+              .decodeMultiAssetDataRecursively(e.args[3])
               .nestedAssetData.map(async (x) => {
-                var data721 = assetDataUtils.decodeERC721AssetData(x);
-
                 wishBundle.push(
                   await this.$props.root.getTokenFromSubgraph(
-                    data721.tokenAddress,
-                    data721.tokenId.toNumber()
+                    x.tokenAddress,
+                    x.tokenId.toNumber()
                   )
                 );
               })
           );
           this.parsedEvents.push({
+            makerAddress: e.args[0],
+            takerAddress: e.args[7],
             blockNumber: e.blockNumber,
             exchangeBundle: exchangeBundle,
             wishBundle: wishBundle,

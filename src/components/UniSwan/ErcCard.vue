@@ -1,7 +1,11 @@
 <template>
   <div class="">
-    <h4>{{ asset.name }}</h4>
-    {{ parseInt(asset.balance) / 10 ** parseInt(asset.decimals) }}
+    <h4>{{ asset.symbol }}</h4>
+    {{
+      Math.round(
+        (parseInt(asset.balance) / 10 ** parseInt(asset.decimals)) * 100000
+      ) / 100000
+    }}
   </div>
 </template>
 <script>

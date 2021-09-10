@@ -219,42 +219,6 @@
               />
             </b-card-group>
           </card>
-          <!-- <nfts-table :nfts="ownerAssets" :root="$parent.$parent">
-            <template v-slot:unsHeader>
-              <h5>Owner</h5>
-              <br />
-              <b-row align-v="center">
-                <b-col>
-                  <b-media no-body class="align-items-center">
-                    <span class="avatar avatar-sm rounded-circle">
-                      <a :href="'/#/account/' + asset.owner.address">
-                        <img
-                          :src="
-                            $parent.$parent.makeBlockie(asset.owner.address)
-                          "
-                        />
-                      </a>
-                    </span>
-                    <b-media-body class="ml-2 d-none d-lg-block">
-                      <h3>
-                        <account-card
-                          :address="asset.owner.address"
-                          :root="$parent.$parent"
-                        />
-                      </h3>
-                    </b-media-body>
-                  </b-media>
-                </b-col>
-                <b-col class="text-right">
-                  <a
-                    :href="'/#/account/' + asset.owner.address"
-                    class="btn btn-sm btn-secondary"
-                    >See account</a
-                  >
-                </b-col>
-              </b-row>
-            </template>
-          </nfts-table> -->
         </b-col>
       </b-row>
       <br />
@@ -336,21 +300,16 @@ export default {
         this.$route.params.tokenid.toString()
       );
       this.asset = this.$parent.$parent.formatAsset(nft);
-      // this.asset = this.$parent.$parent.formatAsset2(nft);
 
       // Swap Options
       this.validSwaps = await this.$parent.$parent.getSwapOptions([nft]);
 
       // Owners Assets
-      // FIXME: this will fail on Mainnet
-      // this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph(
       this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph2(
         nft.owner
       );
-      // this.ownerAssets = res.nfts
-      // this.ownerInfo = res.raw
 
-      var orders = await this.$parent.$parent.queryOrderBook({
+      var orders = await this.$parent.$parent.getOrdersFromDB({
         makerAddress: nft.owner,
       });
       orders.map((x) => {

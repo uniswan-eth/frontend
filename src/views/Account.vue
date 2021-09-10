@@ -114,10 +114,6 @@
     <b-container fluid class="mt--7">
       <b-row v-if="!$route.query.tab" class="justify-content-center">
         <b-col lg="12">
-          <erc-table
-            :nfts="this.$parent.$parent.userERC20s"
-            :root="$parent.$parent"
-          ></erc-table>
           <b-card-group deck>
             <nft-card2
               minWidth="15rem"
@@ -127,6 +123,13 @@
               :key="'nft' + idx"
               :nft="n"
               :root="$parent.$parent"
+            />
+          </b-card-group>
+          <b-card-group deck>
+            <erc-card
+              v-for="(n, idx) in $parent.$parent.userERC20s"
+              :key="'asset' + idx"
+              :asset="n"
             />
           </b-card-group>
         </b-col>
@@ -182,7 +185,7 @@ import NftsTable from "@/views/Dashboard/NftsTable";
 import HistoryTable from "./Dashboard/HistoryTable";
 import OffersTable from "./Dashboard/OffersTable";
 import OptionsTable from "./Dashboard/OptionsTable";
-import ErcTable from "./Dashboard/ErcTable";
+import ErcCard from "@/components/UniSwan/ErcCard";
 import NftCard2 from "@/components/UniSwan/NftCard2";
 
 Vue.use(VueClipboard);
@@ -195,7 +198,7 @@ export default {
     OffersTable,
     BaseHeader,
     NftsTable,
-    ErcTable,
+    ErcCard,
   },
   data() {
     return {
@@ -227,7 +230,7 @@ export default {
           );
           console.log("Acc NFTs", this.nfts);
         } else if (this.$route.query.tab === "offers") {
-          this.offers = await this.$parent.$parent.queryOrderBook({
+          this.offers = await this.$parent.$parent.getOrdersFromDB({
             makerAddress: this.$route.params.address,
           });
           console.log("Acc Offers", this.offers);
