@@ -55,6 +55,20 @@
             >
             </b-card>
           </b-card-group>
+          <b-card-group deck>
+            <b-card
+              v-for="(n, idx) in $parent.userERC20s"
+              @click="addToExchangeBundle(n)"
+              :key="'cp' + idx"
+              :title="n.name"
+              img-alt="Image"
+              img-top
+              tag="article"
+              style="max-width: 20rem"
+              class="mb-2"
+            >
+            </b-card>
+          </b-card-group>
         </b-tab>
       </b-tabs>
       <hr />
@@ -113,14 +127,14 @@ import Bundle from "@/components/UniSwan/Bundle";
 import Web3 from "web3";
 import { assetDataUtils, signatureUtils } from "@0x/order-utils";
 import { BigNumber } from "@0x/utils";
-import { Orderbook } from "@0x/orderbook";
 import { MetamaskSubprovider } from "@0x/subproviders";
+import { HttpClient } from "@0x/connect";
 
 const DB_BASE_URL = "https://uns-backend.vercel.app/api/v3";
 const EXCHANGE_ADDRESS = "0x1f98206bE961f98d0c2d2e5f7d965244B2f2129A";
 
 export default {
-  name: "order-modal",
+  name: "create-order-modal",
   props: ["nft", "ownernfts"],
   components: {
     Bundle,
@@ -148,17 +162,31 @@ export default {
         );
       }
     },
-    async addToExchangeBundle(nft) {
-      var test = this.currentExchangeBundle.filter((x) => {
-        return x.tokenID === nft.tokenID && x.contract === nft.contract;
-      });
-      if (test.length === 0) this.currentExchangeBundle.push(nft);
+    async addToExchangeBundle(asset) {
+      if (asset.tokenJSON) {
+        var alreadyAdded = this.currentExchangeBundle.find(
+          (x) => x.tokenID === asset.tokenID && x.contract === asset.contract
+        );
+        if (!alreadyAdded) this.currentExchangeBundle.push(asset);
+      } else {
+        var alreadyAdded = this.currentExchangeBundle.find(
+          (x) => x.address === asset.address
+        );
+        if (!alreadyAdded) this.currentExchangeBundle.push(asset);
+      }
     },
-    async addToWishBundle(nft) {
-      var test = this.currentWishBundle.filter((x) => {
-        return x.tokenID === nft.tokenID && x.contract === nft.contract;
-      });
-      if (test.length === 0) this.currentWishBundle.push(nft);
+    async addToWishBundle(asset) {
+      if (asset.tokenJSON) {
+        var alreadyAdded = this.currentWishBundle.find(
+          (x) => x.tokenID === asset.tokenID && x.contract === asset.contract
+        );
+        if (!alreadyAdded) this.currentWishBundle.push(asset);
+      } else {
+        var alreadyAdded = this.currentWishBundle.find(
+          (x) => x.address === asset.address
+        );
+        if (!alreadyAdded) this.currentWishBundle.push(asset);
+      }
     },
     async clearExchangeBundle() {
       this.currentExchangeBundle = [];
@@ -170,11 +198,17 @@ export default {
       let amounts = [];
       let assetDatas = [];
       for (let i = 0; i < bundle.length; i++) {
-        let assetData = assetDataUtils.encodeERC721AssetData(
-          bundle[i].contract,
-          bundle[i].tokenID
-        );
-        amounts.push(new BigNumber(1));
+        let assetData;
+        if (bundle[i].tokenJSON) {
+          assetData = assetDataUtils.encodeERC721AssetData(
+            bundle[i].contract,
+            new BigNumber(bundle[i].tokenID)
+          );
+          amounts.push(new BigNumber(1));
+        } else {
+          assetData = assetDataUtils.encodeERC20AssetData(bundle[i].address);
+          amounts.push(new BigNumber(bundle[i].balance));
+        }
         assetDatas.push(assetData);
       }
       return [amounts, assetDatas];
@@ -226,18 +260,15 @@ export default {
         this.$parent.signeraddr
       );
 
-      console.log(signedOrder);
+      console.log("order", signedOrder);
 
       var self = this;
-      const orderbook = Orderbook.getOrderbookForPollingProvider({
-        httpEndpoint: DB_BASE_URL,
-        pollingIntervalMs: 5000,
-      });
 
-      orderbook.addOrdersAsync([signedOrder]).then(async (res) => {
-        self.$parent.userprefs = await self.$parent.getPreferences(
-          self.$parent.signeraddr
-        );
+      var c = new HttpClient(DB_BASE_URL);
+      await c.submitOrderAsync(signedOrder).then(async (res) => {
+        self.$parent.userprefs = await self.$parent.getOrdersFromDB({
+          makerAddress: self.$parent.signeraddr,
+        });
 
         this.$bvModal.hide("modalCreateOffer");
         this.$notify({

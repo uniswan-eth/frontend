@@ -8,19 +8,13 @@
       :data="nfts"
       header-row-class-name="thead-light"
     >
-      <el-table-column label="NFT" min-width="130px" prop="page">
-        <template v-slot="{ row }">
-          <nft-card v-if="row.tokenJSON" :nft="row" :root="root" />
-          <erc-card v-if="!row.tokenJSON" :asset="row" />
-        </template>
+      <el-table-column label="Token" min-width="130px" prop="page">
+        <template v-slot="{ row }"> <erc-card :asset="row" /> </template>
       </el-table-column>
     </el-table>
   </b-card>
 </template>
 <script>
-import NftCard from "@/components/UniSwan/NftCard";
-import ErcCard from "@/components/UniSwan/ErcCard";
-
 import {
   Table,
   TableColumn,
@@ -28,12 +22,12 @@ import {
   DropdownItem,
   Dropdown,
 } from "element-ui";
+import ErcCard from "../../components/UniSwan/ErcCard.vue";
 export default {
-  name: "nfts-table",
+  name: "erc-table",
   props: ["nfts", "root"],
   components: {
     ErcCard,
-    NftCard,
     [Table.name]: Table,
     [TableColumn.name]: TableColumn,
     [Dropdown.name]: Dropdown,

@@ -2,17 +2,7 @@
   <div>
     <base-header class="pb-6 pb-8 pt-5 pt-md-8 bg-gradient-success">
       <b-row>
-        <b-col xl="6" md="6">
-          <!-- <stats-card title="Orders"
-                      type="gradient-red"
-                      sub-title="4,514"
-                      icon="ni ni-active-40"
-                      class="mb-4">
-
-            <template slot="footer">
-            </template>
-          </stats-card> -->
-        </b-col>
+        <b-col xl="6" md="6"> </b-col>
       </b-row>
     </base-header>
 
@@ -23,12 +13,13 @@
             <h3 slot="header" class="mb-0">
               Latest Orders
               <b-button
-              @click="$parent.$parent.getPreferences()"
-              v-b-modal.modalSwapChain
-              size="sm"
-              variant="secondary">
-              Refresh
-            </b-button>
+                @click="$parent.$parent.getOrdersFromDB()"
+                v-b-modal.modalSwapChain
+                size="sm"
+                variant="secondary"
+              >
+                Refresh
+              </b-button>
             </h3>
             <offers-table
               zzdisplay="medium"
@@ -82,8 +73,7 @@ export default {
       console.log("Network", this.$parent.$parent.network.chainId);
       if (this.$parent.$parent.network.chainId === 137) {
         // Matic
-        console.log('LOAD TIMER');
-        // this.orders = await this.$parent.$parent.getPreferences();
+        console.log("LOAD TIMER");
         this.orders = await this.$parent.$parent.orderbook;
         console.log("Orders", this.orders);
       } else if (this.$parent.$parent.network.chainId === 1) {
