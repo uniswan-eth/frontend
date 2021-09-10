@@ -215,9 +215,9 @@ export default {
           );
           console.log("Acc NFTs", this.nfts);
         } else if (this.$route.query.tab === "offers") {
-          this.offers = await this.$parent.$parent.queryOrderBook(
-            this.$route.params.address
-          );
+          this.offers = await this.$parent.$parent.queryOrderBook({
+            makerAddress: this.$route.params.address,
+          });
           console.log("Acc Offers", this.offers);
         } else if (this.$route.query.tab === "options") {
           this.swapOptions = await this.$parent.$parent.getSwapOptions(

@@ -220,7 +220,9 @@ export default {
     async loadUser() {
       this.userERC20s = await this.getUserERC20s(this.signeraddr);
       this.usernfts = await this.getUserTokensFromSubGraph(this.signeraddr);
-      this.userprefs = this.queryOrderBook(this.signeraddr.toLowerCase());
+      this.userprefs = this.queryOrderBook({
+        makerAddress: this.signeraddr.toLowerCase(),
+      });
       this.userSwapOptions = await this.getSwapOptions(this.usernfts);
 
       const exchange = new ethers.Contract(
@@ -367,10 +369,12 @@ export default {
       return bundle;
     },
 
-    queryOrderBook(owner) {
-      var toret = this.orderbook.filter((x) => {
-        return x.signedOrder.makerAddress.toLowerCase() === owner;
-      });
+    queryOrderBook(requestOpts) {
+      const addr = requestOpts.makerAddress.toLowerCase();
+      var toret = this.orderbook.filter(
+        (x) => x.signedOrder.makerAddress.toLowerCase() === addr
+      );
+
       return toret;
     },
     async dataToBundle(assetData) {

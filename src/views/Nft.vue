@@ -259,7 +259,9 @@ export default {
         nft.owner
       );
 
-      var orders = await this.$parent.$parent.queryOrderBook(nft.owner);
+      var orders = await this.$parent.$parent.queryOrderBook({
+        makerAddress: nft.owner,
+      });
       orders.map((x) => {
         x.exchangeBundle.map((y) => {
           if (y.tokenID === nft.tokenID && y.contract === nft.contract)
