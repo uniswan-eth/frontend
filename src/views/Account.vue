@@ -114,7 +114,18 @@
     <b-container fluid class="mt--7">
       <b-row v-if="!$route.query.tab" class="justify-content-center">
         <b-col lg="12">
-          <nfts-table :nfts="nfts" :root="$parent.$parent"></nfts-table>
+          <b-card-group deck>
+            <nft-card2
+              minWidth="15rem"
+              maxWidth="25rem"
+              display="card"
+              v-for="(n,idx) in nfts"
+              :key="'nft'+idx"
+              :nft="n"
+              :root="$parent.$parent"
+              />
+          </b-card-group>
+          <!-- <nfts-table :nfts="nfts" :root="$parent.$parent"></nfts-table> -->
         </b-col>
       </b-row>
       <b-row
@@ -159,11 +170,13 @@ import BaseHeader from "@/components/BaseHeader";
 import NftsTable from "@/views/Dashboard/NftsTable";
 import OffersTable from "./Dashboard/OffersTable";
 import OptionsTable from "./Dashboard/OptionsTable";
+import NftCard2 from "@/components/UniSwan/NftCard2";
 
 Vue.use(VueClipboard);
 export default {
   name: "account",
   components: {
+    NftCard2,
     OptionsTable,
     OffersTable,
     BaseHeader,

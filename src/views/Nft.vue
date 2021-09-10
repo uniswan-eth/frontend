@@ -22,37 +22,46 @@
               {{ asset.description }}
             </p>
             <br />
-            <b-button
-              v-if="!signerApproved"
-              @click="
-                $parent.$parent.approveTransfers(asset.asset_contract.address)
-              "
-              size="lg"
-              variant="success"
-            >
-              Approve transfers
-            </b-button>
-            <b-button
-              v-if="signerApproved"
-              @click="
-                $parent.$parent.unApproveTransfers(asset.asset_contract.address)
-              "
-              size="sm"
-              variant="secondary"
-            >
-              Remove approval
-            </b-button>
+            <div v-if="asset.owner.address.toLowerCase() === $parent.$parent.signeraddr.toLowerCase()">
+              <b-button
+                v-if="!signerApproved"
+                @click="
+                  $parent.$parent.approveTransfers(asset.asset_contract.address)
+                "
+                size="lg"
+                variant="success">
+                Approve transfers
+              </b-button>
+              <b-button
+                v-if="signerApproved"
+                @click="$parent.$parent.unApproveTransfers(asset.asset_contract.address)"
+                size="sm"
+                variant="secondary">
+                Remove approval
+              </b-button>
+            </div>
           </card>
           <br />
           <card header-classes="bg-transparent">
-            <h2 slot="header" class="mb-0">Chain Info</h2>
+            <div slot="header">
+              <h6 slot="header" class="navbar-heading text-muted text-uppercase">
+                Chain Info
+              </h6>
+              <h2 class="mb-0">
+                <router-link :to="'/explorer/?contract='+asset.asset_contract.address">
+                  {{contract.name}}
+                </router-link>
+              </h2>
+            </div>
+            <!-- <pre>{{contract}}</pre> -->
             <div>
               Address:
+              <!-- target="_blank" -->
               <a
-                target="_blank"
                 rel="noreferrer"
                 :href="
-                  'https://etherscan.io/address/' + asset.asset_contract.address
+                  'https://polygonscan.com/address/' + asset.asset_contract.address
+                  /* '/#/explorer?contract=' + asset.asset_contract.address */
                 "
               >
                 {{ asset.asset_contract.address }}
@@ -77,7 +86,10 @@
             <template v-slot:unsHeader>
               <b-row align-v="center">
                 <b-col>
-                  <h3 class="mb-0">Owners options</h3>
+                  <!-- <h3 class="mb-0"> -->
+                  <h6 slot="header" class="navbar-heading text-muted text-uppercase">
+
+                    This NFT can be swapped for</h6>
                 </b-col>
                 <b-col class="text-right">
                   <b-button
@@ -97,11 +109,23 @@
           </options-table>
           <br />
           <card header-classes="bg-transparent">
-            <h3 slot="header" class="mb-0">
+            <h6 slot="header" class="navbar-heading text-muted text-uppercase">
+              What
+              <!-- <img :src="$parent.$parent.makeBlockie(asset.owner.address)"/> -->
+              &nbsp;
+              <img
+                :title="'Owner: '+asset.owner.address"
+                class="blockie"
+                :src="$parent.$parent.makeBlockie(asset.owner.address)"/>
+              <account-card :address="asset.owner.address" :root="$parent.$parent"/>
+              &nbsp;
+              wish in return for {{asset.name}}
+            </h6>
+            <!-- <h3 slot="header" class="mb-0">
               What
               <account-card :address="asset.owner.address" :root="$parent.$parent"/>
               wish in return for {{asset.name}}
-            </h3>
+            </h3> -->
             <div
               v-for="(order, idx) in ownerOrders"
               :key="'order' + idx"
@@ -129,7 +153,40 @@
           </card>
           <br />
           <br />
-          <nfts-table :nfts="ownerAssets" :root="$parent.$parent">
+          <card header-classes="bg-transparent">
+            <div slot="header">
+              <h6 class="navbar-heading text-muted text-uppercase">
+                NFTs held by the same owner
+              </h6>
+              <b-media no-body class="align-items-center">
+                <span class="avatar avatar-sm rounded-circle">
+                  <a :href="'/#/account/' + asset.owner.address">
+                    <img :src="$parent.$parent.makeBlockie(asset.owner.address)"/>
+                  </a>
+                </span>
+                <b-media-body class="ml-2 d-none d-lg-block">
+                  <h3>
+                    <account-card
+                      :address="asset.owner.address"
+                      :root="$parent.$parent"
+                    />
+                  </h3>
+                </b-media-body>
+              </b-media>
+            </div>
+            <b-card-group deck v-if="ownerAssets">
+              <nft-card2
+                minWidth="8rem"
+                maxWidth="12rem"
+                display="card"
+                v-for="(n,idx) in ownerAssets.nfts"
+                :key="'ownernft'+idx"
+                :nft="n"
+                :root="$parent.$parent"
+                />
+            </b-card-group>
+          </card>
+          <!-- <nfts-table :nfts="ownerAssets" :root="$parent.$parent">
             <template v-slot:unsHeader>
               <h5>Owner</h5>
               <br />
@@ -164,7 +221,7 @@
                 </b-col>
               </b-row>
             </template>
-          </nfts-table>
+          </nfts-table> -->
         </b-col>
       </b-row>
       <br />
@@ -190,11 +247,13 @@ import OptionsTable from "./Dashboard/OptionsTable";
 import NftCard from "@/components/UniSwan/NftCard";
 import Bundle from "@/components/UniSwan/Bundle";
 import AccountCard from "@/components/UniSwan/AccountCard";
+import NftCard2 from "@/components/UniSwan/NftCard2";
 
 Vue.use(VueClipboard);
 export default {
   name: "nft",
   components: {
+    NftCard2,
     AccountCard,
     OptionsTable,
     Bundle,
@@ -205,8 +264,10 @@ export default {
   },
   data() {
     return {
+
+      contract: null,
       asset: null,
-      ownerAssets: [],
+      ownerAssets: null,
       validSwaps: [],
       ownerOrders: [],
       signerApproved: false,
@@ -223,6 +284,8 @@ export default {
       this.validSwaps = []
       this.ownerOrders = []
 
+      this.contract = await this.$parent.$parent.getContract(this.$route.params.contract)
+
       this.signerApproved = await this.$parent.$parent.signerIsApproved(
         this.$route.params.contract
       );
@@ -233,16 +296,20 @@ export default {
       );
 
       // Use same format as OpenSea API
+      console.log(nft, this.$route.params.contract,
+      this.$route.params.tokenid.toString());
       this.asset = this.$parent.$parent.formatAsset(nft);
+      // this.asset = this.$parent.$parent.formatAsset2(nft);
 
       // Swap Options
       this.validSwaps = await this.$parent.$parent.getSwapOptions([nft]);
 
       // Owners Assets
       // FIXME: this will fail on Mainnet
-      this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph(
-        nft.owner
-      );
+      // this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph(
+      this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph2(nft.owner);
+      // this.ownerAssets = res.nfts
+      // this.ownerInfo = res.raw
 
       // var orders = await this.$parent.$parent.getPreferences(
       var orders = await this.$parent.$parent.queryOrderBook(

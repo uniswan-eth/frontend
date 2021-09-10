@@ -1,5 +1,23 @@
 <template>
   <div class="">
+    <div v-if="display === 'card'" class="nftcard">
+      <b-card
+        :title="nft.tokenJSON.image"
+        :img-src="nft.tokenJSON.image"
+        :img-alt="nft.tokenJSON.image"
+        img-top
+        tag="article"
+        style="max-width: 20rem;"
+        class="mb-2"
+      >
+        <b-card-text>
+          {{nft.tokenJSON.description}}
+        </b-card-text>
+
+        <b-button href="javascript:;" variant="primary">Go somewhere</b-button>
+      </b-card>
+    </div>
+
     <div class="nftHolder" v-if="display === 'medium'">
       <div v-if="!idx || idx === 0" class="" style="font-size:12px;padding-bottom:10px;padding-left:5px;">
         {{nft.tokenJSON.name}}
