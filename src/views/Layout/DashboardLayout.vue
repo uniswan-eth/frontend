@@ -582,21 +582,17 @@ export default {
       var bundlesDBURI = DB_BASE_URL + "/orders";
       var res = await fetch(bundlesDBURI);
       var json = await res.json();
-      const exchange = new ethers.Contract(
-        EXCHANGE_ADDRESS,
-        EXCHANGEABI,
-        this.signer
-      );
-      // console.log("Prefs", bundlesDBURI, json);
+
+      console.log("Prefs", bundlesDBURI, json);
       var preferences = [];
       await Promise.all(
-        json.map(async (signedOrder) => {
+        json.records.map(async (signedOrder) => {
           if (
             !user ||
-            user.toLowerCase() === signedOrder.makerAddress.toLowerCase()
+            user.toLowerCase() === signedOrder.order.makerAddress.toLowerCase()
           ) {
             var inter = assetDataUtils.decodeMultiAssetData(
-              signedOrder.makerAssetData
+              signedOrder.order.makerAssetData
             );
             const exchangeBundle = [];
             for (let i = 0; i < inter.nestedAssetData.length; i++) {
@@ -611,7 +607,7 @@ export default {
               );
             }
             inter = assetDataUtils.decodeMultiAssetData(
-              signedOrder.takerAssetData
+              signedOrder.order.takerAssetData
             );
             const wishBundle = [];
             for (let i = 0; i < inter.nestedAssetData.length; i++) {
@@ -626,7 +622,7 @@ export default {
               );
             }
             preferences.push({
-              signedOrder: signedOrder,
+              signedOrder: signedOrder.order,
               exchangeBundle: exchangeBundle,
               wishBundle: wishBundle,
             });
@@ -635,24 +631,7 @@ export default {
       );
       // console.log("Prefs Done", preferences);
 
-      var validOrders = [];
-      preferences.map((x) => {
-        var isOwnerOfAll = true;
-        x.exchangeBundle.map((y) => {
-          // console.log('Order test', x.signedOrder.order.makerAddress, y.owner);
-          if (x.signedOrder.makerAddress.toLowerCase() !== y.owner)
-            isOwnerOfAll = false;
-        });
-
-        // validOrders.push(x)
-        if (isOwnerOfAll) {
-          validOrders.push(x);
-        } else {
-          // console.log("Invalid Order", isOwnerOfAll, x);
-        }
-      });
-      return validOrders;
-      // return preferences;
+      return preferences;
     },
     async getSwapOptions(NFTs) {
       let wantAssetData = [];
@@ -670,6 +649,7 @@ export default {
         wantAssetData
       );
       const bundlesDBURI = DB_BASE_URL + "/options/" + encodedData;
+      console.log(bundlesDBURI);
       var res = await fetch(bundlesDBURI);
       var options = await res.json();
 
