@@ -1,15 +1,59 @@
 <template>
-  <b-card
+  <!-- :title="nft.tokenJSON.name" -->
+  <div
+    :style="{
+      minWidth: minWidth ? minWidth : '10rem',
+      maxWidth: maxWidth ? maxWidth : '15rem'
+    }"
+    class="nftCardHolder card">
+      <!-- <router-link :to="'/nft/'+nft.contract+'/'+nft.tokenID"> -->
+        <img
+          class="nftCardImage"
+          @click="$router.push('/nft/'+nft.contract+'/'+nft.tokenID)"
+          fluid
+          :src="nft.tokenJSON.image"
+          :title="nft.tokenJSON.name"
+          alt=""/>
+      <!-- </router-link> -->
+      <div class="nftCardBlockie">
+        <router-link :to="'/account/'+nft.owner">
+          <img
+            :title="'Owner: '+nft.owner"
+            class="blockie"
+            :src="
+              root.makeBlockie(nft.owner)
+            "
+          />
+        </router-link>
+      </div>
+      <div class="nftCardContract">
+        <router-link :to="'/explorer?contract='+nft.contract">
+          <b-badge variant="default">
+              {{nft.contract.substr(0,6)}}
+          </b-badge>
+        </router-link>
+      </div>
+      <div class="nftCardFooter text-center">
+        <!-- <router-link :to="'/nft/'+nft.contract+'/'+nft.tokenID"> -->
+          <b>
+            {{nft.tokenJSON.name}}
+          </b>
+        <!-- </router-link> -->
+      </div>
+
+
+  </div>
+  <!-- <b-card
     :img-src="nft.tokenJSON.image"
     :img-alt="nft.tokenJSON.name"
     img-top
     tag="article"
     :style="{
-      minWidth: minWidth ? minWidth : '10rem',
-      maxWidth: maxWidth ? maxWidth : '15rem',
-    }"
-    class="nftCardHolder mb-2"
-  >
+        minWidth: minWidth ? minWidth : '10rem',
+        maxWidth: maxWidth ? maxWidth : '15rem'
+      }
+      "
+    class="nftCardHolder mb-2">
     <b-card-text>
       <small class="navbar-heading text-muted text-uppercase">
         <router-link :to="'/explorer?contract=' + nft.contract">
@@ -33,7 +77,7 @@
         </router-link>
       </i>
     </b-card-text>
-  </b-card>
+  </b-card> -->
 </template>
 <script>
 import AccountCard from "@/components/UniSwan/AccountCard";
@@ -50,6 +94,40 @@ export default {
 };
 </script>
 <style>
+.nftCardHolder {
+  margin-bottom: 20px !important;
+  /* display:none; */
+}
+.nftCardFooter {
+  padding:10px 15px;
+}
+.nftCardImage {
+  cursor: pointer;
+}
+.nftCardBlockie {
+  position:absolute;
+}
+.nftCardHolder:hover .blockie {opacity:100%}
+.nftCardHolder:hover .nftCardContract {opacity:100%}
+.blockie {
+  transition: opacity 0.6s;
+  opacity:50%;
+  height:1.5rem;
+  border-radius: 50%;
+  margin-top: 6px;
+  margin-left: 6px;
+}
+.nftCardContract {
+  opacity:50%;
+  transition: opacity 0.6s;
+  position:absolute;
+  text-align: right;
+  /* background: purple; */
+  margin-left: calc(100% - 100px);
+  width:100px;
+  overflow: hidden;
+  padding:5px 10px;
+}
 .nftCardHolder img {
   /* object-fit: cover;
   width:100%;

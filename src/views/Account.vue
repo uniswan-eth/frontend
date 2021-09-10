@@ -136,22 +136,19 @@
       </b-row>
       <b-row
         v-if="$route.query.tab === 'offers'"
-        class="justify-content-center"
-      >
+        class="justify-content-center">
         <b-col lg="12">
           <offers-table :offers="offers" :root="$parent.$parent"></offers-table>
         </b-col>
       </b-row>
       <b-row
         v-if="$route.query.tab === 'options'"
-        class="justify-content-center"
-      >
+        class="justify-content-center">
         <b-col lg="12">
           <options-table
             display="simple"
             :root="$parent.$parent"
-            :options="swapOptions"
-          >
+            :options="swapOptions">
             <template v-slot:unsHeader>
               <b-row align-v="center">
                 <b-col>
