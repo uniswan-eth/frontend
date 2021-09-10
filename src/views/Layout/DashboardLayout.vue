@@ -382,13 +382,28 @@ export default {
       const bundle = [];
       Promise.all(
         inter.nestedAssetData.map(async (x) => {
-          var bytes = assetDataUtils.decodeERC721AssetData(x);
-          bundle.push(
-            await this.getTokenFromSubgraph(
-              bytes.tokenAddress,
-              bytes.tokenId.toNumber().toString()
-            )
-          );
+          if (x.slice(0, 10) === "0x02571792") {
+            const bytes = assetDataUtils.decodeERC721AssetData(x);
+            bundle.push(
+              await this.getTokenFromSubgraph(
+                bytes.tokenAddress,
+                bytes.tokenId.toNumber().toString()
+              )
+            );
+          } else {
+            const bytes = assetDataUtils.decodeERC20AssetData(x);
+            var collection = new ethers.Contract(
+              "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619", // WETH
+              ERC20ABI,
+              this.signer
+            );
+            bundle.push({
+              address: bytes.tokenAddress,
+              name: await collection.name(),
+              decimals: await collection.decimals(),
+              balance: await collection.balanceOf(this.signeraddr),
+            });
+          }
         })
       );
 
@@ -416,22 +431,7 @@ export default {
         })
       );
 
-      var validOrders = [];
-      orders.map((x) => {
-        var isOwnerOfAll = true;
-
-        x.exchangeBundle.map((y) => {
-          if (x.order.makerAddress.toLowerCase() !== y.owner)
-            isOwnerOfAll = false;
-        });
-
-        if (isOwnerOfAll) {
-          validOrders.push(x);
-        } else {
-          console.log("Invalid Order", isOwnerOfAll, x);
-        }
-      });
-      return validOrders;
+      return orders;
     },
     async getSwapOptions(NFTs) {
       let wantAssetData = [];
@@ -458,36 +458,9 @@ export default {
         options.map(async (chain) => {
           var orders = [];
           for (let i = 0; i < chain.length; i++) {
-            var inter = assetDataUtils.decodeMultiAssetData(
-              chain[i].makerAssetData
-            );
-            const exchangeBundle = [];
-            for (let i = 0; i < inter.nestedAssetData.length; i++) {
-              var bytes = assetDataUtils.decodeERC721AssetData(
-                inter.nestedAssetData[i]
-              );
-              exchangeBundle.push(
-                await this.getTokenFromSubgraph(
-                  bytes.tokenAddress,
-                  bytes.tokenId.toNumber().toString()
-                )
-              );
-            }
-            inter = assetDataUtils.decodeMultiAssetData(
-              chain[i].takerAssetData
-            );
-            const wishBundle = [];
-            for (let i = 0; i < inter.nestedAssetData.length; i++) {
-              bytes = assetDataUtils.decodeERC721AssetData(
-                inter.nestedAssetData[i]
-              );
-              wishBundle.push(
-                await this.getTokenFromSubgraph(
-                  bytes.tokenAddress,
-                  bytes.tokenId.toNumber().toString()
-                )
-              );
-            }
+            var exchangeBundle = this.dataToBundle(chain[i].makerAssetData);
+            var wishBundle = this.dataToBundle(chain[i].takerAssetData);
+
             orders.push({
               exchangeBundle: exchangeBundle,
               wishBundle: wishBundle,
