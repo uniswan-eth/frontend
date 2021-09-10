@@ -22,21 +22,32 @@
               {{ asset.description }}
             </p>
             <br />
-            <div v-if="asset.owner.address.toLowerCase() === $parent.$parent.signeraddr.toLowerCase()">
+            <div
+              v-if="
+                asset.owner.address.toLowerCase() ===
+                $parent.$parent.signeraddr.toLowerCase()
+              "
+            >
               <b-button
                 v-if="!signerApproved"
                 @click="
                   $parent.$parent.approveTransfers(asset.asset_contract.address)
                 "
                 size="lg"
-                variant="success">
+                variant="success"
+              >
                 Approve transfers
               </b-button>
               <b-button
                 v-if="signerApproved"
-                @click="$parent.$parent.unApproveTransfers(asset.asset_contract.address)"
+                @click="
+                  $parent.$parent.unApproveTransfers(
+                    asset.asset_contract.address
+                  )
+                "
                 size="sm"
-                variant="secondary">
+                variant="secondary"
+              >
                 Remove approval
               </b-button>
             </div>
@@ -44,12 +55,17 @@
           <br />
           <card header-classes="bg-transparent">
             <div slot="header">
-              <h6 slot="header" class="navbar-heading text-muted text-uppercase">
+              <h6
+                slot="header"
+                class="navbar-heading text-muted text-uppercase"
+              >
                 Chain Info
               </h6>
               <h2 class="mb-0">
-                <router-link :to="'/explorer/?contract='+asset.asset_contract.address">
-                  {{contract.name}}
+                <router-link
+                  :to="'/explorer/?contract=' + asset.asset_contract.address"
+                >
+                  {{ contract.name }}
                 </router-link>
               </h2>
             </div>
@@ -60,7 +76,8 @@
               <a
                 rel="noreferrer"
                 :href="
-                  'https://polygonscan.com/address/' + asset.asset_contract.address
+                  'https://polygonscan.com/address/' +
+                  asset.asset_contract.address
                   /* '/#/explorer?contract=' + asset.asset_contract.address */
                 "
               >
@@ -82,19 +99,24 @@
           <options-table
             display="simple"
             :root="$parent.$parent"
-            :options="validSwaps">
+            :options="validSwaps"
+          >
             <template v-slot:unsHeader>
               <b-row align-v="center">
                 <b-col>
                   <!-- <h3 class="mb-0"> -->
-                  <h6 slot="header" class="navbar-heading text-muted text-uppercase">
-
-                    This NFT can be swapped for</h6>
+                  <h6
+                    slot="header"
+                    class="navbar-heading text-muted text-uppercase"
+                  >
+                    This NFT can be swapped for
+                  </h6>
                 </b-col>
                 <b-col class="text-right">
                   <b-button
                     :disabled="
-                      $parent.$parent.signeraddr.toLowerCase() === asset.owner.address.toLowerCase()
+                      $parent.$parent.signeraddr.toLowerCase() ===
+                      asset.owner.address.toLowerCase()
                     "
                     @click="$parent.$parent.createOrder(asset, ownerAssets)"
                     v-b-modal.modalCreateOffer
@@ -114,41 +136,50 @@
               <!-- <img :src="$parent.$parent.makeBlockie(asset.owner.address)"/> -->
               &nbsp;
               <img
-                :title="'Owner: '+asset.owner.address"
+                :title="'Owner: ' + asset.owner.address"
                 class="blockie"
-                :src="$parent.$parent.makeBlockie(asset.owner.address)"/>
-              <account-card :address="asset.owner.address" :root="$parent.$parent"/>
-              &nbsp;
-              wish in return for {{asset.name}}
+                :src="$parent.$parent.makeBlockie(asset.owner.address)"
+              />
+              <account-card
+                :address="asset.owner.address"
+                :root="$parent.$parent"
+              />
+              &nbsp; wish in return for {{ asset.name }}
             </h6>
-            <!-- <h3 slot="header" class="mb-0">
-              What
-              <account-card :address="asset.owner.address" :root="$parent.$parent"/>
-              wish in return for {{asset.name}}
-            </h3> -->
+
             <div
               v-for="(order, idx) in ownerOrders"
               :key="'order' + idx"
-              class="">
-              <bundle display="medium" :bundle="order.wishBundle" :root="$parent.$parent">
+              class=""
+            >
+              <bundle
+                display="medium"
+                :bundle="order.wishBundle"
+                :root="$parent.$parent"
+              >
                 <template v-slot:bundleHeader>
                   <b-button
-                    @click="$event.preventDefault();$parent.$parent.viewOrder(order)"
+                    @click="
+                      $event.preventDefault();
+                      $parent.$parent.viewOrder(order);
+                    "
                     v-b-modal.modalOffer
                     size="sm"
-                    variant="secondary">
+                    variant="secondary"
+                  >
                     <span>
                       {{
-                        order.wishBundle[0].owner.toLowerCase() === $parent.$parent.signeraddr.toLowerCase() ?
-                        'Execute' :
-                        'View'
+                        order.wishBundle[0].owner.toLowerCase() ===
+                        $parent.$parent.signeraddr.toLowerCase()
+                          ? "Execute"
+                          : "View"
                       }}
-                    <!-- Order -->
-                  </span>
-                </b-button>
+                      <!-- Order -->
+                    </span>
+                  </b-button>
                 </template>
               </bundle>
-              <br>
+              <br />
             </div>
           </card>
           <br />
@@ -161,7 +192,9 @@
               <b-media no-body class="align-items-center">
                 <span class="avatar avatar-sm rounded-circle">
                   <a :href="'/#/account/' + asset.owner.address">
-                    <img :src="$parent.$parent.makeBlockie(asset.owner.address)"/>
+                    <img
+                      :src="$parent.$parent.makeBlockie(asset.owner.address)"
+                    />
                   </a>
                 </span>
                 <b-media-body class="ml-2 d-none d-lg-block">
@@ -179,49 +212,13 @@
                 minWidth="8rem"
                 maxWidth="12rem"
                 display="card"
-                v-for="(n,idx) in ownerAssets.nfts"
-                :key="'ownernft'+idx"
+                v-for="(n, idx) in ownerAssets.nfts"
+                :key="'ownernft' + idx"
                 :nft="n"
                 :root="$parent.$parent"
-                />
+              />
             </b-card-group>
           </card>
-          <!-- <nfts-table :nfts="ownerAssets" :root="$parent.$parent">
-            <template v-slot:unsHeader>
-              <h5>Owner</h5>
-              <br />
-              <b-row align-v="center">
-                <b-col>
-                  <b-media no-body class="align-items-center">
-                    <span class="avatar avatar-sm rounded-circle">
-                      <a :href="'/#/account/' + asset.owner.address">
-                        <img
-                          :src="
-                            $parent.$parent.makeBlockie(asset.owner.address)
-                          "
-                        />
-                      </a>
-                    </span>
-                    <b-media-body class="ml-2 d-none d-lg-block">
-                      <h3>
-                        <account-card
-                          :address="asset.owner.address"
-                          :root="$parent.$parent"
-                        />
-                      </h3>
-                    </b-media-body>
-                  </b-media>
-                </b-col>
-                <b-col class="text-right">
-                  <a
-                    :href="'/#/account/' + asset.owner.address"
-                    class="btn btn-sm btn-secondary"
-                    >See account</a
-                  >
-                </b-col>
-              </b-row>
-            </template>
-          </nfts-table> -->
         </b-col>
       </b-row>
       <br />
@@ -264,7 +261,6 @@ export default {
   },
   data() {
     return {
-
       contract: null,
       asset: null,
       ownerAssets: null,
@@ -281,10 +277,12 @@ export default {
     async loadPage() {
       this.ownerAssets = [];
       this.asset = null;
-      this.validSwaps = []
-      this.ownerOrders = []
+      this.validSwaps = [];
+      this.ownerOrders = [];
 
-      this.contract = await this.$parent.$parent.getContract(this.$route.params.contract)
+      this.contract = await this.$parent.$parent.getContract(
+        this.$route.params.contract
+      );
 
       this.signerApproved = await this.$parent.$parent.signerIsApproved(
         this.$route.params.contract
@@ -296,33 +294,36 @@ export default {
       );
 
       // Use same format as OpenSea API
-      console.log(nft, this.$route.params.contract,
-      this.$route.params.tokenid.toString());
+      console.log(
+        nft,
+        this.$route.params.contract,
+        this.$route.params.tokenid.toString()
+      );
       this.asset = this.$parent.$parent.formatAsset(nft);
-      // this.asset = this.$parent.$parent.formatAsset2(nft);
 
       // Swap Options
       this.validSwaps = await this.$parent.$parent.getSwapOptions([nft]);
 
       // Owners Assets
-      // FIXME: this will fail on Mainnet
-      // this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph(
-      this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph2(nft.owner);
-      // this.ownerAssets = res.nfts
-      // this.ownerInfo = res.raw
-
-      // var orders = await this.$parent.$parent.getPreferences(
-      var orders = await this.$parent.$parent.queryOrderBook(
+      this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph2(
         nft.owner
       );
-      orders.map(x => {
-        x.exchangeBundle.map(y => {
-          if (y.tokenID === nft.tokenID && y.contract === nft.contract)
-          this.ownerOrders.push(x)
-        })
-      })
-      console.log('ddd orders', this.ownerOrders, nft.owner, this.$parent.$parent.signeraddr);
 
+      var orders = await this.$parent.$parent.getOrdersFromDB({
+        makerAddress: nft.owner,
+      });
+      orders.map((x) => {
+        x.exchangeBundle.map((y) => {
+          if (y.tokenID === nft.tokenID && y.contract === nft.contract)
+            this.ownerOrders.push(x);
+        });
+      });
+      console.log(
+        "ddd orders",
+        this.ownerOrders,
+        nft.owner,
+        this.$parent.$parent.signeraddr
+      );
     },
     onCopy() {
       this.$notify({

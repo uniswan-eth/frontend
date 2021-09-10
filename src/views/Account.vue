@@ -93,7 +93,7 @@
               '',
               $route.query.tab === 'history' ? 'tabselected' : 'tabdimmed',
             ]"
-            :sub-title="history.length.toString()"
+            :sub-title="$parent.$parent.fillEvents.length.toString()"
             icon="ni ni-chart-bar-32"
             class="mb-4"
           >
@@ -119,13 +119,19 @@
               minWidth="15rem"
               maxWidth="25rem"
               display="card"
-              v-for="(n,idx) in nfts"
-              :key="'nft'+idx"
+              v-for="(n, idx) in nfts"
+              :key="'nft' + idx"
               :nft="n"
               :root="$parent.$parent"
-              />
+            />
           </b-card-group>
-          <!-- <nfts-table :nfts="nfts" :root="$parent.$parent"></nfts-table> -->
+          <b-card-group deck>
+            <erc-card
+              v-for="(n, idx) in $parent.$parent.userERC20s"
+              :key="'asset' + idx"
+              :asset="n"
+            />
+          </b-card-group>
         </b-col>
       </b-row>
       <b-row
@@ -155,9 +161,17 @@
               </b-row>
             </template>
           </options-table>
-
-          <!-- <pre>{{swapOptions}}</pre> -->
-          <!-- <offers-table :offers="swapOptions"></offers-table> -->
+        </b-col>
+      </b-row>
+      <b-row
+        v-if="$route.query.tab === 'history'"
+        class="justify-content-center"
+      >
+        <b-col lg="12">
+          <history-table
+            :events="$parent.$parent.fillEvents"
+            :root="$parent.$parent"
+          ></history-table>
         </b-col>
       </b-row>
     </b-container>
@@ -168,19 +182,23 @@ import Vue from "vue";
 import VueClipboard from "vue-clipboard2";
 import BaseHeader from "@/components/BaseHeader";
 import NftsTable from "@/views/Dashboard/NftsTable";
+import HistoryTable from "./Dashboard/HistoryTable";
 import OffersTable from "./Dashboard/OffersTable";
 import OptionsTable from "./Dashboard/OptionsTable";
+import ErcCard from "@/components/UniSwan/ErcCard";
 import NftCard2 from "@/components/UniSwan/NftCard2";
 
 Vue.use(VueClipboard);
 export default {
   name: "account",
   components: {
+    HistoryTable,
     NftCard2,
     OptionsTable,
     OffersTable,
     BaseHeader,
     NftsTable,
+    ErcCard,
   },
   data() {
     return {
@@ -212,9 +230,9 @@ export default {
           );
           console.log("Acc NFTs", this.nfts);
         } else if (this.$route.query.tab === "offers") {
-          this.offers = await this.$parent.$parent.queryOrderBook(
-            this.$route.params.address
-          );
+          this.offers = await this.$parent.$parent.getOrdersFromDB({
+            makerAddress: this.$route.params.address,
+          });
           console.log("Acc Offers", this.offers);
         } else if (this.$route.query.tab === "options") {
           this.swapOptions = await this.$parent.$parent.getSwapOptions(
