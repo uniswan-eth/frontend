@@ -252,7 +252,7 @@ export default {
             numOwners
             tokens(first:${limit}, skip:${offset}) {
               id,
-              contract {id}
+              contract {id, name, numTokens, numOwners, symbol}
               tokenID
               owner {id, numTokens}
               tokenURI
@@ -268,6 +268,34 @@ export default {
       });
       console.log("Data: ", data);
       const tokenData = data.data.tokenContract.tokens;
+      const nfts = await this.constructBundle2(tokenData);
+      return {
+        nfts: nfts,
+        raw: data.data.tokenContract
+      };
+    },
+    async getUserTokensFromSubGraph2(userAddress, limit=20, offset=0) {
+      const tokensQuery = `
+        {
+          owner(id:"${userAddress.toLowerCase()}") {
+            id
+            numTokens
+            tokens(first:${limit}, skip:${offset}) {
+              id,
+              contract {id, name, numTokens, numOwners, symbol}
+              tokenID
+              owner {id, numTokens}
+              tokenURI
+              mintTime
+            }
+          }
+        }
+        `;
+      console.log(tokensQuery);
+      const data = await client2.query({
+        query: gql(tokensQuery),
+      });
+      const tokenData = data.data.owner.tokens;
       const nfts = await this.constructBundle2(tokenData);
       return {
         nfts: nfts,

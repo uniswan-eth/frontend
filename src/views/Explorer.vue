@@ -225,6 +225,24 @@ export default {
     this.loadPage();
   },
   methods: {
+    async getNFTs(collectionAddress, offset = 0) {
+      // this.nfts = null
+      // this.contractData = null
+
+      this.currentContract = collectionAddress;
+      var res = await this.$parent.$parent.getContractTokensFromSubGraph2(
+        collectionAddress,
+        10,
+        offset
+      );
+      if (offset === 0) {
+        this.nfts = res.nfts
+      } else {
+        this.nfts = this.nfts.concat(res.nfts)
+      }
+      this.contractData = res.raw
+      this.$parent.$parent.routeName = this.contractData.name;
+    },
     navContract(ev) {
       ev.preventDefault;
       this.$router.push('/explorer?contract='+this.currentContract)
@@ -300,24 +318,6 @@ export default {
       this.$router.push(
         "/nft/" + this.currentContract + "/" + this.currentTokenID
       );
-    },
-    async getNFTs(collectionAddress, offset = 0) {
-      // this.nfts = null
-      // this.contractData = null
-
-      this.currentContract = collectionAddress;
-      var res = await this.$parent.$parent.getContractTokensFromSubGraph2(
-        collectionAddress,
-        10,
-        offset
-      );
-      if (offset === 0) {
-        this.nfts = res.nfts
-      } else {
-        this.nfts = this.nfts.concat(res.nfts)
-      }
-      this.contractData = res.raw
-      this.$parent.$parent.routeName = this.contractData.name;
     },
     async loadOS(offset) {
       if (!this.$route.query.slug) {

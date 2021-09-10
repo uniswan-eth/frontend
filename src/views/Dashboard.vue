@@ -60,6 +60,21 @@
 
     <b-container fluid class="mt--7">
       <b-row class="mt-5">
+        <b-col xl="12" class="mb-5 mb-xl-0">
+          <b-card-group deck>
+            <nft-card2
+              minWidth="20rem"
+              maxWidth="30rem"
+              display="card"
+              v-for="(n,idx) in $parent.$parent.usernfts"
+              :key="'nft'+idx"
+              :nft="n"
+              :root="$parent.$parent"
+              />
+          </b-card-group>
+        </b-col>
+      </b-row>
+      <b-row class="mt-5">
         <b-col xl="6" class="mb-5 mb-xl-0">
           <nfts-table :nfts="$parent.$parent.usernfts" :root="$parent.$parent">
             <template v-slot:unsHeader>
@@ -114,10 +129,12 @@
   import OffersTable from './Dashboard/OffersTable';
   import OptionsTable from './Dashboard/OptionsTable';
   import Bundle from '@/components/UniSwan/Bundle';
+  import NftCard2 from "@/components/UniSwan/NftCard2";
   import { Table, TableColumn, DropdownMenu, DropdownItem, Dropdown} from 'element-ui'
 
   export default {
     components: {
+      NftCard2,
       OptionsTable,
       Bundle,
       NftsTable,
@@ -138,6 +155,8 @@
     },
     mounted() {
       document.title ="🦢 UniSwan"
+      this.$parent.$parent.routeName = 'Dashboard';
+
     },
     methods: {
     },

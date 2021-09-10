@@ -174,12 +174,12 @@
                 </b-media-body>
               </b-media>
             </div>
-            <b-card-group deck>
+            <b-card-group deck v-if="ownerAssets">
               <nft-card2
                 minWidth="8rem"
                 maxWidth="12rem"
                 display="card"
-                v-for="(n,idx) in ownerAssets"
+                v-for="(n,idx) in ownerAssets.nfts"
                 :key="'ownernft'+idx"
                 :nft="n"
                 :root="$parent.$parent"
@@ -264,9 +264,10 @@ export default {
   },
   data() {
     return {
+
       contract: null,
       asset: null,
-      ownerAssets: [],
+      ownerAssets: null,
       validSwaps: [],
       ownerOrders: [],
       signerApproved: false,
@@ -305,9 +306,10 @@ export default {
 
       // Owners Assets
       // FIXME: this will fail on Mainnet
-      this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph(
-        nft.owner
-      );
+      // this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph(
+      this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph2(nft.owner);
+      // this.ownerAssets = res.nfts
+      // this.ownerInfo = res.raw
 
       // var orders = await this.$parent.$parent.getPreferences(
       var orders = await this.$parent.$parent.queryOrderBook(

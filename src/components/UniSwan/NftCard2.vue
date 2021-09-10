@@ -10,8 +10,10 @@
         maxWidth: maxWidth ? maxWidth : '15rem'
       }
       "
-    class="mb-2"
-  >
+    class="nftCardHolder mb-2">
+    <!-- <div class="nftCardHeader">
+      Hello
+    </div> -->
     <b-card-text>
       <small class="navbar-heading text-muted text-uppercase">
         <router-link :to="'/explorer?contract='+nft.contract">
@@ -27,7 +29,6 @@
       <br>
       <i>
         <router-link :to="'/account/'+nft.owner">
-          <!-- <account-card :address="nft.owner" :root="root"/> -->
           <img
             :title="'Owner: '+nft.owner"
             class="blockie"
@@ -70,6 +71,19 @@
   }
 </script>
 <style>
+.nftCardHolder img {
+  /* object-fit: cover;
+  width:100%;
+  height:20rem; */
+}
+.nftCardHeader {
+  background-color: purple;
+  position:absolute;
+  /* height:30px; */
+  width:50%;
+  padding:5px 10px;
+  border-radius: 10px;
+}
 .blockie {
   height:20px;
   border-radius: 50%;
