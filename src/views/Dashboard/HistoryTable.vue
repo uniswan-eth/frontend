@@ -68,41 +68,48 @@ export default {
   },
   methods: {
     async loadPage() {
-      this.parsedEvents = this.$props.events.slice();
-      for (let i = 0; i < this.parsedEvents.length; i++) {
-        this.parsedEvents[i].exchangeBundle = [];
-        this.parsedEvents[i].wishBundle = [];
+      this.parsedEvents = [];
+      Promise.all(
+        this.$props.events.map(async (e) => {
+          var exchangeBundle = [];
+          var wishBundle = [];
 
-        await Promise.all(
-          assetDataUtils
-            .decodeMultiAssetData(this.parsedEvents[i].args[2])
-            .nestedAssetData.map(async (x) => {
-              var data721 = assetDataUtils.decodeERC721AssetData(x);
+          await Promise.all(
+            assetDataUtils
+              .decodeMultiAssetData(e.args[2])
+              .nestedAssetData.map(async (x) => {
+                var data721 = assetDataUtils.decodeERC721AssetData(x);
 
-              this.parsedEvents[i].exchangeBundle.push(
-                await this.$props.root.getTokenFromSubgraph(
-                  data721.tokenAddress,
-                  data721.tokenId.toNumber()
-                )
-              );
-            })
-        );
+                exchangeBundle.push(
+                  await this.$props.root.getTokenFromSubgraph(
+                    data721.tokenAddress,
+                    data721.tokenId.toNumber()
+                  )
+                );
+              })
+          );
 
-        await Promise.all(
-          assetDataUtils
-            .decodeMultiAssetData(this.parsedEvents[i].args[3])
-            .nestedAssetData.map(async (x) => {
-              var data721 = assetDataUtils.decodeERC721AssetData(x);
+          await Promise.all(
+            assetDataUtils
+              .decodeMultiAssetData(e.args[3])
+              .nestedAssetData.map(async (x) => {
+                var data721 = assetDataUtils.decodeERC721AssetData(x);
 
-              this.parsedEvents[i].wishBundle.push(
-                await this.$props.root.getTokenFromSubgraph(
-                  data721.tokenAddress,
-                  data721.tokenId.toNumber()
-                )
-              );
-            })
-        );
-      }
+                wishBundle.push(
+                  await this.$props.root.getTokenFromSubgraph(
+                    data721.tokenAddress,
+                    data721.tokenId.toNumber()
+                  )
+                );
+              })
+          );
+          this.parsedEvents.push({
+            blockNumber: e.blockNumber,
+            exchangeBundle: exchangeBundle,
+            wishBundle: wishBundle,
+          });
+        })
+      );
     },
   },
 };
