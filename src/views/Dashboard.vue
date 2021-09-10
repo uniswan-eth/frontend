@@ -61,7 +61,14 @@
     <b-container fluid class="mt--7">
       <b-row class="mt-5">
         <b-col xl="12" class="mb-5 mb-xl-0">
-          <b-card-group deck>
+          <nft-summary
+            display="card"
+            v-for="(n,idx) in $parent.$parent.usernfts"
+            :key="'nft'+idx"
+            :nft="n"
+            :root="$parent.$parent"
+            />
+          <!-- <b-card-group deck>
             <nft-card2
               minWidth="20rem"
               maxWidth="30rem"
@@ -71,7 +78,7 @@
               :nft="n"
               :root="$parent.$parent"
               />
-          </b-card-group>
+          </b-card-group> -->
         </b-col>
       </b-row>
       <b-row class="mt-5">
@@ -131,9 +138,11 @@
   import Bundle from '@/components/UniSwan/Bundle';
   import NftCard2 from "@/components/UniSwan/NftCard2";
   import { Table, TableColumn, DropdownMenu, DropdownItem, Dropdown} from 'element-ui'
+  import NftSummary from "@/components/UniSwan/NftSummary";
 
   export default {
     components: {
+      NftSummary,
       NftCard2,
       OptionsTable,
       Bundle,
