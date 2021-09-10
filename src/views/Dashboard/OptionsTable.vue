@@ -17,7 +17,6 @@
           :root="root"
         >
           <template v-slot:bundleHeader>
-            <!-- Hello from options -->
             <b-button
               @click="
                 $event.preventDefault();
@@ -26,15 +25,7 @@
               v-b-modal.modalSwapChain
               size="sm"
               variant="secondary"
-            >
-              <span>
-                {{
-                  nftOptions[0].wishBundle[0].owner ===
-                  root.signeraddr.toLowerCase()
-                    ? "Execute"
-                    : "Details"
-                }}
-              </span>
+              >"Details"
               <b-badge v-if="nftOptions.length > 1" variant="primary">{{
                 nftOptions.length
               }}</b-badge>

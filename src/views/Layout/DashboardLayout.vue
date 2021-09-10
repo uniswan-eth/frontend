@@ -458,8 +458,10 @@ export default {
         options.map(async (chain) => {
           var orders = [];
           for (let i = 0; i < chain.length; i++) {
-            var exchangeBundle = this.dataToBundle(chain[i].makerAssetData);
-            var wishBundle = this.dataToBundle(chain[i].takerAssetData);
+            var exchangeBundle = await this.dataToBundle(
+              chain[i].makerAssetData
+            );
+            var wishBundle = await this.dataToBundle(chain[i].takerAssetData);
 
             orders.push({
               exchangeBundle: exchangeBundle,
