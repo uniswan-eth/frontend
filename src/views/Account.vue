@@ -114,11 +114,21 @@
     <b-container fluid class="mt--7">
       <b-row v-if="!$route.query.tab" class="justify-content-center">
         <b-col lg="12">
-          <nfts-table :nfts="nfts" :root="$parent.$parent"></nfts-table>
           <erc-table
             :nfts="this.$parent.$parent.userERC20s"
             :root="$parent.$parent"
           ></erc-table>
+          <b-card-group deck>
+            <nft-card2
+              minWidth="15rem"
+              maxWidth="25rem"
+              display="card"
+              v-for="(n, idx) in nfts"
+              :key="'nft' + idx"
+              :nft="n"
+              :root="$parent.$parent"
+            />
+          </b-card-group>
         </b-col>
       </b-row>
       <b-row
@@ -173,12 +183,14 @@ import HistoryTable from "./Dashboard/HistoryTable";
 import OffersTable from "./Dashboard/OffersTable";
 import OptionsTable from "./Dashboard/OptionsTable";
 import ErcTable from "./Dashboard/ErcTable";
+import NftCard2 from "@/components/UniSwan/NftCard2";
 
 Vue.use(VueClipboard);
 export default {
   name: "account",
   components: {
     HistoryTable,
+    NftCard2,
     OptionsTable,
     OffersTable,
     BaseHeader,

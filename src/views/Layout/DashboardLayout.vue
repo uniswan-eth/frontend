@@ -86,12 +86,42 @@ import { assetDataUtils } from "@0x/order-utils";
 import { BigNumber } from "@0x/utils";
 
 /* eslint-disable no-new */
+import DashboardNavbar from "./DashboardNavbar.vue";
+import ContentFooter from "./ContentFooter.vue";
+import DashboardContent from "./Content.vue";
+
+import OrderModal from "@/components/UniSwan/OrderModal";
+import CreateOrderModal from "@/components/UniSwan/CreateOrderModal";
+import SwapChainModal from "@/components/UniSwan/SwapChainModal";
+import makeBlockie from "ethereum-blockies-base64";
+
+import Datastore from "nedb";
+
+import { FadeTransition } from "vue2-transitions";
+import { ethers } from "ethers";
 import PerfectScrollbar from "perfect-scrollbar";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 
+import { HttpClient } from "@0x/connect";
 const DB_BASE_URL = "https://uns-backend.vercel.app/api/v3";
 const SUBGRAPH_URL =
+  "https://api.thegraph.com/subgraphs/name/zapaz/eip721-matic";
+const SUBGRAPH_URL2 =
   "https://api.thegraph.com/subgraphs/name/tranchien2002/eip721-matic";
+
+const EXCHANGE_ADDRESS = "0x1f98206be961f98d0c2d2e5f7d965244b2f2129a";
+
+const httpLink = createHttpLink({ uri: SUBGRAPH_URL });
+const client = new ApolloClient({
+  link: httpLink,
+  cache: new InMemoryCache(),
+});
+const client2 = new ApolloClient({
+  link: createHttpLink({
+    uri: SUBGRAPH_URL2,
+  }),
+  cache: new InMemoryCache(),
+});
 
 function hasElement(className) {
   return document.getElementsByClassName(className).length > 0;
@@ -107,29 +137,6 @@ function initScrollbar(className) {
   }
 }
 
-import DashboardNavbar from "./DashboardNavbar.vue";
-import ContentFooter from "./ContentFooter.vue";
-import DashboardContent from "./Content.vue";
-import { FadeTransition } from "vue2-transitions";
-import { ethers } from "ethers";
-import makeBlockie from "ethereum-blockies-base64";
-
-import OrderModal from "@/components/UniSwan/OrderModal";
-import CreateOrderModal from "@/components/UniSwan/CreateOrderModal";
-import SwapChainModal from "@/components/UniSwan/SwapChainModal";
-
-import { HttpClient } from "@0x/connect";
-
-const EXCHANGE_ADDRESS = "0x1f98206be961f98d0c2d2e5f7d965244b2f2129a";
-
-const httpLink = createHttpLink({
-  uri: SUBGRAPH_URL,
-});
-const client = new ApolloClient({
-  link: httpLink,
-  cache: new InMemoryCache(),
-});
-
 export default {
   components: {
     SwapChainModal,
@@ -142,6 +149,10 @@ export default {
   },
   data() {
     return {
+      nedbNFTs: null,
+      routeName: null,
+      showSearch: false,
+
       ERC721_PROXY_ADDRESS: "0x7931459d633a9639F26e851c9E63D30388957B60",
       nonFungibleMaticV2Address: "0x36a8377e2bb3ec7d6b0f1675e243e542eb6a4764",
       access: false,
@@ -179,6 +190,10 @@ export default {
   },
   async mounted() {
     document.title = "🦢 UniSwan";
+
+    this.buildNEDB();
+    console.log(this.nedbNFTs);
+
     await window.ethereum.enable();
     var self = this;
     this.provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -199,6 +214,154 @@ export default {
     this.loadApp();
   },
   methods: {
+    buildNEDB() {
+      this.nedbNFTs = new Datastore({ filename: "NFTs", autoload: true });
+    },
+    insertNEDB(x) {
+      var self = this;
+      return new Promise(function (resolve) {
+        self.nedbNFTs.update({ _id: x._id }, x, { upsert: true }, () => {
+          resolve(true);
+        });
+      });
+    },
+    queryNEDB(sea) {
+      var self = this;
+      return new Promise(function (resolve) {
+        // console.log('SEA', sea);
+        self.nedbNFTs
+          .find(sea)
+          .sort()
+          .skip(0)
+          .limit(100)
+          .exec(function (err, docs) {
+            resolve(docs);
+          });
+      });
+    },
+    async getContractTokensFromSubGraph2(
+      contractAddress,
+      limit = 10,
+      offset = 0
+    ) {
+      const tokensQuery = `
+        {
+          tokenContract(id:"${contractAddress.toLowerCase()}") {
+            id
+            name
+            numTokens
+            numOwners
+            tokens(first:${limit}, skip:${offset}) {
+              id,
+              contract {id, name, numTokens, numOwners, symbol}
+              tokenID
+              owner {id, numTokens}
+              tokenURI
+              mintTime
+            }
+          }
+        }
+      `;
+
+      console.log(tokensQuery);
+      const data = await client2.query({
+        query: gql(tokensQuery),
+      });
+      console.log("Data: ", data);
+      const tokenData = data.data.tokenContract.tokens;
+      const nfts = await this.constructBundle2(tokenData);
+      return {
+        nfts: nfts,
+        raw: data.data.tokenContract,
+      };
+    },
+    async getUserTokensFromSubGraph2(userAddress, limit = 20, offset = 0) {
+      const tokensQuery = `
+        {
+          owner(id:"${userAddress.toLowerCase()}") {
+            id
+            numTokens
+            tokens(first:${limit}, skip:${offset}) {
+              id,
+              contract {id, name, numTokens, numOwners, symbol}
+              tokenID
+              owner {id, numTokens}
+              tokenURI
+              mintTime
+            }
+          }
+        }
+        `;
+      console.log(tokensQuery);
+      const data = await client2.query({
+        query: gql(tokensQuery),
+      });
+      const tokenData = data.data.owner.tokens;
+      const nfts = await this.constructBundle2(tokenData);
+      return {
+        nfts: nfts,
+        raw: data.data.tokenContract,
+      };
+    },
+    async constructBundle2(tokenData) {
+      var bundle = [];
+      await Promise.all(
+        tokenData.map(async (d) => {
+          var nft;
+          // Check If we have it in cach
+          var test = await this.queryNEDB({
+            tokenID: d.tokenID,
+            contract: d.contract.id,
+          });
+          if (test.length > 0) {
+            nft = {
+              contract: d.contract.id,
+              tokenID: d.tokenID,
+              owner: d.owner.id,
+              tokenJSON: test[0].tokenJSON,
+            };
+          } else {
+            console.log("New JSON Look Up");
+            // If the subgraph doesn't give us the metadata, retrieve it manually
+            var collection = new ethers.Contract(
+              d.contract.id,
+              ERC721ABI,
+              this.signer
+            );
+
+            var tokenURI = await collection.tokenURI(d.tokenID);
+            var res = await fetch(tokenURI);
+            var tokenJSON = await res.json();
+
+            nft = {
+              contract: d.contract.id,
+              tokenID: d.tokenID,
+              owner: d.owner.id,
+              tokenJSON: tokenJSON,
+            };
+            var toInsert = { ...nft };
+            toInsert._id = ethers.utils.id(nft.contract + "/" + nft.tokenID);
+            this.insertNEDB(toInsert);
+          }
+          bundle.push(nft);
+        })
+      );
+      return bundle;
+    },
+
+    async getContract(collectionAddress) {
+      // console.log('hello', );
+      var collection = new ethers.Contract(
+        collectionAddress,
+        ERC721ABI,
+        this.signer
+      );
+      var collectionName = await collection.name();
+      var toret = {
+        name: collectionName,
+      };
+      return toret;
+    },
     async loadApp() {
       this.signer = this.provider.getSigner();
       this.signeraddr = await this.signer.getAddress();
@@ -206,16 +369,15 @@ export default {
       var access = this.allowList.includes(this.signeraddr);
       if (access) {
         await this.loadNetwork();
-        this.orderbook = await this.getPreferences();
-        console.log("Load: Orderbook", this.orderbook);
         await this.loadUser();
-        console.log("Load: User", this.userprefs);
         this.pageloaded = true;
       }
     },
     async loadNetwork() {
       this.network = await this.provider.getNetwork();
       this.blockNumber = await this.provider.getBlockNumber();
+
+      this.orderbook = await this.getPreferences();
     },
     async loadUser() {
       this.userERC20s = await this.getUserERC20s(this.signeraddr);
@@ -236,6 +398,29 @@ export default {
         18900000
       );
       console.log(this.fillEvents);
+    },
+    async getContractsFromSubGraph(search, limit = 10) {
+      const tokensQuery = `{
+        alls(first: 5) {
+          id
+          numTokenContracts
+          numTokens
+          numOwners
+        }
+        tokenContracts(first:${limit}, where: {name_contains:"${search}"}) {
+          id
+          name
+          numTokens
+          numOwners
+        }
+      }`;
+      console.log(tokensQuery);
+
+      const data = await client2.query({
+        query: gql(tokensQuery),
+      });
+      console.log("Graph2 res", data);
+      return data;
     },
     async getCollectionFromSubGraph(
       contractAddress,
@@ -281,7 +466,7 @@ export default {
 
       const tokensQuery = `
           query {
-            tokens(where:{id:"${id}"}) {
+            tokens(where:{ id:"${id}"}) {
               id
               contract {
                 id
@@ -325,12 +510,38 @@ export default {
         },
       ];
     },
-    async getUserTokensFromSubGraph(userAddress) {
+    async getTokenFromSubgraph2(contractAddress, tokenId) {
+      const id = contractAddress.toLowerCase() + "_" + tokenId;
+      const tokensQuery = `
+          query {
+            tokens(where:{ id:"${id}"}) {
+              id
+              contract {
+                id
+              }
+              owner {
+                id
+              }
+              tokenID
+              metadata
+            }
+          }
+        `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      const tokenData = data.data.tokens;
+      const output = await this.constructBundle(tokenData);
+      console.log("ZZZ", output, data);
+      console.log(tokensQuery);
+      return output;
+    },
+    async getUserTokensFromSubGraph(userAddress, limit = 20, offset = 0) {
       const tokensQuery = `
           query {
           owners(where:{id:"${userAddress.toLowerCase()}"}) {
             id
-            tokens {
+            tokens(first:${limit}, skip:${offset}) {
               id,
               contract {
                 id
@@ -408,6 +619,12 @@ export default {
       );
 
       return bundle;
+    },
+    queryOrderBook(owner) {
+      var toret = this.orderbook.filter((x) => {
+        return x.signedOrder.makerAddress.toLowerCase() === owner;
+      });
+      return toret;
     },
     async getPreferences(requestOpts) {
       var client = new HttpClient(DB_BASE_URL);
@@ -638,6 +855,21 @@ export default {
     },
 
     formatAsset(nft) {
+      return {
+        token_id: nft.tokenID,
+        image_url: nft.tokenJSON.image,
+        image_preview_url: nft.tokenJSON.image,
+        name: nft.tokenJSON.name,
+        description: nft.tokenJSON.description,
+        asset_contract: {
+          address: nft.contract,
+        },
+        owner: {
+          address: nft.owner,
+        },
+      };
+    },
+    formatAsset2(nft) {
       return {
         token_id: nft.tokenID,
         image_url: nft.tokenJSON.image,
