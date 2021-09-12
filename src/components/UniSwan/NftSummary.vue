@@ -60,7 +60,7 @@
               </b-button>
               <div
                 @click="$router.push('/nft/'+nft.contract+'/'+nft.tokenID)"
-                v-for="(nft,idx) in ring[0].exchangeBundle"
+                v-for="(nft,idx) in ring[ring.length - 1].exchangeBundle"
                 :key="'wish'+idx"
                 :style="{backgroundImage: 'url('+nft.tokenJSON.image+')'}"
                 class="imgHolder">
@@ -141,7 +141,7 @@
   float:left;
   background: #ccc;
   padding:5px;
-  margin-right:5px;
+  margin-right:10px;
   margin-bottom:5px;
   border-radius: 8px;
 

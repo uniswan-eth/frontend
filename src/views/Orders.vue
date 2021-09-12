@@ -60,7 +60,8 @@ export default {
       // Query OpenSea
       this.orders = [];
       if (this.$parent.$parent.network.chainId === 137) {
-        this.orders = await this.$parent.$parent.orderbook;
+        // this.orders = await this.$parent.$parent.orderbook;
+        this.orders = await this.$parent.$parent.getOrdersFromDB();
       } else if (this.$parent.$parent.network.chainId === 1) {
       }
     },

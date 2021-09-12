@@ -106,7 +106,7 @@
                 <i class="ni ni-spaceship"></i>
               </b-button>
               <div
-                v-for="(nft,idx) in ring[0].exchangeBundle"
+                v-for="(nft,idx) in ring[ring.length - 1].exchangeBundle"
                 :key="'wish'+idx"
                 :style="{backgroundImage: 'url('+nft.tokenJSON.image+')'}"
                 class="imgHolder">
@@ -332,6 +332,7 @@ export default {
       this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph2(nft.owner);
 
       var orders = await this.$parent.$parent.getOrdersFromDB({makerAddress: nft.owner});
+      console.log(orders);
       orders.map((x) => {
         x.exchangeBundle.map((y) => {
           if (y.tokenID === nft.tokenID && y.contract === nft.contract)

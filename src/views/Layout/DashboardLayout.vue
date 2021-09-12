@@ -401,12 +401,12 @@ export default {
         this.signer
       );
 
-      var blockNumber = await this.provider.getBlockNumber();
-      this.fillEvents = await exchange.queryFilter(
-        exchange.filters.Fill(),
-        blockNumber - 90000
-        // 18900000
-      );
+      // var blockNumber = await this.provider.getBlockNumber();
+      // this.fillEvents = await exchange.queryFilter(
+      //   exchange.filters.Fill(),
+      //   blockNumber - 50000
+      //   // 18900000
+      // );
     },
     async getContractsFromSubGraph(search, limit = 10) {
       const tokensQuery = `{
@@ -548,8 +548,9 @@ export default {
     async getOrdersFromDB(requestOpts) {
       var orderClient = new HttpClient(DB_BASE_URL);
       var json = await orderClient.getOrdersAsync(requestOpts);
-
       var orders = [];
+      console.log('orders', json);
+
       await Promise.all(
         json.records.map(async (signedOrder) => {
           const exchangeBundle = await this.dataToBundle(
@@ -567,6 +568,7 @@ export default {
         })
       );
 
+      console.log(orders, json);
       return orders;
     },
     async getSwapOptions(NFTs) {

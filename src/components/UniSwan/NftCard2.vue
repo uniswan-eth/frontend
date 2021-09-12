@@ -29,7 +29,7 @@
       <div class="nftCardContract">
         <router-link :to="'/explorer?contract='+nft.contract">
           <b-badge variant="default">
-              {{nft.contract.substr(0,6)}}
+            {{nft.contract.substr(0,6)}}
           </b-badge>
         </router-link>
       </div>
