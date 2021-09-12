@@ -60,60 +60,13 @@
         <b-col xl="12" class="mb-5 mb-xl-0">
           <nft-summary
             display="card"
-            v-for="(n,idx) in $parent.$parent.usernfts"
+            v-for="(n,idx) in summary"
             :key="'nft'+idx"
-            :nft="n"
+            :nft="n.nft"
+            :summary="n"
             :root="$parent.$parent"
             />
-          <!-- <b-card-group deck>
-            <nft-card2
-              minWidth="20rem"
-              maxWidth="30rem"
-              display="card"
-              v-for="(n, idx) in $parent.$parent.usernfts"
-              :key="'nft' + idx"
-              :nft="n"
-              :root="$parent.$parent"
-              />
-          </b-card-group> -->
         </b-col>
-      </b-row>
-      <b-row class="mt-5">
-        <b-col xl="6" class="mb-5 mb-xl-0">
-          <nfts-table :nfts="$parent.$parent.usernfts" :root="$parent.$parent">
-            <template v-slot:unsHeader>
-              <b-row align-v="center">
-                <b-col>
-                  <h3 class="mb-0">NFTs</h3>
-                </b-col>
-              </b-row>
-            </template>
-          </nfts-table>
-          <br />
-          <offers-table
-            :root="$parent.$parent"
-            :offers="$parent.$parent.userprefs"
-          ></offers-table>
-        </b-col>
-        <b-col xl="6" class="mb-5 mb-xl-0">
-          <options-table
-            display="simple"
-            :root="$parent.$parent"
-            :options="$parent.$parent.userSwapOptions"
-          >
-            <template v-slot:unsHeader>
-              <b-row align-v="center">
-                <b-col>
-                  <h3 class="mb-0">My swap options</h3>
-                </b-col>
-                <b-col class="text-right"> </b-col>
-              </b-row>
-            </template>
-          </options-table>
-        </b-col>
-      </b-row>
-      <b-row class="mt-5">
-        <b-col xl="6" class="mb-5 mb-xl-0"> </b-col>
       </b-row>
     </b-container>
   </div>
@@ -143,8 +96,6 @@ export default {
     OffersTable,
     LineChart,
     BarChart,
-    BaseProgress,
-    StatsCard,
     [Table.name]: Table,
     [TableColumn.name]: TableColumn,
     [Dropdown.name]: Dropdown,
@@ -153,11 +104,36 @@ export default {
   },
   data() {
     return {
+      summary:[],
     };
   },
   mounted() {
     document.title ="🦢 UniSwan"
     this.$parent.$parent.routeName = 'Dashboard';
+
+    // Build summary
+    this.$parent.$parent.usernfts.map(nft => {
+      var nftSummary = {
+        nft:nft,
+        orders:[],
+        options:[],
+      }
+      this.$parent.$parent.userprefs.map(order => {
+        order.exchangeBundle.map(exch => {
+          if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {
+            nftSummary.orders.push(order)
+          }
+        })
+      })
+      this.$parent.$parent.userSwapOptions.map(ring => {
+        ring[0].wishBundle.map(exch => {
+          if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {
+            nftSummary.options.push(ring)
+          }
+        })
+      })
+      this.summary.push(nftSummary)
+    })
   },
   methods: {},
 };

@@ -103,6 +103,7 @@ export default {
 }
 .nftCardImage {
   cursor: pointer;
+  border-radius: 5px 5px 0px 0px;
 }
 .nftCardBlockie {
   position:absolute;

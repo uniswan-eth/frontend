@@ -1,10 +1,24 @@
 <template>
   <div v-if="asset">
     <base-header class="pb-6 pb-8 pt-5 pt-md-8 bg-gradient-success">
-      <b-row>
-        <b-col xl="6" md="6"> </b-col>
-        <b-col xl="6" md="6"> </b-col>
-      </b-row>
+      <!-- <b-row>
+        <b-col xl="6" md="6">
+          <stats-card
+            title="Contract"
+            type="gradient-red"
+            :sub-title="assetSubGraph.contract.name"
+            icon="ni ni-active-40"
+            class="mb-4">
+            <template slot="footer">
+              <span class="text-success mr-2">{{$parent.$parent.formatNumberWithCommas(assetSubGraph.contract.numOwners)}}</span>
+              <span class="text-nowrap">Owners</span>
+              &nbsp;
+              <span class="text-success mr-2">{{$parent.$parent.formatNumberWithCommas(assetSubGraph.contract.numTokens)}}</span>
+              <span class="text-nowrap">Tokens</span>
+            </template>
+          </stats-card>
+        </b-col>
+      </b-row> -->
     </base-header>
 
     <b-container fluid class="mt--7">
@@ -15,96 +29,108 @@
           </card>
           <br />
           <card header-classes="bg-transparent">
-            <h1 slot="header" class="mb-0">
-              {{ asset.name }}
-            </h1>
+            <div slot="header" class="mb-0">
+              <small class="text-muted text-uppercase">
+                <router-link :to="'/explorer/?contract=' + asset.asset_contract.address">
+                  {{ contract.name }}
+                </router-link>
+              </small>
+              <h1 slot="header" class="mb-0">
+                {{ asset.name }}
+              </h1>
+            </div>
             <p>
               {{ asset.description }}
             </p>
+            <div>
+              <a class="btn btn-secondary btn-sm" rel="noreferrer"
+                target="_blank"
+                :href="'https://opensea.io/assets/matic/' + asset.asset_contract.address +'/'+ + asset.token_id">
+                Token ID
+                <b>
+                  {{ asset.token_id.substr(0, 10)}}
+                </b>
+                {{
+                  asset.token_id.length > 10
+                    ? "..." + asset.token_id.substr(asset.token_id.length - 5)
+                    : ""
+                }}
+              </a>
+              <a class="btn btn-secondary btn-sm" rel="noreferrer"
+                target="_blank"
+                :href="'https://polygonscan.com/address/' + asset.asset_contract.address">
+                Contract {{ asset.asset_contract.address }}
+              </a>
+            </div>
             <br />
-            <div
-              v-if="
-                asset.owner.address.toLowerCase() ===
-                $parent.$parent.signeraddr.toLowerCase()
-              "
-            >
-              <b-button
-                v-if="!signerApproved"
-                @click="
-                  $parent.$parent.approveTransfers(asset.asset_contract.address)
-                "
+            <div class="">
+              <span class="text-success mr-2">{{$parent.$parent.formatNumberWithCommas(assetSubGraph.contract.numOwners)}}</span>
+              <span class="text-nowrap">Owners</span>
+              &nbsp;
+              <span class="text-success mr-2">{{$parent.$parent.formatNumberWithCommas(assetSubGraph.contract.numTokens)}}</span>
+              <span class="text-nowrap">Tokens</span>
+            </div>
+            <br>
+            <div class="slide" v-if="asset.owner.address.toLowerCase() === $parent.$parent.signeraddr.toLowerCase()">
+              <b-button v-if="!signerApproved"
+                @click="$parent.$parent.approveTransfers(asset.asset_contract.address)"
                 size="lg"
-                variant="success"
-              >
+                variant="success">
                 Approve transfers
               </b-button>
-              <b-button
-                v-if="signerApproved"
-                @click="
-                  $parent.$parent.unApproveTransfers(
-                    asset.asset_contract.address
-                  )
-                "
+              <b-button v-if="signerApproved"
+                @click="$parent.$parent.unApproveTransfers(asset.asset_contract.address)"
                 size="sm"
-                variant="secondary"
-              >
+                variant="secondary">
                 Remove approval
               </b-button>
             </div>
           </card>
           <br />
-          <card header-classes="bg-transparent">
-            <div slot="header">
-              <h6
-                slot="header"
-                class="navbar-heading text-muted text-uppercase"
-              >
-                Chain Info
-              </h6>
-              <h2 class="mb-0">
-                <router-link
-                  :to="'/explorer/?contract=' + asset.asset_contract.address"
-                >
-                  {{ contract.name }}
-                </router-link>
-              </h2>
-            </div>
-            <!-- <pre>{{contract}}</pre> -->
-            <div>
-              Address:
-              <!-- target="_blank" -->
-              <a
-                rel="noreferrer"
-                :href="
-                  'https://polygonscan.com/address/' +
-                  asset.asset_contract.address
-                  /* '/#/explorer?contract=' + asset.asset_contract.address */
-                "
-              >
-                {{ asset.asset_contract.address }}
-              </a>
-            </div>
-            <div :title="asset.token_id">
-              TokenID: {{ asset.token_id.substr(0, 10)
-              }}{{
-                asset.token_id.length > 10
-                  ? "..." + asset.token_id.substr(asset.token_id.length - 5)
-                  : ""
-              }}
-            </div>
-            <div>Type: {{ asset.asset_contract.schema_name }}</div>
-          </card>
         </b-col>
         <b-col lg="6">
-          <options-table
+          <card header-classes="bg-transparent">
+            <h6 slot="header" class="navbar-heading text-muted text-uppercase">
+              This NFT can be swapped for
+            </h6>
+            <div v-for="(ring,idx) in validSwaps"
+              class="bundleHolder"
+              :key="'ring'+idx">
+              <b-button
+                class="swapBtn"
+                @click="
+                $event.preventDefault();
+                $parent.$parent.viewSwapChain(ring);
+                "
+                v-b-modal.modalSwapChain size="sm" variant="secondary">
+                <i class="ni ni-spaceship"></i>
+              </b-button>
+              <div
+                v-for="(nft,idx) in ring[0].exchangeBundle"
+                :key="'wish'+idx"
+                :style="{backgroundImage: 'url('+nft.tokenJSON.image+')'}"
+                class="imgHolder">
+              </div>
+            </div>
+            <div class="cb"/>
+            <b-button @click="$parent.$parent.createOrder(asset, ownerAssets)"
+              :disabled="
+                $parent.$parent.signeraddr.toLowerCase() ===
+                asset.owner.address.toLowerCase()
+              "
+              v-b-modal.modalCreateOffer
+              size="lg"
+              variant="success">
+              Make offer
+            </b-button>
+          </card>
+          <!-- <options-table
             display="simple"
             :root="$parent.$parent"
-            :options="validSwaps"
-          >
+            :options="validSwaps">
             <template v-slot:unsHeader>
               <b-row align-v="center">
                 <b-col>
-                  <!-- <h3 class="mb-0"> -->
                   <h6
                     slot="header"
                     class="navbar-heading text-muted text-uppercase"
@@ -128,12 +154,11 @@
                 </b-col>
               </b-row>
             </template>
-          </options-table>
+          </options-table> -->
           <br />
           <card header-classes="bg-transparent">
             <h6 slot="header" class="navbar-heading text-muted text-uppercase">
               What
-              <!-- <img :src="$parent.$parent.makeBlockie(asset.owner.address)"/> -->
               &nbsp;
               <img
                 :title="'Owner: ' + asset.owner.address"
@@ -146,17 +171,18 @@
               />
               &nbsp; wish in return for {{ asset.name }}
             </h6>
+            <router-link class="btn btn-secondary btn-sm" :to="'/account/'+asset.owner.address+'?tab=offers'">
+              See all
+            </router-link>
 
             <div
               v-for="(order, idx) in ownerOrders"
               :key="'order' + idx"
-              class=""
-            >
+              class="">
               <bundle
                 display="medium"
                 :bundle="order.wishBundle"
-                :root="$parent.$parent"
-              >
+                :root="$parent.$parent">
                 <template v-slot:bundleHeader>
                   <b-button
                     @click="
@@ -165,8 +191,7 @@
                     "
                     v-b-modal.modalOffer
                     size="sm"
-                    variant="secondary"
-                  >
+                    variant="secondary">
                     <span>
                       {{
                         order.wishBundle[0].owner.toLowerCase() ===
@@ -183,7 +208,11 @@
             </div>
           </card>
           <br />
-          <br />
+        </b-col>
+      </b-row>
+      <br />
+      <b-row class="justify-content-center">
+        <b-col lg="12">
           <card header-classes="bg-transparent">
             <div slot="header">
               <h6 class="navbar-heading text-muted text-uppercase">
@@ -219,15 +248,11 @@
               />
             </b-card-group>
           </card>
-        </b-col>
-      </b-row>
-      <br />
-      <b-row class="justify-content-center" v-if="asset.collection">
-        <b-col lg="12">
-          <card header-classes="bg-transparent">
+
+          <!-- <card header-classes="bg-transparent">
             <h3 slot="header" class="mb-0">Collection</h3>
             <collection :collection="asset.collection" />
-          </card>
+          </card> -->
         </b-col>
       </b-row>
       <br />
@@ -263,6 +288,7 @@ export default {
     return {
       contract: null,
       asset: null,
+      assetSubGraph: null,
       ownerAssets: null,
       validSwaps: [],
       ownerOrders: [],
@@ -288,42 +314,30 @@ export default {
         this.$route.params.contract
       );
 
-      var nft = await this.$parent.$parent.getTokenFromSubgraph(
+      var data = await this.$parent.$parent.getTokenFromSubgraph2(
         this.$route.params.contract,
         this.$route.params.tokenid.toString()
       );
+      var nft = data.nft
+      this.$parent.$parent.routeName = nft.tokenJSON.name;
 
       // Use same format as OpenSea API
-      console.log(
-        nft,
-        this.$route.params.contract,
-        this.$route.params.tokenid.toString()
-      );
       this.asset = this.$parent.$parent.formatAsset(nft);
+      this.assetSubGraph = data.raw.data.tokens[0];
 
       // Swap Options
       this.validSwaps = await this.$parent.$parent.getSwapOptions([nft]);
 
       // Owners Assets
-      this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph2(
-        nft.owner
-      );
+      this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph2(nft.owner);
 
-      var orders = await this.$parent.$parent.getOrdersFromDB({
-        makerAddress: nft.owner,
-      });
+      var orders = await this.$parent.$parent.getOrdersFromDB({makerAddress: nft.owner});
       orders.map((x) => {
         x.exchangeBundle.map((y) => {
           if (y.tokenID === nft.tokenID && y.contract === nft.contract)
             this.ownerOrders.push(x);
         });
       });
-      console.log(
-        "ddd orders",
-        this.ownerOrders,
-        nft.owner,
-        this.$parent.$parent.signeraddr
-      );
     },
     onCopy() {
       this.$notify({
@@ -339,4 +353,5 @@ export default {
   },
 };
 </script>
-<style></style>
+<style>
+</style>

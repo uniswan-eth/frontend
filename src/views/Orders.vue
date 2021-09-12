@@ -9,24 +9,11 @@
     <b-container fluid class="mt--7">
       <b-row class="justify-content-center">
         <b-col lg="12">
-          <card header-classes="bg-transparent">
-            <h3 slot="header" class="mb-0">
-              Latest Orders
-              <b-button
-                @click="$parent.$parent.getOrdersFromDB()"
-                v-b-modal.modalSwapChain
-                size="sm"
-                variant="secondary"
-              >
-                Refresh
-              </b-button>
-            </h3>
-            <offers-table
-              zzdisplay="medium"
-              :root="$parent.$parent"
-              :offers="orders"
-            ></offers-table>
-          </card>
+          <offers-table
+            zzdisplay="medium"
+            :root="$parent.$parent"
+            :offers="orders"
+          ></offers-table>
         </b-col>
       </b-row>
     </b-container>
@@ -68,26 +55,16 @@ export default {
   },
   methods: {
     async loadPage() {
+      this.$parent.$parent.routeName = "Orders";
+
       // Query OpenSea
       this.orders = [];
-      console.log("Network", this.$parent.$parent.network.chainId);
       if (this.$parent.$parent.network.chainId === 137) {
-        // Matic
-        console.log("LOAD TIMER");
         this.orders = await this.$parent.$parent.orderbook;
-        console.log("Orders", this.orders);
       } else if (this.$parent.$parent.network.chainId === 1) {
-        // Main net
-        // this.loadOS(0)
       }
     },
     async loadOS(offset) {},
-    onCopy() {
-      this.$notify({
-        type: "info",
-        message: "Copied to clipboard",
-      });
-    },
   },
   watch: {
     async $route() {

@@ -32,7 +32,7 @@
           >
             <template slot="footer">
               <a
-                :href="'/#/account/' + this.$route.params.address + ''"
+                :href="'/#/account/' + this.$route.params.address + '?tab=nfts'"
                 class="btn btn-sm btn-primary"
                 >NFTs</a
               >
@@ -113,6 +113,18 @@
 
     <b-container fluid class="mt--7">
       <b-row v-if="!$route.query.tab" class="justify-content-center">
+        <b-col xl="12" class="mb-5 mb-xl-0">
+          <nft-summary
+            display="card"
+            v-for="(n,idx) in summary"
+            :key="'nft'+idx"
+            :nft="n.nft"
+            :summary="n"
+            :root="$parent.$parent"
+            />
+        </b-col>
+      </b-row>
+      <b-row v-if="$route.query.tab === 'nfts'" class="justify-content-center">
         <b-col lg="12">
           <b-card-group deck>
             <nft-card2
@@ -134,19 +146,17 @@
           </b-card-group>
         </b-col>
       </b-row>
-      <b-row
-        v-if="$route.query.tab === 'offers'"
+      <b-row v-if="$route.query.tab === 'offers'"
         class="justify-content-center">
         <b-col lg="12">
           <offers-table :offers="offers" :root="$parent.$parent"></offers-table>
         </b-col>
       </b-row>
-      <b-row
-        v-if="$route.query.tab === 'options'"
+      <b-row v-if="$route.query.tab === 'options'"
         class="justify-content-center">
         <b-col lg="12">
           <options-table
-            display="simple"
+            zzdisplay="simple"
             :root="$parent.$parent"
             :options="swapOptions">
             <template v-slot:unsHeader>
@@ -160,10 +170,8 @@
           </options-table>
         </b-col>
       </b-row>
-      <b-row
-        v-if="$route.query.tab === 'history'"
-        class="justify-content-center"
-      >
+      <b-row v-if="$route.query.tab === 'history'"
+        class="justify-content-center">
         <b-col lg="12">
           <history-table
             :events="$parent.$parent.fillEvents"
@@ -184,11 +192,13 @@ import OffersTable from "./Dashboard/OffersTable";
 import OptionsTable from "./Dashboard/OptionsTable";
 import ErcCard from "@/components/UniSwan/ErcCard";
 import NftCard2 from "@/components/UniSwan/NftCard2";
+import NftSummary from "@/components/UniSwan/NftSummary";
 
 Vue.use(VueClipboard);
 export default {
   name: "account",
   components: {
+    NftSummary,
     HistoryTable,
     NftCard2,
     OptionsTable,
@@ -199,6 +209,7 @@ export default {
   },
   data() {
     return {
+      summary:[],
       contractAddress: this.$parent.$parent.nonFungibleMaticV2Address,
       nfts: [],
       offers: [],
@@ -213,6 +224,53 @@ export default {
   },
   methods: {
     async loadPage() {
+      this.$parent.$parent.routeName = this.$route.params.address.substr(0,6);
+
+      if (
+        this.$route.params.address.toLowerCase() ===
+        this.$parent.$parent.signeraddr.toLowerCase()
+      ) {
+        this.nfts = this.$parent.$parent.usernfts;
+        this.offers = this.$parent.$parent.userprefs;
+        this.swapOptions = this.$parent.$parent.userSwapOptions;
+      } else {
+        var res = await this.$parent.$parent.getUserTokensFromSubGraph2(this.$route.params.address);
+        this.nfts = res.nfts
+        // console.log("Acc NFTs", this.nfts);
+        this.offers = await this.$parent.$parent.getOrdersFromDB({
+          makerAddress: this.$route.params.address,
+        });
+        // console.log("Acc Offers", this.offers);
+        this.swapOptions = await this.$parent.$parent.getSwapOptions(
+          this.nfts
+        );
+        // console.log("Acc Optiosn", this.swapOptions);
+      }
+      this.nfts.map(nft => {
+        var nftSummary = {
+          nft:nft,
+          orders:[],
+          options:[],
+        }
+        // What offers with NFT in exchangeBundle
+        this.offers.map(order => {
+          order.exchangeBundle.map(exch => {
+            if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {
+              nftSummary.orders.push(order)
+            }
+          })
+        })
+        this.swapOptions.map(ring => {
+          ring[0].wishBundle.map(exch => {
+            if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {
+              nftSummary.options.push(ring)
+            }
+          })
+        })
+        this.summary.push(nftSummary)
+      })
+    },
+    async oldloadPage() {
       if (
         this.$route.params.address.toLowerCase() ===
         this.$parent.$parent.signeraddr.toLowerCase()
@@ -222,9 +280,13 @@ export default {
         this.swapOptions = this.$parent.$parent.userSwapOptions;
       } else {
         if (!this.$route.query.tab) {
-          this.nfts = await this.$parent.$parent.getUserTokensFromSubGraph(
+          var res = await this.$parent.$parent.getUserTokensFromSubGraph2(
             this.$route.params.address
           );
+          this.nfts = res.nfts
+          // this.nfts = await this.$parent.$parent.getUserTokensFromSubGraph2(
+          //   this.$route.params.address
+          // ).nfts;
           console.log("Acc NFTs", this.nfts);
         } else if (this.$route.query.tab === "offers") {
           this.offers = await this.$parent.$parent.getOrdersFromDB({
