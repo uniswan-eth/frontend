@@ -19,7 +19,7 @@
         <sidebar-item
           :link="{
             name: 'My NFTs',
-            path: '/account/' + signeraddr + '?tab=offers',
+            path: '/account/' + signeraddr + '?tab=nfts',
             icon: 'ni ni-ui-04 text-primary',
           }"
         ></sidebar-item>

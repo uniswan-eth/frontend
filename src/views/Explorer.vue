@@ -138,6 +138,8 @@ export default {
   },
   async mounted() {
     document.title = "🦢 Explorer";
+    this.$parent.$parent.routeName = "Explorer";
+
     this.loadPage();
   },
   methods: {
