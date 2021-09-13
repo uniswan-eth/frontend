@@ -225,7 +225,7 @@ export default {
   },
   async mounted() {
     document.title = "🦢 Account";
-
+    console.log('Events', this.$parent.$parent.fillEvents);
     this.loadPage();
   },
   methods: {
