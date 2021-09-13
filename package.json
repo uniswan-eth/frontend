@@ -14,7 +14,6 @@
     "@0x/order-utils": "^10.4.28",
     "@0x/utils": "^5.6.4",
     "apollo-boost": "^0.4.9",
-    "axios": "^0.21.1",
     "bootstrap": "4.3.1",
     "bootstrap-vue": "^2.5.0",
     "chart.js": "^2.9.3",
