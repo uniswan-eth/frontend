@@ -18,35 +18,35 @@
         ></sidebar-item>
         <sidebar-item
           :link="{
-            name: 'My NFTs',
+            name: 'NFTs',
             path: '/account/' + signeraddr + '?tab=nfts',
             icon: 'ni ni-ui-04 text-primary',
           }"
         ></sidebar-item>
         <sidebar-item
           :link="{
-            name: 'My offers',
+            name: 'Orders',
             path: '/account/' + signeraddr + '?tab=offers',
             icon: 'ni ni-single-02 text-primary',
           }"
         ></sidebar-item>
         <sidebar-item
           :link="{
-            name: 'My swap options',
+            name: 'Options',
             path: '/account/' + signeraddr + '?tab=options',
             icon: 'ni ni-ui-04 text-success',
           }"
         ></sidebar-item>
         <sidebar-item
           :link="{
-            name: 'My swap history',
+            name: 'Activity',
             path: '/account/' + signeraddr + '?tab=history',
             icon: 'ni ni-calendar-grid-58 text-primary',
           }"
         ></sidebar-item>
         <sidebar-item
           :link="{
-            name: 'NFT Explorer',
+            name: 'Explorer',
             path: '/explorer',
             icon: 'ni ni-world-2 text-warning',
           }"
@@ -371,7 +371,7 @@ export default {
       var access = this.allowList.includes(this.signeraddr);
       if (access) {
         await this.loadNetwork();
-        this.loadUser();
+        await this.loadUser();
         this.pageloaded = true;
       }
     },
@@ -380,8 +380,8 @@ export default {
       this.blockNumber = await this.provider.getBlockNumber();
       this.orderbook = await this.getOrdersFromDB();
       this.orderbook.map(x => {
-        if (!this.uniSwanUsers.includes(x.signedOrder.makerAddress)) {
-          this.uniSwanUsers.push(x.signedOrder.makerAddress)
+        if (!this.uniSwanUsers.includes(x.signedOrder.makerAddress.toLowerCase())) {
+          this.uniSwanUsers.push(x.signedOrder.makerAddress.toLowerCase())
         }
       })
     },
@@ -391,10 +391,16 @@ export default {
         await this.getUserTokensFromSubGraph2(this.signeraddr)
       ).nfts;
       this.userprefs = await this.getOrdersFromDB({
-        makerAddress: this.signeraddr,
+        makerAddress: this.signeraddr.toLowerCase(),
       });
-      this.userSwapOptions = await this.getSwapOptions(this.usernfts);
-
+      // this.userSwapOptions = await this.getSwapOptions(this.usernfts);
+      await Promise.all(
+        this.usernfts.map(async x => {
+          var temp = await this.getSwapOptions([x])
+          this.userSwapOptions.push(...temp)
+        })
+      )
+      console.log('User Swaps', this.userSwapOptions, this.usernfts);
       const exchange = new ethers.Contract(
         EXCHANGE_ADDRESS,
         EXCHANGEABI,
@@ -549,7 +555,7 @@ export default {
       var orderClient = new HttpClient(DB_BASE_URL);
       var json = await orderClient.getOrdersAsync(requestOpts);
       var orders = [];
-      console.log('orders', json);
+      // console.log('orders', json);
 
       await Promise.all(
         json.records.map(async (signedOrder) => {
@@ -568,7 +574,7 @@ export default {
         })
       );
 
-      console.log(orders, json);
+      // console.log(orders, json);
       return orders;
     },
     async getSwapOptions(NFTs) {
@@ -590,6 +596,9 @@ export default {
 
       var res = await fetch(bundlesDBURI);
       var options = await res.json();
+
+      console.log('Swaps vv', options);
+
 
       var newChains = [];
       await Promise.all(

@@ -7,9 +7,10 @@
 
             </navbar-toggle-button>
             <router-link class="navbar-brand" to="/dashboard">
-              <span style="font-size:48px;">
+              <b-img src="img/brand/uniswan.png" fluid/>
+              <!-- <span style="font-size:48px;">
                 🦢
-              </span>
+              </span> -->
             </router-link>
 
             <slot name="mobile-right">

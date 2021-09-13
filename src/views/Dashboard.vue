@@ -18,7 +18,7 @@
         </b-col>
         <b-col xl="3" md="6">
           <stats-card
-            title="Offers"
+            title="Orders"
             type="gradient-orange"
             :sub-title="$parent.$parent.userprefs.length.toString()"
             icon="ni ni-chart-pie-35"
@@ -118,6 +118,7 @@ export default {
         orders:[],
         options:[],
       }
+      console.log('Orders ss', this.$parent.$parent.userprefs);
       this.$parent.$parent.userprefs.map(order => {
         order.exchangeBundle.map(exch => {
           if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {
@@ -125,6 +126,7 @@ export default {
           }
         })
       })
+      console.log('Dashb options', this.$parent.$parent.userSwapOptions);
       this.$parent.$parent.userSwapOptions.map(ring => {
         ring[0].wishBundle.map(exch => {
           if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {

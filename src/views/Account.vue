@@ -16,6 +16,12 @@
                 }}</span>
               </b-media-body>
             </b-media>
+            <div class="text-right">
+              <a
+              :href="'/#/account/' + this.$route.params.address + ''"
+              class="btn btn-sm btn-primary">
+              Dashboard</a>
+            </div>
           </card>
         </b-col>
       </b-row>
@@ -24,7 +30,7 @@
         <b-col xl="3" md="6">
           <stats-card
             title="NFTs"
-            :class="['', !$route.query.tab ? 'tabselected' : 'tabdimmed']"
+            :class="['', $route.query.tab === 'nfts' ? 'tabselected' : 'tabdimmed']"
             :sub-title="nfts.length.toString()"
             type="gradient-red"
             icon="ni ni-active-40"
@@ -41,7 +47,7 @@
         </b-col>
         <b-col xl="3" md="6">
           <stats-card
-            title="Offers"
+            title="Orders"
             :class="[
               '',
               $route.query.tab === 'offers' ? 'tabselected' : 'tabdimmed',
@@ -226,25 +232,19 @@ export default {
     async loadPage() {
       this.$parent.$parent.routeName = this.$route.params.address.substr(0,6);
 
-      if (
-        this.$route.params.address.toLowerCase() ===
-        this.$parent.$parent.signeraddr.toLowerCase()
-      ) {
+      if (this.$route.params.address.toLowerCase() === this.$parent.$parent.signeraddr.toLowerCase()) {
         this.nfts = this.$parent.$parent.usernfts;
         this.offers = this.$parent.$parent.userprefs;
         this.swapOptions = this.$parent.$parent.userSwapOptions;
       } else {
         var res = await this.$parent.$parent.getUserTokensFromSubGraph2(this.$route.params.address);
         this.nfts = res.nfts
-        // console.log("Acc NFTs", this.nfts);
         this.offers = await this.$parent.$parent.getOrdersFromDB({
           makerAddress: this.$route.params.address,
         });
-        // console.log("Acc Offers", this.offers);
         this.swapOptions = await this.$parent.$parent.getSwapOptions(
           this.nfts
         );
-        // console.log("Acc Optiosn", this.swapOptions);
       }
       this.nfts.map(nft => {
         var nftSummary = {
@@ -260,8 +260,9 @@ export default {
             }
           })
         })
+        console.log('Swap opts', nft.tokenJSON.name, this.swapOptions.length);
         this.swapOptions.map(ring => {
-          ring[0].wishBundle.map(exch => {
+          ring[ring.length - 1].wishBundle.map(exch => {
             if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {
               nftSummary.options.push(ring)
             }
@@ -269,43 +270,6 @@ export default {
         })
         this.summary.push(nftSummary)
       })
-    },
-    async oldloadPage() {
-      if (
-        this.$route.params.address.toLowerCase() ===
-        this.$parent.$parent.signeraddr.toLowerCase()
-      ) {
-        this.nfts = this.$parent.$parent.usernfts;
-        this.offers = this.$parent.$parent.userprefs;
-        this.swapOptions = this.$parent.$parent.userSwapOptions;
-      } else {
-        if (!this.$route.query.tab) {
-          var res = await this.$parent.$parent.getUserTokensFromSubGraph2(
-            this.$route.params.address
-          );
-          this.nfts = res.nfts
-          // this.nfts = await this.$parent.$parent.getUserTokensFromSubGraph2(
-          //   this.$route.params.address
-          // ).nfts;
-          console.log("Acc NFTs", this.nfts);
-        } else if (this.$route.query.tab === "offers") {
-          this.offers = await this.$parent.$parent.getOrdersFromDB({
-            makerAddress: this.$route.params.address,
-          });
-          console.log("Acc Offers", this.offers);
-        } else if (this.$route.query.tab === "options") {
-          this.swapOptions = await this.$parent.$parent.getSwapOptions(
-            this.nfts
-          );
-          console.log("Acc Optiosn", this.swapOptions);
-        }
-      }
-    },
-    onCopy() {
-      this.$notify({
-        type: "info",
-        message: "Copied to clipboard",
-      });
     },
   },
 };

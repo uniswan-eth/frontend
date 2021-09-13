@@ -108,6 +108,7 @@
               <div
                 v-for="(nft,idx) in ring[ring.length - 1].exchangeBundle"
                 :key="'wish'+idx"
+                @click="$router.push('/nft/'+nft.contract+'/'+nft.tokenID)"
                 :style="{backgroundImage: 'url('+nft.tokenJSON.image+')'}"
                 class="imgHolder">
               </div>
@@ -174,7 +175,7 @@
             <router-link class="btn btn-secondary btn-sm" :to="'/account/'+asset.owner.address+'?tab=offers'">
               See all
             </router-link>
-
+            <!-- <pre>{{ownerOrders}}</pre> -->
             <div
               v-for="(order, idx) in ownerOrders"
               :key="'order' + idx"
@@ -327,12 +328,12 @@ export default {
 
       // Swap Options
       this.validSwaps = await this.$parent.$parent.getSwapOptions([nft]);
+      console.log('Swaps', this.validSwaps);
 
       // Owners Assets
       this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph2(nft.owner);
 
-      var orders = await this.$parent.$parent.getOrdersFromDB({makerAddress: nft.owner});
-      console.log(orders);
+      var orders = await this.$parent.$parent.getOrdersFromDB({makerAddress: nft.owner.toLowerCase()});
       orders.map((x) => {
         x.exchangeBundle.map((y) => {
           if (y.tokenID === nft.tokenID && y.contract === nft.contract)
