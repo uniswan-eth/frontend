@@ -18,35 +18,35 @@
         ></sidebar-item>
         <sidebar-item
           :link="{
-            name: 'My NFTs',
-            path: '/account/' + signeraddr + '',
+            name: 'NFTs',
+            path: '/account/' + signeraddr + '?tab=nfts',
             icon: 'ni ni-ui-04 text-primary',
           }"
         ></sidebar-item>
         <sidebar-item
           :link="{
-            name: 'My offers',
+            name: 'Orders',
             path: '/account/' + signeraddr + '?tab=offers',
             icon: 'ni ni-single-02 text-primary',
           }"
         ></sidebar-item>
         <sidebar-item
           :link="{
-            name: 'My swap options',
+            name: 'Options',
             path: '/account/' + signeraddr + '?tab=options',
             icon: 'ni ni-ui-04 text-success',
           }"
         ></sidebar-item>
         <sidebar-item
           :link="{
-            name: 'My swap history',
+            name: 'Activity',
             path: '/account/' + signeraddr + '?tab=history',
             icon: 'ni ni-calendar-grid-58 text-primary',
           }"
         ></sidebar-item>
         <sidebar-item
           :link="{
-            name: 'NFT Explorer',
+            name: 'Explorer',
             path: '/explorer',
             icon: 'ni ni-world-2 text-warning',
           }"
@@ -104,11 +104,8 @@ import PerfectScrollbar from "perfect-scrollbar";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 
 const DB_BASE_URL = "https://uns-backend.vercel.app/api/v3";
-const SUBGRAPH_URL =
-  "https://api.thegraph.com/subgraphs/name/tranchien2002/eip721-matic";
-
+const SUBGRAPH_URL = "https://api.thegraph.com/subgraphs/name/tranchien2002/eip721-matic";
 const EXCHANGE_ADDRESS = "0x1f98206be961f98d0c2d2e5f7d965244b2f2129a";
-
 const client = new ApolloClient({
   link: createHttpLink({
     uri: SUBGRAPH_URL,
@@ -179,13 +176,13 @@ export default {
       signerblockie: null,
       makeBlockie: makeBlockie,
       pageloaded: false,
+      uniSwanUsers:[],
     };
   },
   async mounted() {
     document.title = "🦢 UniSwan";
 
     this.buildNEDB();
-    console.log(this.nedbNFTs);
 
     await window.ethereum.enable();
     var self = this;
@@ -205,6 +202,7 @@ export default {
       self.loadNetwork();
     });
     this.loadApp();
+
   },
   methods: {
     buildNEDB() {
@@ -221,7 +219,6 @@ export default {
     queryNEDB(sea) {
       var self = this;
       return new Promise(function (resolve) {
-        // console.log('SEA', sea);
         self.nedbNFTs
           .find(sea)
           .sort()
@@ -233,10 +230,10 @@ export default {
       });
     },
     async getContractTokensFromSubGraph2(
-      contractAddress,
-      limit = 10,
-      offset = 0
-    ) {
+        contractAddress,
+        limit = 10,
+        offset = 0
+      ) {
       const tokensQuery = `
         {
           tokenContract(id:"${contractAddress.toLowerCase()}") {
@@ -255,12 +252,9 @@ export default {
           }
         }
       `;
-
-      console.log(tokensQuery);
       const data = await client.query({
         query: gql(tokensQuery),
       });
-      console.log("Data: ", data);
       const tokenData = data.data.tokenContract.tokens;
       const nfts = await this.constructBundle2(tokenData);
       return {
@@ -285,7 +279,6 @@ export default {
           }
         }
         `;
-      console.log(tokensQuery);
       const data = await client.query({
         query: gql(tokensQuery),
       });
@@ -293,7 +286,7 @@ export default {
       const nfts = await this.constructBundle2(tokenData);
       return {
         nfts: nfts,
-        raw: data.data.tokenContract,
+        raw: data.data.owner,
       };
     },
     async constructBundle(tokenData) {
@@ -333,7 +326,6 @@ export default {
               tokenJSON: test[0].tokenJSON,
             };
           } else {
-            console.log("New JSON Look Up");
             // If the subgraph doesn't give us the metadata, retrieve it manually
             var collection = new ethers.Contract(
               d.contract.id,
@@ -362,7 +354,6 @@ export default {
     },
 
     async getContract(collectionAddress) {
-      // console.log('hello', );
       var collection = new ethers.Contract(
         collectionAddress,
         ERC721ABI,
@@ -377,7 +368,6 @@ export default {
     async loadApp() {
       this.signer = this.provider.getSigner();
       this.signeraddr = await this.signer.getAddress();
-
       var access = this.allowList.includes(this.signeraddr);
       if (access) {
         await this.loadNetwork();
@@ -388,8 +378,12 @@ export default {
     async loadNetwork() {
       this.network = await this.provider.getNetwork();
       this.blockNumber = await this.provider.getBlockNumber();
-
       this.orderbook = await this.getOrdersFromDB();
+      this.orderbook.map(x => {
+        if (!this.uniSwanUsers.includes(x.signedOrder.makerAddress.toLowerCase())) {
+          this.uniSwanUsers.push(x.signedOrder.makerAddress.toLowerCase())
+        }
+      })
     },
     async loadUser() {
       this.userERC20s = await this.getUserERC20s(this.signeraddr);
@@ -397,19 +391,27 @@ export default {
         await this.getUserTokensFromSubGraph2(this.signeraddr)
       ).nfts;
       this.userprefs = await this.getOrdersFromDB({
-        makerAddress: this.signeraddr,
+        makerAddress: this.signeraddr.toLowerCase(),
       });
-      this.userSwapOptions = await this.getSwapOptions(this.usernfts);
-
+      // this.userSwapOptions = await this.getSwapOptions(this.usernfts);
+      await Promise.all(
+        this.usernfts.map(async x => {
+          var temp = await this.getSwapOptions([x])
+          this.userSwapOptions.push(...temp)
+        })
+      )
+      console.log('User Swaps', this.userSwapOptions, this.usernfts);
       const exchange = new ethers.Contract(
         EXCHANGE_ADDRESS,
         EXCHANGEABI,
         this.signer
       );
 
+      var blockNumber = await this.provider.getBlockNumber();
       this.fillEvents = await exchange.queryFilter(
         exchange.filters.Fill(),
-        18900000
+        blockNumber - 990
+        // 18900000
       );
     },
     async getContractsFromSubGraph(search, limit = 10) {
@@ -421,12 +423,10 @@ export default {
           numOwners
         }
       }`;
-      console.log(tokensQuery);
 
       const data = await client.query({
         query: gql(tokensQuery),
       });
-      console.log("Graph2 res", data);
       return data;
     },
     async getTokenFromSubgraph(contractAddress, tokenId) {
@@ -438,9 +438,47 @@ export default {
               id
               contract {
                 id
+                name
+                numTokens
+                numOwners
               }
               owner {
                 id
+              }
+              tokenURI
+            }
+          }
+        `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      const d = data.data.tokens[0];
+      var res = await fetch(d.tokenURI);
+      var tokenJSON = await res.json();
+      const nft = {
+        contract: d.contract.id,
+        tokenID: tokenId,
+        owner: d.owner.id,
+        tokenJSON: tokenJSON,
+      };
+      return nft;
+    },
+    async getTokenFromSubgraph2(contractAddress, tokenId) {
+      const id = contractAddress.toLowerCase() + "_" + tokenId;
+
+      const tokensQuery = `
+          query {
+            tokens(where:{ id:"${id}"}) {
+              id
+              contract {
+                id
+                name
+                numTokens
+                numOwners
+              }
+              owner {
+                id
+                numTokens
               }
               tokenURI
             }
@@ -460,7 +498,10 @@ export default {
         tokenJSON: tokenJSON,
       };
 
-      return nft;
+      return {
+        nft:nft,
+        raw:data
+      }
     },
     async getUserERC20s(userAddress) {
       var collection = new ethers.Contract(
@@ -513,8 +554,9 @@ export default {
     async getOrdersFromDB(requestOpts) {
       var orderClient = new HttpClient(DB_BASE_URL);
       var json = await orderClient.getOrdersAsync(requestOpts);
-
       var orders = [];
+      // console.log('orders', json);
+
       await Promise.all(
         json.records.map(async (signedOrder) => {
           const exchangeBundle = await this.dataToBundle(
@@ -532,6 +574,7 @@ export default {
         })
       );
 
+      // console.log(orders, json);
       return orders;
     },
     async getSwapOptions(NFTs) {
@@ -553,6 +596,9 @@ export default {
 
       var res = await fetch(bundlesDBURI);
       var options = await res.json();
+
+      console.log('Swaps vv', options);
+
 
       var newChains = [];
       await Promise.all(
@@ -618,7 +664,6 @@ export default {
           gasLimit: 1000000,
         }
       );
-      console.log("Notify and refresh user NFTs", exchange);
       this.loadApp();
     },
     async deleteOrder(order) {
@@ -657,11 +702,9 @@ export default {
       this.currentSwapChain = chain;
     },
     viewOrder(order) {
-      console.log("Modal", order);
       this.currentOrder = order;
     },
     createOrder(nft, ownerNFTs) {
-      console.log("Modal", nft);
       this.newOrderNFT = nft;
 
       this.newOrderOwnerNFTs = ownerNFTs.nfts;
@@ -731,11 +774,9 @@ export default {
       if (searchObj.order) {
         url += "&order_by=" + searchObj.order;
       }
-      console.log("OpenSea Fetch: " + url, searchObj);
 
       const response = await fetch(url);
       const res = await response.json();
-      // console.log('OpenSea', res);
       return res;
     },
 
@@ -792,6 +833,10 @@ export default {
 <style lang="scss">
 .cb {
   clear: both;
+}
+.swapBtn{
+  float:left;
+  margin-right: -30px !important;
 }
 
 .bgim {

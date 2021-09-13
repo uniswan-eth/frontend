@@ -138,28 +138,11 @@ export default {
   },
   async mounted() {
     document.title = "🦢 Explorer";
+    this.$parent.$parent.routeName = "Explorer";
+
     this.loadPage();
   },
   methods: {
-    async getNFTs(collectionAddress, offset = 0) {
-      this.currentContract = collectionAddress;
-      var res = await this.$parent.$parent.getContractTokensFromSubGraph2(
-        collectionAddress,
-        10,
-        offset
-      );
-      if (offset === 0) {
-        this.nfts = res.nfts;
-      } else {
-        this.nfts = this.nfts.concat(res.nfts);
-      }
-      this.contractData = res.raw;
-      this.$parent.$parent.routeName = this.contractData.name;
-    },
-    navContract(ev) {
-      ev.preventDefault;
-      this.$router.push("/explorer?contract=" + this.currentContract);
-    },
     async loadPage() {
       this.assets = [];
       this.nfts = [];
@@ -186,11 +169,30 @@ export default {
             contract: "0x7227e371540cf7b8e512544ba6871472031f3335",
             name: "Neon District Season One",
           },
+          {
+            contract: "",
+            name: "Home Rental Exchange",
+          },
+          // {
+          //   contract: "",
+          //   name: "",
+          // },
         ];
         if (this.$route.query.contract) {
           this.getNFTs(this.$route.query.contract);
         } else {
-          this.getNFTs(this.featuredCollections[0].contract);
+          // Show whats on UniSwan by user for now
+          await Promise.all(
+            this.$parent.$parent.uniSwanUsers.map(async user => {
+              // Get Users NFTS
+              var res = await this.$parent.$parent.getUserTokensFromSubGraph2(
+                user,
+                10,
+                0
+              );
+              this.nfts = this.nfts.concat(res.nfts);
+            })
+          )
         }
       } else if (this.$parent.$parent.network.chainId === 1) {
         // Main net
@@ -208,20 +210,39 @@ export default {
         this.loadOS(0);
       }
     },
+    async getNFTs(collectionAddress, offset = 0) {
+      this.currentContract = collectionAddress;
+      var res = await this.$parent.$parent.getContractTokensFromSubGraph2(
+        collectionAddress,
+        10,
+        offset
+      );
+      if (offset === 0) {
+        this.nfts = res.nfts;
+      } else {
+        this.nfts = this.nfts.concat(res.nfts);
+      }
+      this.contractData = res.raw;
+      this.$parent.$parent.routeName = this.contractData.name;
+    },
+    navContract(ev) {
+      ev.preventDefault;
+      this.$router.push("/explorer?contract=" + this.currentContract);
+    },
     async searchCollections(ev) {
       ev.preventDefault();
       this.contracts = await this.$parent.$parent.getContractsFromSubGraph(
         this.contractSearchWord
       );
     },
-    navNFT(ev) {
-      if (ev) {
-        ev.preventDefault();
-      }
-      this.$router.push(
-        "/nft/" + this.currentContract + "/" + this.currentTokenID
-      );
-    },
+    // navNFT(ev) {
+    //   if (ev) {
+    //     ev.preventDefault();
+    //   }
+    //   this.$router.push(
+    //     "/nft/" + this.currentContract + "/" + this.currentTokenID
+    //   );
+    // },
     async loadOS(offset) {
       if (!this.$route.query.slug) {
         return;
@@ -308,12 +329,6 @@ export default {
       }
 
       this.isLoading = false;
-    },
-    onCopy() {
-      this.$notify({
-        type: "info",
-        message: "Copied to clipboard",
-      });
     },
   },
   watch: {

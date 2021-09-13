@@ -43,11 +43,11 @@ const routes = [
         component: () => import(/* webpackChunkName: "demo" */ '../views/About.vue')
       },
 
-      // {
-      //   path: '/icons',
-      //   name: 'icons',
-      //   component: () => import(/* webpackChunkName: "demo" */ '../views/Icons.vue')
-      // },
+      {
+        path: '/icons',
+        name: 'icons',
+        component: () => import(/* webpackChunkName: "demo" */ '../views/Icons.vue')
+      },
       // {
       //   path: '/profile',
       //   name: 'profile',

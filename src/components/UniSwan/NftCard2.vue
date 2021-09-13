@@ -29,7 +29,7 @@
       <div class="nftCardContract">
         <router-link :to="'/explorer?contract='+nft.contract">
           <b-badge variant="default">
-              {{nft.contract.substr(0,6)}}
+            {{nft.contract.substr(0,6)}}
           </b-badge>
         </router-link>
       </div>
@@ -103,6 +103,7 @@ export default {
 }
 .nftCardImage {
   cursor: pointer;
+  border-radius: 5px 5px 0px 0px;
 }
 .nftCardBlockie {
   position:absolute;
