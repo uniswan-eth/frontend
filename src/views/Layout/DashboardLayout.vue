@@ -407,12 +407,12 @@ export default {
         this.signer
       );
 
-      // var blockNumber = await this.provider.getBlockNumber();
-      // this.fillEvents = await exchange.queryFilter(
-      //   exchange.filters.Fill(),
-      //   blockNumber - 50000
-      //   // 18900000
-      // );
+      var blockNumber = await this.provider.getBlockNumber();
+      this.fillEvents = await exchange.queryFilter(
+        exchange.filters.Fill(),
+        blockNumber - 990
+        // 18900000
+      );
     },
     async getContractsFromSubGraph(search, limit = 10) {
       const tokensQuery = `{
