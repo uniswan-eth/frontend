@@ -3,7 +3,7 @@
     <template v-slot:header>
       <b-row align-v="center">
         <b-col>
-          <h3 class="mb-0">Offers</h3>
+          <h3 class="mb-0">Orders</h3>
         </b-col>
       </b-row>
     </template>

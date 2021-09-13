@@ -70,7 +70,7 @@ export default {
   async mounted() {
     document.title = "🦢 History";
 
-    this.loadPage();
+    // this.loadPage();
   },
   methods: {
     async loadPage() {
@@ -85,10 +85,10 @@ export default {
               .decodeMultiAssetDataRecursively(e.args[2])
               .nestedAssetData.map(async (x) => {
                 exchangeBundle.push(
-                  await this.$props.root.getTokenFromSubgraph(
+                  await this.$props.root.getTokenFromSubgraph2(
                     x.tokenAddress,
                     x.tokenId.toNumber()
-                  )
+                  ).nft
                 );
               })
           );
@@ -98,10 +98,10 @@ export default {
               .decodeMultiAssetDataRecursively(e.args[3])
               .nestedAssetData.map(async (x) => {
                 wishBundle.push(
-                  await this.$props.root.getTokenFromSubgraph(
+                  await this.$props.root.getTokenFromSubgraph2(
                     x.tokenAddress,
                     x.tokenId.toNumber()
-                  )
+                  ).nft
                 );
               })
           );
@@ -114,6 +114,8 @@ export default {
           });
         })
       );
+      console.log('Events2', this.parsedEvents);
+
     },
   },
 };
