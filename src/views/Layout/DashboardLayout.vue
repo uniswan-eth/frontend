@@ -104,7 +104,8 @@ import PerfectScrollbar from "perfect-scrollbar";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 
 const DB_BASE_URL = "https://uns-backend.vercel.app/api/v3";
-const SUBGRAPH_URL = "https://api.thegraph.com/subgraphs/name/tranchien2002/eip721-matic";
+const SUBGRAPH_URL =
+  "https://api.thegraph.com/subgraphs/name/tranchien2002/eip721-matic";
 const EXCHANGE_ADDRESS = "0x1f98206be961f98d0c2d2e5f7d965244b2f2129a";
 const client = new ApolloClient({
   link: createHttpLink({
@@ -176,7 +177,7 @@ export default {
       signerblockie: null,
       makeBlockie: makeBlockie,
       pageloaded: false,
-      uniSwanUsers:[],
+      uniSwanUsers: [],
     };
   },
   async mounted() {
@@ -202,7 +203,6 @@ export default {
       self.loadNetwork();
     });
     this.loadApp();
-
   },
   methods: {
     buildNEDB() {
@@ -230,10 +230,10 @@ export default {
       });
     },
     async getContractTokensFromSubGraph2(
-        contractAddress,
-        limit = 10,
-        offset = 0
-      ) {
+      contractAddress,
+      limit = 10,
+      offset = 0
+    ) {
       const tokensQuery = `
         {
           tokenContract(id:"${contractAddress.toLowerCase()}") {
@@ -379,11 +379,13 @@ export default {
       this.network = await this.provider.getNetwork();
       this.blockNumber = await this.provider.getBlockNumber();
       this.orderbook = await this.getOrdersFromDB();
-      this.orderbook.map(x => {
-        if (!this.uniSwanUsers.includes(x.signedOrder.makerAddress.toLowerCase())) {
-          this.uniSwanUsers.push(x.signedOrder.makerAddress.toLowerCase())
+      this.orderbook.map((x) => {
+        if (
+          !this.uniSwanUsers.includes(x.signedOrder.makerAddress.toLowerCase())
+        ) {
+          this.uniSwanUsers.push(x.signedOrder.makerAddress.toLowerCase());
         }
-      })
+      });
     },
     async loadUser() {
       this.userERC20s = await this.getUserERC20s(this.signeraddr);
@@ -395,12 +397,12 @@ export default {
       });
       // this.userSwapOptions = await this.getSwapOptions(this.usernfts);
       await Promise.all(
-        this.usernfts.map(async x => {
-          var temp = await this.getSwapOptions([x])
-          this.userSwapOptions.push(...temp)
+        this.usernfts.map(async (x) => {
+          var temp = await this.getSwapOptions([x]);
+          this.userSwapOptions.push(...temp);
         })
-      )
-      console.log('User Swaps', this.userSwapOptions, this.usernfts);
+      );
+      console.log("User Swaps", this.userSwapOptions, this.usernfts);
       const exchange = new ethers.Contract(
         EXCHANGE_ADDRESS,
         EXCHANGEABI,
@@ -410,8 +412,7 @@ export default {
       var blockNumber = await this.provider.getBlockNumber();
       this.fillEvents = await exchange.queryFilter(
         exchange.filters.Fill(),
-        blockNumber - 990
-        // 18900000
+        blockNumber - 10000
       );
     },
     async getContractsFromSubGraph(search, limit = 10) {
@@ -430,40 +431,6 @@ export default {
       return data;
     },
     async getTokenFromSubgraph(contractAddress, tokenId) {
-      const id = contractAddress.toLowerCase() + "_" + tokenId;
-
-      const tokensQuery = `
-          query {
-            tokens(where:{ id:"${id}"}) {
-              id
-              contract {
-                id
-                name
-                numTokens
-                numOwners
-              }
-              owner {
-                id
-              }
-              tokenURI
-            }
-          }
-        `;
-      const data = await client.query({
-        query: gql(tokensQuery),
-      });
-      const d = data.data.tokens[0];
-      var res = await fetch(d.tokenURI);
-      var tokenJSON = await res.json();
-      const nft = {
-        contract: d.contract.id,
-        tokenID: tokenId,
-        owner: d.owner.id,
-        tokenJSON: tokenJSON,
-      };
-      return nft;
-    },
-    async getTokenFromSubgraph2(contractAddress, tokenId) {
       const id = contractAddress.toLowerCase() + "_" + tokenId;
 
       const tokensQuery = `
@@ -499,9 +466,9 @@ export default {
       };
 
       return {
-        nft:nft,
-        raw:data
-      }
+        nft: nft,
+        raw: data,
+      };
     },
     async getUserERC20s(userAddress) {
       var collection = new ethers.Contract(
@@ -541,10 +508,12 @@ export default {
           });
         } else {
           bundle.push(
-            await this.getTokenFromSubgraph(
-              bytes.tokenAddress,
-              bytes.tokenId.toNumber().toString()
-            )
+            (
+              await this.getTokenFromSubgraph(
+                bytes.tokenAddress,
+                bytes.tokenId.toNumber().toString()
+              )
+            ).nft
           );
         }
       }
@@ -597,8 +566,7 @@ export default {
       var res = await fetch(bundlesDBURI);
       var options = await res.json();
 
-      console.log('Swaps vv', options);
-
+      console.log("Swaps vv", options);
 
       var newChains = [];
       await Promise.all(
@@ -834,8 +802,8 @@ export default {
 .cb {
   clear: both;
 }
-.swapBtn{
-  float:left;
+.swapBtn {
+  float: left;
   margin-right: -30px !important;
 }
 

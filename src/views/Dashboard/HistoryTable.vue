@@ -74,6 +74,7 @@ export default {
   },
   methods: {
     async loadPage() {
+      console.log(this.$props.events);
       this.parsedEvents = [];
       Promise.all(
         this.$props.events.map(async (e) => {
@@ -85,7 +86,7 @@ export default {
               .decodeMultiAssetDataRecursively(e.args[2])
               .nestedAssetData.map(async (x) => {
                 exchangeBundle.push(
-                  await this.$props.root.getTokenFromSubgraph2(
+                  await this.$props.root.getTokenFromSubgraph(
                     x.tokenAddress,
                     x.tokenId.toNumber()
                   ).nft
@@ -98,7 +99,7 @@ export default {
               .decodeMultiAssetDataRecursively(e.args[3])
               .nestedAssetData.map(async (x) => {
                 wishBundle.push(
-                  await this.$props.root.getTokenFromSubgraph2(
+                  await this.$props.root.getTokenFromSubgraph(
                     x.tokenAddress,
                     x.tokenId.toNumber()
                   ).nft
@@ -114,8 +115,7 @@ export default {
           });
         })
       );
-      console.log('Events2', this.parsedEvents);
-
+      console.log("Events2", this.parsedEvents);
     },
   },
 };
