@@ -175,7 +175,7 @@ export default {
           await Promise.all(
             this.$parent.$parent.uniSwanUsers.map(async user => {
               // Get Users NFTS
-              var res = await this.$parent.$parent.getUserTokensFromSubGraph2(
+              var res = await this.$parent.$parent.getUserTokensFromSubGraph(
                 user,
                 10,
                 0
@@ -202,7 +202,7 @@ export default {
     },
     async getNFTs(collectionAddress, offset = 0) {
       this.currentContract = collectionAddress;
-      var res = await this.$parent.$parent.getContractTokensFromSubGraph2(
+      var res = await this.$parent.$parent.getContractTokensFromSubGraph(
         collectionAddress,
         10,
         offset
@@ -216,7 +216,7 @@ export default {
       this.$parent.$parent.routeName = this.contractData.name;
     },
     navContract(ev) {
-      ev.preventDefault;
+      ev.preventDefault();
       this.$router.push("/explorer?contract=" + this.currentContract);
     },
     async searchCollections(ev) {

@@ -84,7 +84,7 @@ export default {
               .decodeMultiAssetDataRecursively(e.args[2])
               .nestedAssetData.map(async (x) => {
                 exchangeBundle.push(
-                  await this.$props.root.getTokenFromSubgraph2(
+                  await this.$props.root.getTokenFromSubgraph(
                     x.tokenAddress,
                     x.tokenId.toNumber()
                   ).nft
@@ -97,7 +97,7 @@ export default {
               .decodeMultiAssetDataRecursively(e.args[3])
               .nestedAssetData.map(async (x) => {
                 wishBundle.push(
-                  await this.$props.root.getTokenFromSubgraph2(
+                  await this.$props.root.getTokenFromSubgraph(
                     x.tokenAddress,
                     x.tokenId.toNumber()
                   ).nft

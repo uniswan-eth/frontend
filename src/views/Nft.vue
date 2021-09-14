@@ -56,8 +56,25 @@
               variant="warning">
               Remove
             </b-button>
-            <br>
-            <br>
+            <div v-if="nft.tokenJSON.attributes">
+              <hr>
+              <!-- <h3>Attributes</h3> -->
+              <div v-for="(attr,idx) in nft.tokenJSON.attributes" :key="'trait'+idx">
+                <div class="attr">
+                  <div class="type">
+                    {{attr.trait_type}}
+                  </div>
+                  <div class="value">
+                    {{attr.value}}
+                  </div>
+                  <!-- <div class="rarity">
+                    {{ Math.round((attr.trait_count / assetSubGraph.contract.numTokens) * 100) }}%
+                  </div> -->
+                </div>
+              </div>
+              <div class="cb"/>
+            </div>
+            <hr>
             <div>
               <a class="btn btn-secondary btn-sm" rel="noreferrer"
                 target="_blank"
@@ -340,7 +357,7 @@ export default {
       this.signerApproved = await this.$parent.$parent.signerIsApproved(
         this.$route.params.contract
       );
-      var data = await this.$parent.$parent.getTokenFromSubgraph2(
+      var data = await this.$parent.$parent.getTokenFromSubgraph(
         this.$route.params.contract,
         this.$route.params.tokenid.toString()
       );
@@ -358,7 +375,7 @@ export default {
       this.validSwaps = await this.$parent.$parent.getSwapOptions([nft]);
 
       // Owners Assets
-      this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph2(nft.owner);
+      this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph(nft.owner);
 
       var orders = await this.$parent.$parent.getOrdersFromDB({makerAddress: nft.owner.toLowerCase()});
       orders.map((x) => {
@@ -377,4 +394,23 @@ export default {
 };
 </script>
 <style>
+.attr {
+  float:left;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px 20px;
+  background: #eee;
+  text-align: center;
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+.type {
+  color:grey;
+}
+.value {
+  font-weight: bold;
+}
+.rarity {
+  font-size: 12px;
+}
 </style>
