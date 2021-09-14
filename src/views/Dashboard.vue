@@ -11,8 +11,6 @@
             class="mb-4"
           >
             <template slot="footer">
-              <!-- <span class="text-success mr-2">3.48%</span>
-              <span class="text-nowrap">Since last month</span> -->
             </template>
           </stats-card>
         </b-col>
@@ -25,8 +23,6 @@
             class="mb-4"
           >
             <template slot="footer">
-              <!-- <span class="text-success mr-2">12.18%</span>
-              <span class="text-nowrap">Since last month</span> -->
             </template>
           </stats-card>
         </b-col>
@@ -58,6 +54,24 @@
     <b-container fluid class="mt--7">
       <b-row class="mt-5">
         <b-col xl="12" class="mb-5 mb-xl-0">
+          <card header-classes="bg-transparent">
+            <h2 slot="header" class="mb-0">
+              Saved
+            </h2>
+            <b-card-group deck>
+              <nft-card2
+                display="card"
+                v-for="(n,idx) in $parent.$parent.savedNFTs"
+                :key="'savednft'+idx"
+                :nft="n"
+                :root="$parent.$parent"
+                />
+            </b-card-group>
+          </card>
+        </b-col>
+      </b-row>
+      <b-row class="mt-5">
+        <b-col xl="12" class="mb-5 mb-xl-0">
           <nft-summary
             display="card"
             v-for="(n,idx) in summary"
@@ -72,18 +86,11 @@
   </div>
 </template>
 <script>
-// Charts
-import * as chartConfigs from "@/components/Charts/config";
-import LineChart from "@/components/Charts/LineChart";
-import BarChart from "@/components/Charts/BarChart";
-
-// Tables
 import NftsTable from './Dashboard/NftsTable';
 import OffersTable from './Dashboard/OffersTable';
 import OptionsTable from './Dashboard/OptionsTable';
 import Bundle from '@/components/UniSwan/Bundle';
 import NftCard2 from "@/components/UniSwan/NftCard2";
-import { Table, TableColumn, DropdownMenu, DropdownItem, Dropdown} from 'element-ui'
 import NftSummary from "@/components/UniSwan/NftSummary";
 
 export default {
@@ -94,13 +101,6 @@ export default {
     Bundle,
     NftsTable,
     OffersTable,
-    LineChart,
-    BarChart,
-    [Table.name]: Table,
-    [TableColumn.name]: TableColumn,
-    [Dropdown.name]: Dropdown,
-    [DropdownItem.name]: DropdownItem,
-    [DropdownMenu.name]: DropdownMenu,
   },
   data() {
     return {
@@ -118,7 +118,6 @@ export default {
         orders:[],
         options:[],
       }
-      console.log('Orders ss', this.$parent.$parent.userprefs);
       this.$parent.$parent.userprefs.map(order => {
         order.exchangeBundle.map(exch => {
           if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {
@@ -126,7 +125,6 @@ export default {
           }
         })
       })
-      console.log('Dashb options', this.$parent.$parent.userSwapOptions);
       this.$parent.$parent.userSwapOptions.map(ring => {
         ring[0].wishBundle.map(exch => {
           if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {
@@ -141,8 +139,4 @@ export default {
 };
 </script>
 <style>
-.el-table .cell {
-  padding-left: 0px;
-  padding-right: 0px;
-}
 </style>

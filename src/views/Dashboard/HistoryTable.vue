@@ -69,8 +69,7 @@ export default {
   },
   async mounted() {
     document.title = "🦢 History";
-
-    // this.loadPage();
+    this.loadPage();
   },
   methods: {
     async loadPage() {
@@ -115,7 +114,6 @@ export default {
         })
       );
       console.log('Events2', this.parsedEvents);
-
     },
   },
 };

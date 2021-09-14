@@ -225,7 +225,6 @@ export default {
   },
   async mounted() {
     document.title = "🦢 Account";
-    console.log('Events', this.$parent.$parent.fillEvents);
     this.loadPage();
   },
   methods: {
@@ -252,7 +251,6 @@ export default {
           orders:[],
           options:[],
         }
-        // What offers with NFT in exchangeBundle
         this.offers.map(order => {
           order.exchangeBundle.map(exch => {
             if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {
@@ -260,7 +258,6 @@ export default {
             }
           })
         })
-        console.log('Swap opts', nft.tokenJSON.name, this.swapOptions.length);
         this.swapOptions.map(ring => {
           ring[ring.length - 1].wishBundle.map(exch => {
             if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {

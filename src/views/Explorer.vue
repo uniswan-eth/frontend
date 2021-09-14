@@ -25,7 +25,6 @@
                 <br />
               </form>
             </div>
-
             <br />
           </card>
         </b-col>
@@ -139,7 +138,6 @@ export default {
   async mounted() {
     document.title = "🦢 Explorer";
     this.$parent.$parent.routeName = "Explorer";
-
     this.loadPage();
   },
   methods: {
@@ -169,14 +167,6 @@ export default {
             contract: "0x7227e371540cf7b8e512544ba6871472031f3335",
             name: "Neon District Season One",
           },
-          {
-            contract: "",
-            name: "Home Rental Exchange",
-          },
-          // {
-          //   contract: "",
-          //   name: "",
-          // },
         ];
         if (this.$route.query.contract) {
           this.getNFTs(this.$route.query.contract);
@@ -235,14 +225,6 @@ export default {
         this.contractSearchWord
       );
     },
-    // navNFT(ev) {
-    //   if (ev) {
-    //     ev.preventDefault();
-    //   }
-    //   this.$router.push(
-    //     "/nft/" + this.currentContract + "/" + this.currentTokenID
-    //   );
-    // },
     async loadOS(offset) {
       if (!this.$route.query.slug) {
         return;
