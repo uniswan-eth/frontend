@@ -15,12 +15,6 @@
             }"
           :title="nft.tokenJSON.name"
           alt=""/>
-        <!-- <b-card-img
-          @click="$router.push('/nft/'+nft.contract+'/'+nft.tokenID)"
-          fluid
-          :src="nft.tokenJSON.image"
-          :title="nft.tokenJSON.name"
-          class="rounded-0"></b-card-img> -->
       </b-col>
       <b-col md="9">
         <b-card-body :title="nft.tokenJSON.name">
@@ -115,22 +109,19 @@
 </template>
 <script>
   import AccountCard from '@/components/UniSwan/AccountCard';
-  import Bundle2 from '@/components/UniSwan/Bundle';
+  // import Bundle2 from '@/components/UniSwan/Bundle';
   export default {
     name: 'nft-summary',
     props: ["summary", "nft", "display", "root", "idx", "minWidth", "maxWidth"],
     components: {
-      Bundle2,
+      // Bundle2,
       AccountCard
     },
     data() {
       return {
-        // nft:null,
       }
     },
     mounted() {
-      // console.log(this.summary);
-      // this.nft = this.summary.nft
     },
     methods: {
     }
@@ -148,28 +139,19 @@
 }
 .imgHolder {
   float:left;
-  /* margin-right:10px; */
   height:100px;
   width:100px;
   border:3px solid #fff;
   border-radius: 8px;
-
-  /* text-align: center; */
   background-position: center; /* Center the image */
   background-repeat: no-repeat; /* Do not repeat the image */
   background-size: cover;
-  /* max-height: 270px; */
-  /* overflow: hidden;
-  white-space: nowrap; */
   cursor: pointer;
-  /* background: purple; */
 }
 .bundleImage {
   width: 100px;
 }
 .nftHolder {
   min-height:100px;
-  /* background: purple; */
-  /* height:5rem; */
 }
 </style>

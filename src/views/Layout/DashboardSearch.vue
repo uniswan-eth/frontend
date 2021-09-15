@@ -36,14 +36,12 @@ export default {
   methods: {
     async search(searchWord) {
       if (searchWord.length < 3) {return}
-
       if (searchWord.length === 42) {
           // this.$parent.closeSearch()
           //Redirect to Account Page
           this.$router.push("/account/"+searchWord)
       } else {
         this.contracts = await this.root.getContractsFromSubGraph(searchWord);
-        // console.log('Searching', this.contracts, this.root);
       }
     }
   },
@@ -52,15 +50,12 @@ export default {
       if (newVal && newVal.length === 0) {this.contracts = []}
       this.root.showSearch = true
       this.search(newVal);
-      console.log('Searching...', newVal, oldVal);
     },
   },
-
 };
 </script>
 <style lang="scss">
 .searchPopUp {
-  // background-color: purple;
   position: absolute;
   margin-top: 8px;
   width: 317px;

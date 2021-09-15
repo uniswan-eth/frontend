@@ -37,7 +37,6 @@
       </template>
     </nfts-table>
     <br />
-    <!-- <pre>{{order}}</pre> -->
     <base-button
       v-if="
         order.signedOrder.makerAddress.toLowerCase() ===

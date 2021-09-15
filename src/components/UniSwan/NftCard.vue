@@ -13,11 +13,9 @@
         <b-card-text>
           {{ nft.tokenJSON.description }}
         </b-card-text>
-
         <b-button href="javascript:;" variant="primary">Go somewhere</b-button>
       </b-card>
     </div>
-
     <div class="nftHolder" v-if="display === 'medium'">
       <div
         v-if="!idx || idx === 0"
@@ -46,7 +44,6 @@
       >
         <account-card :address="nft.owner" :root="root" />
       </div>
-      <!-- <pre>{{nft}}</pre> -->
     </div>
     <div v-if="!display" class="nftcard">
       <b-media no-body class="text-left">
@@ -102,28 +99,20 @@ export default {
   padding: 5px;
 }
 .imgHolder.small {
-  /* position: absolute; */
   height: 50px;
   width: 50px;
   float: left;
   margin-top: -76px;
   border: 2px solid #eee;
-  /* margin-right: 5px; */
 }
 .nftcard {
   margin-bottom: 5px;
   white-space: nowrap;
   overflow: hidden;
-  /* font-size: 10px; */
-  /* display: inline-block;
-  line-height: 36px; */
 }
 .smallim {
   height: 100%;
   width: calc(36px);
-  /* height: 36px;
-  width: 36px; */
-  /* border: 1px solid #000; */
   border-radius: 50%;
 }
 </style>

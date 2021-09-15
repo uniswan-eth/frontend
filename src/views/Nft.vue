@@ -44,6 +44,39 @@
             <p>
               {{ asset.description }}
             </p>
+            <b-button
+              v-if="!saved.length ||  saved.length === 0"
+              @click="$parent.$parent.saveNFT(nft)"
+              size="lg"
+              variant="success">
+              Save
+            </b-button>
+            <b-button
+              v-if="saved.length > 0"
+              @click="$parent.$parent.removeSavedNFT(nft)"
+              size="lg"
+              variant="warning">
+              Remove
+            </b-button>
+            <div v-if="nft.tokenJSON.attributes">
+              <hr>
+              <!-- <h3>Attributes</h3> -->
+              <div v-for="(attr,idx) in nft.tokenJSON.attributes" :key="'trait'+idx">
+                <div class="attr">
+                  <div class="type">
+                    {{attr.trait_type}}
+                  </div>
+                  <div class="value">
+                    {{attr.value}}
+                  </div>
+                  <!-- <div class="rarity">
+                    {{ Math.round((attr.trait_count / assetSubGraph.contract.numTokens) * 100) }}%
+                  </div> -->
+                </div>
+              </div>
+              <div class="cb"/>
+            </div>
+            <hr>
             <div>
               <a
                 class="btn btn-secondary btn-sm"
@@ -220,19 +253,20 @@
               />
               &nbsp; wish in return for {{ asset.name }}
             </h6>
-            <router-link
-              class="btn btn-secondary btn-sm"
-              :to="'/account/' + asset.owner.address + '?tab=offers'"
-            >
-              See all
-            </router-link>
             <!-- <pre>{{ownerOrders}}</pre> -->
-            <div
-              v-for="(order, idx) in ownerOrders"
+            <div v-for="(order, idx) in ownerOrders"
               :key="'order' + idx"
-              class=""
-            >
-              <bundle
+              class="bundleHolder">
+
+              <div
+                v-for="(nft, idx) in order.wishBundle"
+                :key="'wish'+idx"
+                @click="$router.push('/nft/'+nft.contract+'/'+nft.tokenID)"
+                :style="{backgroundImage: 'url('+nft.tokenJSON.image+')'}"
+                class="imgHolder">
+              </div>
+
+              <!-- <bundle
                 display="medium"
                 :bundle="order.wishBundle"
                 :root="$parent.$parent"
@@ -254,13 +288,17 @@
                           ? "Execute"
                           : "View"
                       }}
-                      <!-- Order -->
                     </span>
                   </b-button>
                 </template>
-              </bundle>
+              </bundle> -->
               <br />
             </div>
+            <div class="cb"/>
+            <br/>
+            <router-link class="btn btn-secondary btn-sm" :to="'/account/'+asset.owner.address+'?tab=offers'">
+              See all
+            </router-link>
           </card>
           <br />
         </b-col>
@@ -341,8 +379,10 @@ export default {
   },
   data() {
     return {
+      saved:null,
       contract: null,
       asset: null,
+      nft: null, // our format
       assetSubGraph: null,
       ownerAssets: null,
       validSwaps: [],
@@ -364,16 +404,17 @@ export default {
       this.contract = await this.$parent.$parent.getContract(
         this.$route.params.contract
       );
-
       this.signerApproved = await this.$parent.$parent.signerIsApproved(
         this.$route.params.contract
       );
-
       var data = await this.$parent.$parent.getTokenFromSubgraph(
         this.$route.params.contract,
         this.$route.params.tokenid.toString()
       );
-      var nft = data.nft;
+      var nft = data.nft
+      this.nft = nft
+      this.saved = await this.$parent.$parent.checkSaved(nft)
+
       this.$parent.$parent.routeName = nft.tokenJSON.name;
 
       // Use same format as OpenSea API
@@ -382,12 +423,9 @@ export default {
 
       // Swap Options
       this.validSwaps = await this.$parent.$parent.getSwapOptions([nft]);
-      console.log("Swaps", this.validSwaps);
 
       // Owners Assets
-      this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph2(
-        nft.owner
-      );
+      this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph(nft.owner);
 
       var orders = await this.$parent.$parent.getOrdersFromDB({
         makerAddress: nft.owner.toLowerCase(),
@@ -399,12 +437,6 @@ export default {
         });
       });
     },
-    onCopy() {
-      this.$notify({
-        type: "info",
-        message: "Copied to clipboard",
-      });
-    },
   },
   watch: {
     $route: function () {
@@ -414,4 +446,23 @@ export default {
 };
 </script>
 <style>
+.attr {
+  float:left;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px 20px;
+  background: #eee;
+  text-align: center;
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+.type {
+  color:grey;
+}
+.value {
+  font-weight: bold;
+}
+.rarity {
+  font-size: 12px;
+}
 </style>

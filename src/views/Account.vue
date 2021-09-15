@@ -225,7 +225,6 @@ export default {
   },
   async mounted() {
     document.title = "🦢 Account";
-    console.log('Events', this.$parent.$parent.fillEvents);
     this.loadPage();
   },
   methods: {
@@ -237,7 +236,7 @@ export default {
         this.offers = this.$parent.$parent.userprefs;
         this.swapOptions = this.$parent.$parent.userSwapOptions;
       } else {
-        var res = await this.$parent.$parent.getUserTokensFromSubGraph2(this.$route.params.address);
+        var res = await this.$parent.$parent.getUserTokensFromSubGraph(this.$route.params.address);
         this.nfts = res.nfts
         this.offers = await this.$parent.$parent.getOrdersFromDB({
           makerAddress: this.$route.params.address,
@@ -252,7 +251,6 @@ export default {
           orders:[],
           options:[],
         }
-        // What offers with NFT in exchangeBundle
         this.offers.map(order => {
           order.exchangeBundle.map(exch => {
             if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {
@@ -260,7 +258,6 @@ export default {
             }
           })
         })
-        console.log('Swap opts', nft.tokenJSON.name, this.swapOptions.length);
         this.swapOptions.map(ring => {
           ring[ring.length - 1].wishBundle.map(exch => {
             if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {

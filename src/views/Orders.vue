@@ -5,7 +5,6 @@
         <b-col xl="6" md="6"> </b-col>
       </b-row>
     </base-header>
-
     <b-container fluid class="mt--7">
       <b-row class="justify-content-center">
         <b-col lg="12">
@@ -56,11 +55,8 @@ export default {
   methods: {
     async loadPage() {
       this.$parent.$parent.routeName = "Orders";
-
-      // Query OpenSea
       this.orders = [];
       if (this.$parent.$parent.network.chainId === 137) {
-        // this.orders = await this.$parent.$parent.orderbook;
         this.orders = await this.$parent.$parent.getOrdersFromDB();
       } else if (this.$parent.$parent.network.chainId === 1) {
       }
@@ -69,10 +65,7 @@ export default {
   },
   watch: {
     async $route() {
-      // this.assets = []
       this.orders = [];
-      // this.collection = null
-      // this.offset = 0
       this.loadPage();
     },
   },

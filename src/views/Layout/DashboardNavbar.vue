@@ -4,12 +4,9 @@
     class="navbar-top navbar-expand"
     :class="{'navbar-dark': type === 'default'}">
     <a href="#" aria-current="page" class="h4 mb-0 text-white text-uppercase d-none d-lg-inline-block active router-link-active">
-      <!-- {{$route.name}}  -->
       {{$parent.routeName}}
     </a>
-    <!-- Navbar links -->
     <b-navbar-nav class="align-items-center ml-md-auto">
-      <!-- This item dont have <b-nav-item> because item have data-action/data-target on tag <a>, wich we cant add -->
       <li class="nav-item d-sm-none">
         <a class="nav-link" href="#" data-action="search-show" data-target="#navbar-search-main">
           <i class="ni ni-zoom-split-in"></i>
@@ -29,9 +26,7 @@
           </b-input-group>
         </b-form-group>
         <dashboard-search :searchQuery="searchQuery" :root="$parent"></dashboard-search>
-
       </b-form>
-
       <base-dropdown menu-on-right
        class="nav-item"
        tag="li"
@@ -47,7 +42,6 @@
             </b-media-body>
           </b-media>
         </a>
-
         <template>
           <b-dropdown-header class="noti-title">
             <h6 class="text-overflow m-0">Welcome!</h6>

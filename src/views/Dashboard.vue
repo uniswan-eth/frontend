@@ -11,8 +11,6 @@
             class="mb-4"
           >
             <template slot="footer">
-              <!-- <span class="text-success mr-2">3.48%</span>
-              <span class="text-nowrap">Since last month</span> -->
             </template>
           </stats-card>
         </b-col>
@@ -25,8 +23,6 @@
             class="mb-4"
           >
             <template slot="footer">
-              <!-- <span class="text-success mr-2">12.18%</span>
-              <span class="text-nowrap">Since last month</span> -->
             </template>
           </stats-card>
         </b-col>
@@ -58,6 +54,24 @@
     <b-container fluid class="mt--7">
       <b-row class="mt-5">
         <b-col xl="12" class="mb-5 mb-xl-0">
+          <card header-classes="bg-transparent">
+            <h2 slot="header" class="mb-0">
+              Saved
+            </h2>
+            <b-card-group deck>
+              <nft-card2
+                display="card"
+                v-for="(n,idx) in $parent.$parent.savedNFTs"
+                :key="'savednft'+idx"
+                :nft="n"
+                :root="$parent.$parent"
+                />
+            </b-card-group>
+          </card>
+        </b-col>
+      </b-row>
+      <b-row class="mt-5">
+        <b-col xl="12" class="mb-5 mb-xl-0">
           <nft-summary
             display="card"
             v-for="(n,idx) in summary"
@@ -68,48 +82,82 @@
             />
         </b-col>
       </b-row>
+      <!-- <br>
+      <card type="default" header-classes="bg-transparent">
+        <b-row align-v="center" slot="header">
+          <b-col>
+            <h6 class="text-light text-uppercase ls-1 mb-1">Overview</h6>
+            <h5 class="h3 text-white mb-0">Example</h5>
+          </b-col>
+          <b-col>
+          </b-col>
+        </b-row>
+        <line-chart
+          :height="350"
+          ref="bigChart"
+          :chart-data="bigLineChart.chartData"
+          :extra-options="bigLineChart.extraOptions"
+        >
+        </line-chart>
+      </card> -->
+
+
     </b-container>
   </div>
 </template>
 <script>
-// Charts
-import * as chartConfigs from "@/components/Charts/config";
-import LineChart from "@/components/Charts/LineChart";
-import BarChart from "@/components/Charts/BarChart";
-
-// Tables
 import NftsTable from './Dashboard/NftsTable';
 import OffersTable from './Dashboard/OffersTable';
 import OptionsTable from './Dashboard/OptionsTable';
 import Bundle from '@/components/UniSwan/Bundle';
 import NftCard2 from "@/components/UniSwan/NftCard2";
-import { Table, TableColumn, DropdownMenu, DropdownItem, Dropdown} from 'element-ui'
 import NftSummary from "@/components/UniSwan/NftSummary";
+
+import * as chartConfigs from '@/components/Charts/config';
+import LineChart from '@/components/Charts/LineChart';
+import BarChart from '@/components/Charts/BarChart';
+
+
 
 export default {
   components: {
+    LineChart,
+    BarChart,
     NftSummary,
     NftCard2,
     OptionsTable,
     Bundle,
     NftsTable,
     OffersTable,
-    LineChart,
-    BarChart,
-    [Table.name]: Table,
-    [TableColumn.name]: TableColumn,
-    [Dropdown.name]: Dropdown,
-    [DropdownItem.name]: DropdownItem,
-    [DropdownMenu.name]: DropdownMenu,
   },
   data() {
     return {
+      bigLineChart: {
+        allData: [
+          [40, 40, 60, 0, 80, 60, 60, 60, 60],
+          // [0, 20, 5, 25, 10, 30, 15, 40, 40]
+        ],
+        activeIndex: 0,
+        chartData: {
+          datasets: [
+            {
+              label: 'Options',
+              data: [0, 20, 10, 30, 15, 40, 20, 60, 60],
+            }
+          ],
+          labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        },
+        extraOptions: chartConfigs.blueChartOptions,
+      },
       summary:[],
     };
   },
   mounted() {
     document.title ="🦢 UniSwan"
     this.$parent.$parent.routeName = 'Dashboard';
+
+    this.initBigChart(0);
+
 
     // Build summary
     this.$parent.$parent.usernfts.map(nft => {
@@ -118,7 +166,6 @@ export default {
         orders:[],
         options:[],
       }
-      console.log('Orders ss', this.$parent.$parent.userprefs);
       this.$parent.$parent.userprefs.map(order => {
         order.exchangeBundle.map(exch => {
           if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {
@@ -126,7 +173,6 @@ export default {
           }
         })
       })
-      console.log('Dashb options', this.$parent.$parent.userSwapOptions);
       this.$parent.$parent.userSwapOptions.map(ring => {
         ring[0].wishBundle.map(exch => {
           if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {
@@ -137,12 +183,22 @@ export default {
       this.summary.push(nftSummary)
     })
   },
-  methods: {},
+  methods: {
+    initBigChart(index) {
+      let chartData = {
+        datasets: [
+          {
+            label: 'Options',
+            data: this.bigLineChart.allData[index]
+          }
+        ],
+        labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      };
+      this.bigLineChart.chartData = chartData;
+      this.bigLineChart.activeIndex = index;
+    }
+  },
 };
 </script>
 <style>
-.el-table .cell {
-  padding-left: 0px;
-  padding-right: 0px;
-}
 </style>
