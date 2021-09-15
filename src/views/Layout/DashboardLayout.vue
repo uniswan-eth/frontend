@@ -100,7 +100,8 @@ import PerfectScrollbar from "perfect-scrollbar";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 
 const DB_BASE_URL = "https://uns-backend.vercel.app/api/v3";
-const SUBGRAPH_URL = "https://api.thegraph.com/subgraphs/name/tranchien2002/eip721-matic";
+const SUBGRAPH_URL =
+  "https://api.thegraph.com/subgraphs/name/tranchien2002/eip721-matic";
 const EXCHANGE_ADDRESS = "0x1f98206be961f98d0c2d2e5f7d965244b2f2129a";
 const client = new ApolloClient({
   link: createHttpLink({
@@ -174,7 +175,7 @@ export default {
       signerblockie: null,
       makeBlockie: makeBlockie,
       pageloaded: false,
-      uniSwanUsers:[],
+      uniSwanUsers: [],
     };
   },
   async mounted() {
@@ -197,7 +198,6 @@ export default {
       self.loadNetwork();
     });
     this.loadApp();
-
   },
   methods: {
     async loadApp() {
@@ -769,8 +769,8 @@ export default {
 .cb {
   clear: both;
 }
-.swapBtn{
-  float:left;
+.swapBtn {
+  float: left;
   margin-right: -30px !important;
 }
 .bgim {

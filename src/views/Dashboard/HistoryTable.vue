@@ -3,7 +3,7 @@
     <template v-slot:header>
       <b-row align-v="center">
         <b-col>
-          <h3 class="mb-0">All orders filled by anyone ever</h3>
+          <h3 class="mb-0">Recent swap activity</h3>
         </b-col>
       </b-row>
     </template>
@@ -18,10 +18,14 @@
         </template>
       </el-table-column>
       <el-table-column label="Maker" min-width="130px" prop="page">
-        <template v-slot="{ row }">{{ row.makerAddress }} </template>
+        <template v-slot="{ row }">
+          <account-card :address="row.makerAddress" :root="root" />
+        </template>
       </el-table-column>
       <el-table-column label="Taker" min-width="130px" prop="page">
-        <template v-slot="{ row }">{{ row.takerAddress }} </template>
+        <template v-slot="{ row }">
+          <account-card :address="row.takerAddress" :root="root" />
+        </template>
       </el-table-column>
       <el-table-column label="Maker bundle" min-width="130px" prop="page">
         <template v-slot="{ row }">
@@ -83,12 +87,12 @@ export default {
             assetDataUtils
               .decodeMultiAssetDataRecursively(e.args[2])
               .nestedAssetData.map(async (x) => {
-                exchangeBundle.push(
-                  await this.$props.root.getTokenFromSubgraph(
-                    x.tokenAddress,
-                    x.tokenId.toNumber()
-                  ).nft
+                var nftObj = await this.$props.root.getTokenFromSubgraph(
+                  x.tokenAddress,
+                  x.tokenId.toNumber()
                 );
+
+                exchangeBundle.push(nftObj.nft);
               })
           );
 
@@ -96,12 +100,12 @@ export default {
             assetDataUtils
               .decodeMultiAssetDataRecursively(e.args[3])
               .nestedAssetData.map(async (x) => {
-                wishBundle.push(
-                  await this.$props.root.getTokenFromSubgraph(
-                    x.tokenAddress,
-                    x.tokenId.toNumber()
-                  ).nft
+                var nftObj = await this.$props.root.getTokenFromSubgraph(
+                  x.tokenAddress,
+                  x.tokenId.toNumber()
                 );
+
+                wishBundle.push(nftObj.nft);
               })
           );
           this.parsedEvents.push({
@@ -113,7 +117,7 @@ export default {
           });
         })
       );
-      console.log('Events2', this.parsedEvents);
+      console.log("Events2", this.parsedEvents);
     },
   },
 };
