@@ -82,6 +82,26 @@
             />
         </b-col>
       </b-row>
+      <!-- <br>
+      <card type="default" header-classes="bg-transparent">
+        <b-row align-v="center" slot="header">
+          <b-col>
+            <h6 class="text-light text-uppercase ls-1 mb-1">Overview</h6>
+            <h5 class="h3 text-white mb-0">Example</h5>
+          </b-col>
+          <b-col>
+          </b-col>
+        </b-row>
+        <line-chart
+          :height="350"
+          ref="bigChart"
+          :chart-data="bigLineChart.chartData"
+          :extra-options="bigLineChart.extraOptions"
+        >
+        </line-chart>
+      </card> -->
+
+
     </b-container>
   </div>
 </template>
@@ -93,8 +113,16 @@ import Bundle from '@/components/UniSwan/Bundle';
 import NftCard2 from "@/components/UniSwan/NftCard2";
 import NftSummary from "@/components/UniSwan/NftSummary";
 
+import * as chartConfigs from '@/components/Charts/config';
+import LineChart from '@/components/Charts/LineChart';
+import BarChart from '@/components/Charts/BarChart';
+
+
+
 export default {
   components: {
+    LineChart,
+    BarChart,
     NftSummary,
     NftCard2,
     OptionsTable,
@@ -104,12 +132,32 @@ export default {
   },
   data() {
     return {
+      bigLineChart: {
+        allData: [
+          [40, 40, 60, 0, 80, 60, 60, 60, 60],
+          // [0, 20, 5, 25, 10, 30, 15, 40, 40]
+        ],
+        activeIndex: 0,
+        chartData: {
+          datasets: [
+            {
+              label: 'Options',
+              data: [0, 20, 10, 30, 15, 40, 20, 60, 60],
+            }
+          ],
+          labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        },
+        extraOptions: chartConfigs.blueChartOptions,
+      },
       summary:[],
     };
   },
   mounted() {
     document.title ="🦢 UniSwan"
     this.$parent.$parent.routeName = 'Dashboard';
+
+    this.initBigChart(0);
+
 
     // Build summary
     this.$parent.$parent.usernfts.map(nft => {
@@ -135,7 +183,21 @@ export default {
       this.summary.push(nftSummary)
     })
   },
-  methods: {},
+  methods: {
+    initBigChart(index) {
+      let chartData = {
+        datasets: [
+          {
+            label: 'Options',
+            data: this.bigLineChart.allData[index]
+          }
+        ],
+        labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      };
+      this.bigLineChart.chartData = chartData;
+      this.bigLineChart.activeIndex = index;
+    }
+  },
 };
 </script>
 <style>
