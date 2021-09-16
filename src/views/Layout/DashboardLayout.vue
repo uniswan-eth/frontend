@@ -196,7 +196,7 @@ export default {
       await self.loadApp();
       self.pageloaded = true;
     });
-    window.ethereum.on("networkChanged", function (networkId) {
+    window.ethereum.on("chainChanged", function (networkId) {
       // Time to reload your interface with the new networkId
       self.loadNetwork();
     });
