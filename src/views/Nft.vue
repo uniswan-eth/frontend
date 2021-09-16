@@ -1,24 +1,6 @@
 <template>
   <div v-if="asset">
     <base-header class="pb-6 pb-8 pt-5 pt-md-8 bg-gradient-success">
-      <!-- <b-row>
-        <b-col xl="6" md="6">
-          <stats-card
-            title="Contract"
-            type="gradient-red"
-            :sub-title="assetSubGraph.contract.name"
-            icon="ni ni-active-40"
-            class="mb-4">
-            <template slot="footer">
-              <span class="text-success mr-2">{{$parent.$parent.formatNumberWithCommas(assetSubGraph.contract.numOwners)}}</span>
-              <span class="text-nowrap">Owners</span>
-              &nbsp;
-              <span class="text-success mr-2">{{$parent.$parent.formatNumberWithCommas(assetSubGraph.contract.numTokens)}}</span>
-              <span class="text-nowrap">Tokens</span>
-            </template>
-          </stats-card>
-        </b-col>
-      </b-row> -->
     </base-header>
 
     <b-container fluid class="mt--7">
@@ -45,38 +27,39 @@
               {{ asset.description }}
             </p>
             <b-button
-              v-if="!saved.length ||  saved.length === 0"
+              v-if="!saved.length || saved.length === 0"
               @click="$parent.$parent.saveNFT(nft)"
               size="lg"
-              variant="success">
+              variant="success"
+            >
               Save
             </b-button>
             <b-button
               v-if="saved.length > 0"
               @click="$parent.$parent.removeSavedNFT(nft)"
               size="lg"
-              variant="warning">
+              variant="warning"
+            >
               Remove
             </b-button>
             <div v-if="nft.tokenJSON.attributes">
-              <hr>
-              <!-- <h3>Attributes</h3> -->
-              <div v-for="(attr,idx) in nft.tokenJSON.attributes" :key="'trait'+idx">
+              <hr />
+              <div
+                v-for="(attr, idx) in nft.tokenJSON.attributes"
+                :key="'trait' + idx"
+              >
                 <div class="attr">
                   <div class="type">
-                    {{attr.trait_type}}
+                    {{ attr.trait_type }}
                   </div>
                   <div class="value">
-                    {{attr.value}}
+                    {{ attr.value }}
                   </div>
-                  <!-- <div class="rarity">
-                    {{ Math.round((attr.trait_count / assetSubGraph.contract.numTokens) * 100) }}%
-                  </div> -->
                 </div>
               </div>
-              <div class="cb"/>
+              <div class="cb" />
             </div>
-            <hr>
+            <hr />
             <div>
               <a
                 class="btn btn-secondary btn-sm"
@@ -175,7 +158,7 @@
                 class="swapBtn"
                 @click="
                   $event.preventDefault();
-                  $parent.$parent.viewSwapChain(ring);
+                  $parent.$parent.viewSwapChain(ring, finalPools[idx]);
                 "
                 v-b-modal.modalSwapChain
                 size="sm"
@@ -207,37 +190,6 @@
               Make offer
             </b-button>
           </card>
-          <!-- <options-table
-            display="simple"
-            :root="$parent.$parent"
-            :options="validSwaps">
-            <template v-slot:unsHeader>
-              <b-row align-v="center">
-                <b-col>
-                  <h6
-                    slot="header"
-                    class="navbar-heading text-muted text-uppercase"
-                  >
-                    This NFT can be swapped for
-                  </h6>
-                </b-col>
-                <b-col class="text-right">
-                  <b-button
-                    :disabled="
-                      $parent.$parent.signeraddr.toLowerCase() ===
-                      asset.owner.address.toLowerCase()
-                    "
-                    @click="$parent.$parent.createOrder(asset, ownerAssets)"
-                    v-b-modal.modalCreateOffer
-                    size="lg"
-                    variant="success"
-                  >
-                    Make offer
-                  </b-button>
-                </b-col>
-              </b-row>
-            </template>
-          </options-table> -->
           <br />
           <card header-classes="bg-transparent">
             <h6 slot="header" class="navbar-heading text-muted text-uppercase">
@@ -253,50 +205,29 @@
               />
               &nbsp; wish in return for {{ asset.name }}
             </h6>
-            <!-- <pre>{{ownerOrders}}</pre> -->
-            <div v-for="(order, idx) in ownerOrders"
+            <div
+              v-for="(order, idx) in ownerOrders"
               :key="'order' + idx"
-              class="bundleHolder">
-
+              class="bundleHolder"
+            >
               <div
                 v-for="(nft, idx) in order.wishBundle"
-                :key="'wish'+idx"
-                @click="$router.push('/nft/'+nft.contract+'/'+nft.tokenID)"
-                :style="{backgroundImage: 'url('+nft.tokenJSON.image+')'}"
-                class="imgHolder">
-              </div>
+                :key="'wish' + idx"
+                @click="
+                  $router.push('/nft/' + nft.contract + '/' + nft.tokenID)
+                "
+                :style="{ backgroundImage: 'url(' + nft.tokenJSON.image + ')' }"
+                class="imgHolder"
+              ></div>
 
-              <!-- <bundle
-                display="medium"
-                :bundle="order.wishBundle"
-                :root="$parent.$parent"
-              >
-                <template v-slot:bundleHeader>
-                  <b-button
-                    @click="
-                      $event.preventDefault();
-                      $parent.$parent.viewOrder(order);
-                    "
-                    v-b-modal.modalOffer
-                    size="sm"
-                    variant="secondary"
-                  >
-                    <span>
-                      {{
-                        order.wishBundle[0].owner.toLowerCase() ===
-                        $parent.$parent.signeraddr.toLowerCase()
-                          ? "Execute"
-                          : "View"
-                      }}
-                    </span>
-                  </b-button>
-                </template>
-              </bundle> -->
               <br />
             </div>
-            <div class="cb"/>
-            <br/>
-            <router-link class="btn btn-secondary btn-sm" :to="'/account/'+asset.owner.address+'?tab=offers'">
+            <div class="cb" />
+            <br />
+            <router-link
+              class="btn btn-secondary btn-sm"
+              :to="'/account/' + asset.owner.address + '?tab=offers'"
+            >
               See all
             </router-link>
           </card>
@@ -341,11 +272,6 @@
               />
             </b-card-group>
           </card>
-
-          <!-- <card header-classes="bg-transparent">
-            <h3 slot="header" class="mb-0">Collection</h3>
-            <collection :collection="asset.collection" />
-          </card> -->
         </b-col>
       </b-row>
       <br />
@@ -359,10 +285,10 @@ import BaseHeader from "@/components/BaseHeader";
 import Collection from "@/components/UniSwan/Collection";
 import NftsTable from "./Dashboard/NftsTable";
 import OptionsTable from "./Dashboard/OptionsTable";
-import NftCard from "@/components/UniSwan/NftCard";
 import Bundle from "@/components/UniSwan/Bundle";
 import AccountCard from "@/components/UniSwan/AccountCard";
 import NftCard2 from "@/components/UniSwan/NftCard2";
+import { assetDataUtils } from "@0x/order-utils";
 
 Vue.use(VueClipboard);
 export default {
@@ -372,14 +298,13 @@ export default {
     AccountCard,
     OptionsTable,
     Bundle,
-    NftCard,
     NftsTable,
     Collection,
     BaseHeader,
   },
   data() {
     return {
-      saved:null,
+      saved: null,
       contract: null,
       asset: null,
       nft: null, // our format
@@ -388,6 +313,7 @@ export default {
       validSwaps: [],
       ownerOrders: [],
       signerApproved: false,
+      finalPools: [],
     };
   },
   async mounted() {
@@ -411,9 +337,9 @@ export default {
         this.$route.params.contract,
         this.$route.params.tokenid.toString()
       );
-      var nft = data.nft
-      this.nft = nft
-      this.saved = await this.$parent.$parent.checkSaved(nft)
+      var nft = data.nft;
+      this.nft = nft;
+      this.saved = await this.$parent.$parent.checkSaved(nft);
 
       this.$parent.$parent.routeName = nft.tokenJSON.name;
 
@@ -425,7 +351,9 @@ export default {
       this.validSwaps = await this.$parent.$parent.getSwapOptions([nft]);
 
       // Owners Assets
-      this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph(nft.owner);
+      this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph(
+        nft.owner
+      );
 
       var orders = await this.$parent.$parent.getOrdersFromDB({
         makerAddress: nft.owner.toLowerCase(),
@@ -436,6 +364,38 @@ export default {
             this.ownerOrders.push(x);
         });
       });
+      await this.buildFinalPools([nft]);
+    },
+    async buildFinalPools(nfts) {
+      this.finalPools = [];
+
+      for (let i = 0; i < this.validSwaps.length; i++) {
+        var ourAssetsEncoded = assetDataUtils.encodeMultiAssetData(
+          ...this.$parent.$parent.bundleToData(nfts)
+        );
+
+        this.validSwaps[i].map(
+          (order) =>
+            (ourAssetsEncoded = this.$parent.$parent.executeOrder(
+              ourAssetsEncoded,
+              order.signedOrder
+            ))
+        );
+
+        const bundle = await this.$parent.$parent.dataToBundle(
+          ourAssetsEncoded
+        );
+
+        // Filter out any assets that the user already owns
+        this.finalPools.push(
+          bundle.filter(
+            (x) =>
+              !nfts.some(
+                (y) => y.contract === x.contract && y.tokenID === x.tokenID
+              )
+          )
+        );
+      }
     },
   },
   watch: {
@@ -447,7 +407,7 @@ export default {
 </script>
 <style>
 .attr {
-  float:left;
+  float: left;
   border: 1px solid #ccc;
   border-radius: 5px;
   padding: 10px 20px;
@@ -457,7 +417,7 @@ export default {
   margin-bottom: 10px;
 }
 .type {
-  color:grey;
+  color: grey;
 }
 .value {
   font-weight: bold;

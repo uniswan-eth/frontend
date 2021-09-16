@@ -55,7 +55,7 @@
                   class="swapBtn"
                   @click="
                     $event.preventDefault();
-                    root.viewSwapChain(ring);
+                    root.viewSwapChain(ring, finalPools[idx]);
                   "
                   v-b-modal.modalSwapChain
                   size="sm"
@@ -85,7 +85,6 @@
 </template>
 <script>
 import { assetDataUtils } from "@0x/order-utils";
-import { BigNumber } from "@0x/utils";
 
 export default {
   name: "nft-summary",
@@ -100,42 +99,23 @@ export default {
     this.loadPage();
   },
   methods: {
-    encodeAssets(bundle) {
-      let amounts = [];
-      let assetDatas = [];
-      for (let i = 0; i < bundle.length; i++) {
-        let assetData;
-        if (bundle[i].tokenJSON) {
-          assetData = assetDataUtils.encodeERC721AssetData(
-            bundle[i].contract,
-            new BigNumber(bundle[i].tokenID)
-          );
-          amounts.push(new BigNumber(1));
-        } else {
-          assetData = assetDataUtils.encodeERC20AssetData(bundle[i].address);
-          amounts.push(new BigNumber(bundle[i].balance));
-        }
-        assetDatas.push(assetData);
-      }
-      return [amounts, assetDatas];
-    },
     async loadPage() {
       this.finalPools = [];
 
       for (let i = 0; i < this.summary.options.length; i++) {
         var ourAssetsEncoded = assetDataUtils.encodeMultiAssetData(
-          ...this.encodeAssets(this.$props.root.usernfts)
+          ...this.$props.root.bundleToData(this.$props.root.usernfts)
         );
 
         this.summary.options[i].map(
           (order) =>
-            (ourAssetsEncoded = this.executeOrder(
+            (ourAssetsEncoded = this.$props.root.executeOrder(
               ourAssetsEncoded,
               order.signedOrder
             ))
         );
 
-        const bundle = await this.dataToBundle(ourAssetsEncoded);
+        const bundle = await this.$props.root.dataToBundle(ourAssetsEncoded);
 
         // Filter out any assets that the user already owns
         this.finalPools.push(
@@ -147,81 +127,6 @@ export default {
           )
         );
       }
-    },
-    async dataToBundle(assetData) {
-      var inter = assetDataUtils.decodeMultiAssetDataRecursively(assetData);
-      const bundle = [];
-
-      for (let i = 0; i < inter.nestedAssetData.length; i++) {
-        if (inter.amounts[i] > 0) {
-          if (inter.nestedAssetData[i].assetProxyId === "0xf47261b0") {
-            var collection = new ethers.Contract(
-              "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619", // WETH
-              ERC20ABI,
-              this.signer
-            );
-            bundle.push({
-              address: inter.nestedAssetData[i].tokenAddress,
-              name: await collection.name(),
-              symbol: await collection.symbol(),
-              decimals: await collection.decimals(),
-              balance: inter.amounts[i],
-            });
-          } else if (inter.nestedAssetData[i].assetProxyId === "0x02571792") {
-            var result = await this.$props.root.getTokenFromSubgraph(
-              inter.nestedAssetData[i].tokenAddress,
-              inter.nestedAssetData[i].tokenId.toNumber().toString()
-            );
-            bundle.push(result.nft);
-          }
-        }
-      }
-
-      return bundle;
-    },
-    executeOrder(ourAssetsEncoded, order) {
-      const takerAssets = assetDataUtils.decodeAssetDataOrThrow(
-        order.takerAssetData
-      );
-
-      const ourAssets = assetDataUtils.decodeAssetDataOrThrow(ourAssetsEncoded);
-
-      for (let i = 0; i < takerAssets.nestedAssetData.length; i++) {
-        const index = ourAssets.nestedAssetData.indexOf(
-          takerAssets.nestedAssetData[i]
-        );
-        if (index > -1) {
-          ourAssets.amounts[index] = ourAssets.amounts[index].minus(
-            takerAssets.amounts[i]
-          );
-          if (ourAssets.amounts[index].toNumber() < 0) return null;
-        } else return null;
-      }
-
-      const makerAssets = assetDataUtils.decodeAssetDataOrThrow(
-        order.makerAssetData
-      );
-
-      for (let i = 0; i < makerAssets.nestedAssetData.length; i++) {
-        var index = ourAssets.nestedAssetData.indexOf(
-          makerAssets.nestedAssetData[i]
-        );
-        if (index === -1) {
-          index = ourAssets.nestedAssetData.length;
-          ourAssets.nestedAssetData.push(makerAssets.nestedAssetData[i]);
-          ourAssets.amounts.push(new BigNumber(0));
-        }
-        ourAssets.amounts[index] = ourAssets.amounts[index].plus(
-          makerAssets.amounts[i]
-        );
-      }
-
-      const newOurAssetsEncoded = assetDataUtils.encodeMultiAssetData(
-        ourAssets.amounts,
-        ourAssets.nestedAssetData
-      );
-
-      return newOurAssetsEncoded;
     },
   },
 };

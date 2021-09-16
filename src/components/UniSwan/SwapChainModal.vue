@@ -22,6 +22,19 @@
       </template>
     </options-table>
 
+    <div>
+      <h3>You will receive:</h3>
+      <div
+        @click="$router.push('/nft/' + nft.contract + '/' + nft.tokenID)"
+        v-for="(nft, jdx) in $props.receiveBundle"
+        :key="'wish' + jdx"
+        :style="{
+          backgroundImage: 'url(' + nft.tokenJSON.image + ')',
+        }"
+        class="imgHolder"
+      />
+    </div>
+
     <template slot="modal-footer">
       <base-button @click="$parent.executeSwap(chain)" type="success"
         >Execute offer</base-button
@@ -44,7 +57,7 @@ import {
 
 export default {
   name: "swap-chain-modal",
-  props: ["chain"],
+  props: ["chain", "receiveBundle"],
   components: {
     OptionsTable,
     Bundle,
@@ -57,6 +70,7 @@ export default {
   data() {
     return {};
   },
+  mounted() {},
   methods: {},
 };
 </script>

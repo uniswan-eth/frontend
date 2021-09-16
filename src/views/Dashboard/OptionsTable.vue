@@ -20,7 +20,7 @@
             <b-button
               @click="
                 $event.preventDefault();
-                root.viewSwapChain(nftOptions);
+                root.viewSwapChain(nftOptions, []);
               "
               v-b-modal.modalSwapChain
               size="sm"

@@ -194,7 +194,7 @@ export default {
     async clearWishBundle() {
       this.currentWishBundle = [];
     },
-    encodeAssets(bundle) {
+    bundleToData(bundle) {
       let amounts = [];
       let assetDatas = [];
       for (let i = 0; i < bundle.length; i++) {
@@ -214,10 +214,10 @@ export default {
       return [amounts, assetDatas];
     },
     async generateSignature() {
-      const [haveAmounts, haveAssetData] = this.encodeAssets(
+      const [haveAmounts, haveAssetData] = this.bundleToData(
         this.currentExchangeBundle
       );
-      const [wantAmounts, wantAssetData] = this.encodeAssets(
+      const [wantAmounts, wantAssetData] = this.bundleToData(
         this.currentWishBundle
       );
       const salt = new BigNumber(new Date().getTime()).toString();
