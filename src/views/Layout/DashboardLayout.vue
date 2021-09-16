@@ -2,7 +2,10 @@
   <div class="wrapper" v-if="pageloaded">
     <notifications></notifications>
     <order-modal :order="currentOrder"></order-modal>
-    <create-order-modal :nft="newOrderNFT" :ownernfts="newOrderOwnerNFTs"></create-order-modal>
+    <create-order-modal
+      :nft="newOrderNFT"
+      :ownernfts="newOrderOwnerNFTs"
+    ></create-order-modal>
     <swap-chain-modal :chain="currentSwapChain"></swap-chain-modal>
     <side-bar>
       <template slot="links">
@@ -215,14 +218,16 @@ export default {
       this.network = await this.provider.getNetwork();
       this.blockNumber = await this.provider.getBlockNumber();
       this.orderbook = await this.getOrdersFromDB();
-      this.orderbook.map(x => {
-        if (!this.uniSwanUsers.includes(x.signedOrder.makerAddress.toLowerCase())) {
-          this.uniSwanUsers.push(x.signedOrder.makerAddress.toLowerCase())
+      this.orderbook.map((x) => {
+        if (
+          !this.uniSwanUsers.includes(x.signedOrder.makerAddress.toLowerCase())
+        ) {
+          this.uniSwanUsers.push(x.signedOrder.makerAddress.toLowerCase());
         }
-      })
+      });
     },
     async loadUser() {
-      this.savedNFTs = await this.queryNEDB({}, this.nedbSaved)
+      this.savedNFTs = await this.queryNEDB({}, this.nedbSaved);
       this.userERC20s = await this.getUserERC20s(this.signeraddr);
       this.usernfts = (
         await this.getUserTokensFromSubGraph(this.signeraddr)
@@ -230,12 +235,8 @@ export default {
       this.userprefs = await this.getOrdersFromDB({
         makerAddress: this.signeraddr.toLowerCase(),
       });
-      await Promise.all(
-        this.usernfts.map(async x => {
-          var temp = await this.getSwapOptions([x])
-          this.userSwapOptions.push(...temp)
-        })
-      )
+      this.userSwapOptions = await this.getSwapOptions(this.usernfts);
+
       const exchange = new ethers.Contract(
         EXCHANGE_ADDRESS,
         EXCHANGEABI,
@@ -263,35 +264,37 @@ export default {
     queryNEDB(sea, db = this.nedbNFTs) {
       var self = this;
       return new Promise(function (resolve) {
-        db
-        .find(sea)
-        .sort()
-        .skip(0)
-        .limit(100)
-        .exec(function (err, docs) {
-          resolve(docs);
-        });
+        db.find(sea)
+          .sort()
+          .skip(0)
+          .limit(100)
+          .exec(function (err, docs) {
+            resolve(docs);
+          });
       });
     },
     async checkSaved(nft) {
-      var saved = await this.queryNEDB({
-        tokenID: nft.tokenID,
-        contract: nft.contract,
-      }, this.nedbSaved);
-      return saved
+      var saved = await this.queryNEDB(
+        {
+          tokenID: nft.tokenID,
+          contract: nft.contract,
+        },
+        this.nedbSaved
+      );
+      return saved;
     },
     async removeSavedNFT(nft) {
-      var self = this
-      var id = ethers.utils.id('nft/'+nft.contract + "/" + nft.tokenID);
+      var self = this;
+      var id = ethers.utils.id("nft/" + nft.contract + "/" + nft.tokenID);
       this.nedbSaved.remove({ _id: id }, {}, async () => {
-        self.savedNFTs = await self.queryNEDB({}, self.nedbSaved)
+        self.savedNFTs = await self.queryNEDB({}, self.nedbSaved);
       });
     },
     async saveNFT(nft) {
       var toInsert = { ...nft };
-      toInsert._id = ethers.utils.id('nft/'+nft.contract + "/" + nft.tokenID);
-      await this.insertNEDB(toInsert, this.nedbSaved)
-      this.savedNFTs = await this.queryNEDB({}, this.nedbSaved)
+      toInsert._id = ethers.utils.id("nft/" + nft.contract + "/" + nft.tokenID);
+      await this.insertNEDB(toInsert, this.nedbSaved);
+      this.savedNFTs = await this.queryNEDB({}, this.nedbSaved);
     },
     async getOrdersFromDB(requestOpts) {
       var orderClient = new HttpClient(DB_BASE_URL);
@@ -334,22 +337,22 @@ export default {
       var options = await res.json();
       var newChains = [];
       await Promise.all(
-      options.map(async (chain) => {
-        var orders = [];
-        for (let i = 0; i < chain.length; i++) {
-          var exchangeBundle = await this.dataToBundle(
-          chain[i].makerAssetData
-          );
-          var wishBundle = await this.dataToBundle(chain[i].takerAssetData);
+        options.map(async (chain) => {
+          var orders = [];
+          for (let i = 0; i < chain.length; i++) {
+            var exchangeBundle = await this.dataToBundle(
+              chain[i].makerAssetData
+            );
+            var wishBundle = await this.dataToBundle(chain[i].takerAssetData);
 
-          orders.push({
-            exchangeBundle: exchangeBundle,
-            wishBundle: wishBundle,
-            signedOrder: chain[i],
-          });
-        }
-        newChains.push(orders);
-      })
+            orders.push({
+              exchangeBundle: exchangeBundle,
+              wishBundle: wishBundle,
+              signedOrder: chain[i],
+            });
+          }
+          newChains.push(orders);
+        })
       );
       return newChains;
     },
@@ -418,15 +421,15 @@ export default {
       };
 
       return {
-        nft:nft,
-        raw:data
-      }
+        nft: nft,
+        raw: data,
+      };
     },
     async getContractTokensFromSubGraph(
-        contractAddress,
-        limit = 10,
-        offset = 0
-      ) {
+      contractAddress,
+      limit = 10,
+      offset = 0
+    ) {
       const tokensQuery = `
         {
           tokenContract(id:"${contractAddress.toLowerCase()}") {
@@ -519,12 +522,10 @@ export default {
           });
         } else {
           var result = await this.getTokenFromSubgraph(
-           bytes.tokenAddress,
-           bytes.tokenId.toNumber().toString()
-          )
-          bundle.push(
-            result.nft
+            bytes.tokenAddress,
+            bytes.tokenId.toNumber().toString()
           );
+          bundle.push(result.nft);
         }
       }
 
@@ -572,7 +573,7 @@ export default {
             }
             bundle.push(nft);
           } catch (e) {
-            console.log('err', e);
+            console.log("err", e);
           }
         })
       );
