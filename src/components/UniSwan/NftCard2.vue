@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="nft.tokenJSON"
     :style="{
       minWidth: minWidth ? minWidth : '10rem',
       maxWidth: maxWidth ? maxWidth : '15rem'
@@ -12,7 +13,7 @@
         :src="nft.tokenJSON.image"
         :title="nft.tokenJSON.name"
         alt=""/>
-      <div class="nftCardBlockie">
+      <div class="nftCardBlockie" v-if="nft.owner">
         <router-link :to="'/account/'+nft.owner">
           <img
             :title="'Owner: '+nft.owner"
@@ -29,13 +30,13 @@
           class="addFavBtn"
           @click="root.saveNFT(nft)"
           variant="default">
-          <i class="ni ni-favourite-28"></i>
+          <i class="ni ni-favourite-28 text-danger"></i>
         </b-badge>
         <b-badge v-if="saved.length > 0"
           class="addFavBtn"
           @click="root.removeSavedNFT(nft)"
           variant="default">
-          <i class="ni ni-fat-remove"></i>
+          <i class="ni ni-fat-remove text-warning"></i>
         </b-badge>
         <router-link :to="'/explorer?contract='+nft.contract">
           <b-badge variant="default">

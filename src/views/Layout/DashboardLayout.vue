@@ -45,6 +45,7 @@
           :link="{
             name: 'Explorer',
             path: '/explorer',
+            /* path: '/explorer?contract=0x9498274b8c82b4a3127d67839f2127f2ae9753f4', */
             icon: 'ni ni-world-2 text-warning',
           }"
         ></sidebar-item>
@@ -200,6 +201,80 @@ export default {
     this.loadApp();
   },
   methods: {
+    async getContractTokensFromNFTPort(contractAddress, pageSize = 10, pageNumber = 1) {
+      var nfts = await this.getNFTsFromAPI(contractAddress, '', pageSize, pageNumber)
+      var res = await this.normalizeNFTs(nfts);
+      return res
+    },
+    async getUserTokensFromNFTPort(accountAddress, pageSize = 10, pageNumber = 1) {
+      var nfts = await this.getNFTsFromAPI('account/'+accountAddress+'/nfts', '', pageSize, pageNumber)
+      var res = await this.normalizeNFTs(nfts);
+      return res
+    },
+    async getNFTsFromAPI(contract, tokenId, pageSize = 10, pageNumber = 1) {
+      var res = await this.NFTPortAPI(
+        'nfts/' + contract + (tokenId ? '/'+tokenId : ''),
+        '', pageSize, pageNumber
+      )
+      var toret = []
+      if (tokenId) {
+        toret.push(res.nft)
+      } else {
+        await Promise.all(
+          res.nfts.map(async x => {
+            var nft = await this.NFTPortAPI(
+              'nfts/'+x.contract_address + '/' + x.token_id,
+              ''
+            )
+            if (nft) {
+              toret.push(
+                nft
+              )
+            } else {
+              console.log('Err fetching', x);
+            }
+          })
+        )
+      }
+      return toret
+    },
+    async normalizeNFTs(nfts) {
+      var toret = []
+      nfts.map(x => {
+        if (x) {
+          if (!x.nft) {x.nft = x}
+          var nft = {
+            contract: x.nft.contract_address,
+            tokenID: x.nft.token_id,
+            owner: null, // x.owner.id,
+            tokenJSON: x.nft.metadata,
+          }
+          if (x.nft.cached_image_url) {
+            nft.tokenJSON.image = x.nft.cached_image_url
+          }
+          toret.push(nft)
+        }
+      })
+      return toret;
+    },
+    async NFTPortAPI(addUrl, urlParams, pageSize = 10, pageNumber = 1) {
+      try {
+        var url = "https://api.nftport.xyz/"+addUrl+"?chain=polygon&page_number="+pageNumber+"&page_size="+pageSize+urlParams
+        var resp = await fetch(url, {
+          "method": "GET",
+          "headers": {
+            "Content-Type": "application/json",
+            "Authorization": "150f5df4-cf22-4bbd-9c58-93e4cac2582b"
+          }
+        })
+        return resp.json()
+      } catch (e) {
+        console.log(e);
+        return []
+      }
+    },
+
+
     async loadApp() {
       this.signer = this.provider.getSigner();
       this.signeraddr = await this.signer.getAddress();
@@ -230,12 +305,12 @@ export default {
       this.userprefs = await this.getOrdersFromDB({
         makerAddress: this.signeraddr.toLowerCase(),
       });
-      await Promise.all(
-        this.usernfts.map(async x => {
-          var temp = await this.getSwapOptions([x])
-          this.userSwapOptions.push(...temp)
-        })
-      )
+      // await Promise.all(
+      //   this.usernfts.map(async x => {
+      //     var temp = await this.getSwapOptions([x])
+      //     this.userSwapOptions.push(...temp)
+      //   })
+      // )
       const exchange = new ethers.Contract(
         EXCHANGE_ADDRESS,
         EXCHANGEABI,
@@ -476,8 +551,29 @@ export default {
       const data = await client.query({
         query: gql(tokensQuery),
       });
-      const tokenData = data.data.owner.tokens;
-      const nfts = await this.constructBundle(tokenData);
+
+      var nfts = []
+      await Promise.all(
+        data.data.owner.tokens.map(async x => {
+          var nft = await this.getNFTsFromAPI(x.contract.id, x.tokenID)
+          if (nft[0]) {
+            nfts.push(
+              nft[0]
+            )
+          } else {
+            // FIXME: Need to get data an alternative way
+            const nftAlt = await this.constructBundle([x]);
+            nfts.push(
+              nftAlt[0]
+            )
+            // console.log('Missing NFT', x, nft, nftAlt);
+          }
+        })
+      )
+      nfts = await this.normalizeNFTs(nfts);
+      // const tokenData = data.data.owner.tokens;
+      // const nfts = await this.constructBundle(tokenData);
+
       return {
         nfts: nfts,
         raw: data.data.owner,

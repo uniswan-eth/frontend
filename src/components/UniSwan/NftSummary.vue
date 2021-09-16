@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="nft && nft.tokenJSON">
   <b-card no-body class="overflow-hidden" style="margin-bottom:20px;zzmax-width: 540px;">
     <b-row no-gutters>
       <b-col md="3" style="zzbackground:purple;">

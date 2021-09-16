@@ -45,29 +45,50 @@
         <account-card :address="nft.owner" :root="root" />
       </div>
     </div>
-    <div v-if="!display" class="nftcard">
-      <b-media no-body class="text-left">
-        <a
-          :href="'/#/nft/' + nft.contract + '/' + nft.tokenID"
-          class="avatar avatar-sm rounded-circle"
-        >
+    <!-- <div v-if="!display" class="nftcard"> -->
+    <div v-if="!display" class="">
+      <!-- <b-container fluid class="mt--7"> -->
+        <b-row class="nft1Holder">
+          <b-col lg="4">
+            <div
+              @click="$router.push('/nft/'+nft.contract+'/'+nft.tokenID)"
+              :key="'wish'+idx"
+              :style="{height:'50px',width:'50px',backgroundImage: 'url('+nft.tokenJSON.image+')'}"
+              class="img1Holder">
+            </div>
+          </b-col>
+          <b-col lg="8">
+            <div class="">
+              <b>
+                {{ nft.tokenJSON.name }}
+              </b>
+            </div>
+            <div class="">
+              <account-card :address="nft.owner" :root="root" />
+            </div>
+
+          </b-col>
+        </b-row>
+      <!-- </b-container> -->
+      <!-- <b-media no-body class="text-left">
+        <a :href="'/#/nft/' + nft.contract + '/' + nft.tokenID"
+          class="zzavatar zzavatar-sm zzrounded-circle">
           <img
             class="bgim smallim"
             :style="{ backgroundImage: 'url(' + nft.tokenJSON.image + ')' }"
             alt=""
-          /> </a
-        >&nbsp;
-        <b-media-body>
+          />
+        </a>
+        <b-media-body class="innerBody">
           <span
-            :style="{ fontWeight: nft.owner === root.signeraddr ? 900 : 400 }"
-            class="name mb-0 text-sm"
-          >
+            :style="{ fontWeight: 900}"
+            class="name mb-0 text-sm">
             {{ nft.tokenJSON.name }}
           </span>
           <br />
           <account-card :address="nft.owner" :root="root" />
         </b-media-body>
-      </b-media>
+      </b-media> -->
     </div>
   </div>
 </template>
@@ -86,17 +107,31 @@ export default {
 };
 </script>
 <style>
+.innerBody {
+  padding:6px;
+}
 .bundleHeader {
   margin-left: 7px;
   margin-bottom: -35px;
 }
-.nftHolder {
+.nft1Holder {
+  background: #ccc;
+  padding:5px;
+  padding-left:0px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+  margin-left: 0px;
+
 }
-.imgHolder {
+.img1Holder {
   height: 150px;
   width: 150px;
-  border-radius: 10px;
-  padding: 5px;
+  border:3px solid #fff;
+  border-radius: 8px;
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Do not repeat the image */
+  background-size: cover;
+  cursor: pointer;
 }
 .imgHolder.small {
   height: 50px;

@@ -1,7 +1,7 @@
 <template>
   <span class="" v-if="address">
     <!-- {{address.substr(0,6)}} -->
-    <router-link :to="'/account/'+address">
+    <router-link :to="'/account/'+address + '?tab=nfts'">
       <i>{{
         address.toLowerCase() === root.signeraddr.toLowerCase() ?
         'Me'
