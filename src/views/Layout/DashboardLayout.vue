@@ -575,33 +575,36 @@ export default {
       return [amounts, assetDatas];
     },
     async dataToBundle(assetData) {
-      var inter = assetDataUtils.decodeMultiAssetDataRecursively(assetData);
+      var assetDatas =
+        assetDataUtils.decodeMultiAssetDataRecursively(assetData);
       const bundle = [];
 
-      for (let i = 0; i < inter.nestedAssetData.length; i++) {
-        if (inter.amounts[i] > 0) {
-          if (inter.nestedAssetData[i].assetProxyId === "0xf47261b0") {
-            var collection = new ethers.Contract(
-              inter.nestedAssetData[i].tokenAddress,
-              ERC20ABI,
-              this.signer
-            );
-            bundle.push({
-              address: inter.nestedAssetData[i].tokenAddress,
-              name: await collection.name(),
-              symbol: await collection.symbol(),
-              decimals: await collection.decimals(),
-              amount: inter.amounts[i],
-            });
-          } else if (inter.nestedAssetData[i].assetProxyId === "0x02571792") {
-            var result = await this.getTokenFromSubgraph(
-              inter.nestedAssetData[i].tokenAddress,
-              inter.nestedAssetData[i].tokenId.toNumber().toString()
-            );
-            bundle.push(result.nft);
+      Promise.all(
+        assetDatas.nestedAssetData.map(async (n, i) => {
+          if (assetDatas.amounts[i] > 0) {
+            if (n.assetProxyId === "0xf47261b0") {
+              var collection = new ethers.Contract(
+                n.tokenAddress,
+                ERC20ABI,
+                this.signer
+              );
+              bundle.push({
+                address: n.tokenAddress,
+                name: await collection.name(),
+                symbol: await collection.symbol(),
+                decimals: await collection.decimals(),
+                amount: assetDatas.amounts[i],
+              });
+            } else if (n.assetProxyId === "0x02571792") {
+              var result = await this.getTokenFromSubgraph(
+                n.tokenAddress,
+                n.tokenId.toNumber().toString()
+              );
+              bundle.push(result.nft);
+            }
           }
-        }
-      }
+        })
+      );
 
       return bundle;
     },
