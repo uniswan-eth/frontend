@@ -45,50 +45,31 @@
         <account-card :address="nft.owner" :root="root" />
       </div>
     </div>
-    <!-- <div v-if="!display" class="nftcard"> -->
-    <div v-if="!display" class="">
-      <!-- <b-container fluid class="mt--7"> -->
-        <b-row class="nft1Holder">
-          <b-col lg="4">
-            <div
-              @click="$router.push('/nft/'+nft.contract+'/'+nft.tokenID)"
-              :key="'wish'+idx"
-              :style="{height:'50px',width:'50px',backgroundImage: 'url('+nft.tokenJSON.image+')'}"
-              class="img1Holder">
-            </div>
-          </b-col>
-          <b-col lg="8">
-            <div class="">
-              <b>
-                {{ nft.tokenJSON.name }}
-              </b>
-            </div>
-            <div class="">
-              <account-card :address="nft.owner" :root="root" />
-            </div>
-
-          </b-col>
-        </b-row>
-      <!-- </b-container> -->
-      <!-- <b-media no-body class="text-left">
-        <a :href="'/#/nft/' + nft.contract + '/' + nft.tokenID"
-          class="zzavatar zzavatar-sm zzrounded-circle">
-          <img
-            class="bgim smallim"
-            :style="{ backgroundImage: 'url(' + nft.tokenJSON.image + ')' }"
-            alt=""
-          />
-        </a>
-        <b-media-body class="innerBody">
-          <span
-            :style="{ fontWeight: 900}"
-            class="name mb-0 text-sm">
+    <div v-if="!display" class="nft1Holder">
+        <div
+          @click="$router.push('/nft/'+nft.contract+'/'+nft.tokenID)"
+          :key="'wish'+idx"
+          :style="{height:'50px',width:'50px',backgroundImage: 'url('+nft.tokenJSON.image+')'}"
+          class="img1Holder">
+        </div>
+        <div style="float:left;">
+          <b>
             {{ nft.tokenJSON.name }}
-          </span>
-          <br />
-          <account-card :address="nft.owner" :root="root" />
-        </b-media-body>
-      </b-media> -->
+          </b>
+          <div class="" v-if="nft.owner">
+            <img
+              :title="'Owner: '+nft.owner"
+              class="blockie blockie2"
+              :src="
+                root.makeBlockie(nft.owner)
+              "
+            />
+            <account-card style="line-height:30px;" :address="nft.owner" :root="root" />
+          </div>
+        </div>
+        <div class="cb">
+
+        </div>
     </div>
   </div>
 </template>
@@ -107,6 +88,11 @@ export default {
 };
 </script>
 <style>
+.blockie2 {
+  margin-top: -4px !important;
+  margin-right: 5px;
+}
+
 .innerBody {
   padding:6px;
 }
@@ -115,15 +101,17 @@ export default {
   margin-bottom: -35px;
 }
 .nft1Holder {
-  background: #ccc;
-  padding:5px;
-  padding-left:0px;
+  background: #eee;
+  padding:7px;
+  padding-right:10px;
   margin-bottom: 5px;
   border-radius: 5px;
-  margin-left: 0px;
+  /* margin-left: 0px; */
 
 }
 .img1Holder {
+  float:left;
+  margin-right: 5px;
   height: 150px;
   width: 150px;
   border:3px solid #fff;

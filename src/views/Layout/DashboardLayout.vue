@@ -202,22 +202,29 @@ export default {
   },
   methods: {
     async getContractTokensFromNFTPort(contractAddress, pageSize = 10, pageNumber = 1) {
-      var nfts = await this.getNFTsFromAPI(contractAddress, '', pageSize, pageNumber)
+      var nfts = await this.getNFTsFromAPI('nfts/'+contractAddress, pageSize, pageNumber)
+      // console.log('By Contract', nfts);
       var res = await this.normalizeNFTs(nfts);
       return res
     },
     async getUserTokensFromNFTPort(accountAddress, pageSize = 10, pageNumber = 1) {
-      var nfts = await this.getNFTsFromAPI('account/'+accountAddress+'/nfts', '', pageSize, pageNumber)
+      var nfts = await this.getNFTsFromAPI('account/'+accountAddress+'/nfts', pageSize, pageNumber)
+      console.log('User NFTs', accountAddress, nfts);
       var res = await this.normalizeNFTs(nfts);
       return res
     },
-    async getNFTsFromAPI(contract, tokenId, pageSize = 10, pageNumber = 1) {
+    // async getNFTsFromAPI(contract, tokenId, pageSize = 10, pageNumber = 1) {
+    async getNFTsFromAPI(path, pageSize = 10, pageNumber = 1) {
+      // console.log('Path', path);
       var res = await this.NFTPortAPI(
-        'nfts/' + contract + (tokenId ? '/'+tokenId : ''),
+        // 'nfts/' + contract + (tokenId ? '/'+tokenId : ''),
+        path,
         '', pageSize, pageNumber
       )
+      if (!res || res.length === 0 || res.error) { return [] }
       var toret = []
-      if (tokenId) {
+
+      if (res.nft) {
         toret.push(res.nft)
       } else {
         await Promise.all(
@@ -238,7 +245,7 @@ export default {
       }
       return toret
     },
-    async normalizeNFTs(nfts) {
+    normalizeNFTs(nfts) {
       var toret = []
       nfts.map(x => {
         if (x) {
@@ -260,6 +267,7 @@ export default {
     async NFTPortAPI(addUrl, urlParams, pageSize = 10, pageNumber = 1) {
       try {
         var url = "https://api.nftport.xyz/"+addUrl+"?chain=polygon&page_number="+pageNumber+"&page_size="+pageSize+urlParams
+        // console.log('NFTPort URL', url);
         var resp = await fetch(url, {
           "method": "GET",
           "headers": {
@@ -267,7 +275,13 @@ export default {
             "Authorization": "150f5df4-cf22-4bbd-9c58-93e4cac2582b"
           }
         })
-        return resp.json()
+        var toret = await resp.json()
+        // console.log('RES', toret);
+        if (!toret.error) {
+          return toret
+        } else {
+          return null
+        }
       } catch (e) {
         console.log(e);
         return []
@@ -302,15 +316,16 @@ export default {
       this.usernfts = (
         await this.getUserTokensFromSubGraph(this.signeraddr)
       ).nfts;
+      // console.log('User NFTS', this.usernfts);
       this.userprefs = await this.getOrdersFromDB({
         makerAddress: this.signeraddr.toLowerCase(),
       });
-      // await Promise.all(
-      //   this.usernfts.map(async x => {
-      //     var temp = await this.getSwapOptions([x])
-      //     this.userSwapOptions.push(...temp)
-      //   })
-      // )
+      await Promise.all(
+        this.usernfts.map(async x => {
+          var temp = await this.getSwapOptions([x])
+          this.userSwapOptions.push(...temp)
+        })
+      )
       const exchange = new ethers.Contract(
         EXCHANGE_ADDRESS,
         EXCHANGEABI,
@@ -497,6 +512,26 @@ export default {
         raw:data
       }
     },
+    async getContractFromSubGraph(
+        contractAddress
+      ) {
+      const tokensQuery = `
+        {
+          tokenContract(id:"${contractAddress.toLowerCase()}") {
+            id
+            name
+            numTokens
+            numOwners
+          }
+        }
+      `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      return {
+        raw: data.data.tokenContract,
+      };
+    },
     async getContractTokensFromSubGraph(
         contractAddress,
         limit = 10,
@@ -555,22 +590,24 @@ export default {
       var nfts = []
       await Promise.all(
         data.data.owner.tokens.map(async x => {
-          var nft = await this.getNFTsFromAPI(x.contract.id, x.tokenID)
+          var nft = await this.getNFTsFromAPI('nfts/'+x.contract.id+'/'+x.tokenID)
           if (nft[0]) {
             nfts.push(
-              nft[0]
+              this.normalizeNFTs(nft)[0]
             )
           } else {
             // FIXME: Need to get data an alternative way
             const nftAlt = await this.constructBundle([x]);
-            nfts.push(
-              nftAlt[0]
-            )
-            // console.log('Missing NFT', x, nft, nftAlt);
+            if (nftAlt[0]) {
+              nfts.push(
+                nftAlt[0]
+              )
+            } else {
+              console.log('Missing NFT', x);
+            }
           }
         })
       )
-      nfts = await this.normalizeNFTs(nfts);
       // const tokenData = data.data.owner.tokens;
       // const nfts = await this.constructBundle(tokenData);
 
@@ -637,6 +674,7 @@ export default {
               tokenID: d.tokenID,
               contract: d.contract.id,
             });
+            console.log(d, test);
             if (test.length > 0) {
               nft = {
                 contract: d.contract.id,

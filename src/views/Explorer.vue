@@ -36,7 +36,7 @@
           <stats-card
             title="Owners"
             type="gradient-red"
-            :sub-title="contractData.numOwners"
+            :sub-title="$parent.$parent.formatNumberWithCommas(contractData.numOwners)"
             icon="ni ni-active-40"
             class="mb-4"
           >
@@ -47,7 +47,7 @@
           <stats-card
             title="Tokens"
             type="gradient-orange"
-            :sub-title="contractData.numTokens"
+            :sub-title="$parent.$parent.formatNumberWithCommas(contractData.numTokens)"
             icon="ni ni-chart-pie-35"
             class="mb-4"
           >
@@ -143,9 +143,18 @@ export default {
     document.title = "🦢 Explorer";
     this.$parent.$parent.routeName = "Explorer";
     this.featuredCollections = [
+
+        // {
+        //   contract: "0x22dd2d9e9a4279834c928e2e71c68a17d1d09f12",
+        //   name: "Emojibotos",
+        // },
         {
           contract: "0x9498274b8c82b4a3127d67839f2127f2ae9753f4",
           name: "Polygon Punks",
+        },
+        {
+          contract: "0xcda17cf2ac3cf8e6e818088f21ee9b52bf9e021f",
+          name: "Matic Monkeys",
         },
         {
           contract: "0x36a8377e2bb3ec7d6b0f1675e243e542eb6a4764",
@@ -187,7 +196,6 @@ export default {
               10,
               0
             );
-            console.log(user, res);
             this.nfts = this.nfts.concat(res.nfts);
           })
         )
@@ -195,31 +203,17 @@ export default {
     },
     async getNFTs(collectionAddress, page = 1) {
       // console.log('Page ', page);
-      this.test = await this.$parent.$parent.getContractTokensFromNFTPort(
+      this.nfts = await this.$parent.$parent.getContractTokensFromNFTPort(
         this.$route.query.contract,
         20,
         page
       )
-      if (page === 1) {
-        this.nfts = this.test;
-      } else {
-        this.nfts = this.nfts.concat(this.test);
-      }
-      // this.nfts = this.test
-
-      // this.currentContract = collectionAddress;
-      // var res = await this.$parent.$parent.getContractTokensFromSubGraph(
-      //   collectionAddress,
-      //   10,
-      //   offset
-      // );
-      // if (offset === 0) {
-      //   this.nfts = res.nfts;
-      // } else {
-      //   this.nfts = this.nfts.concat(res.nfts);
-      // }
-      // this.contractData = res.raw;
-      // this.$parent.$parent.routeName = this.contractData.name;
+      var res = await this.$parent.$parent.getContractFromSubGraph(
+        this.$route.query.contract
+      )
+      // console.log(res);
+      this.contractData = res.raw;
+      this.$parent.$parent.routeName = this.contractData.name;
     },
     navContract(ev) {
       ev.preventDefault();
