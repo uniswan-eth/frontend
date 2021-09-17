@@ -36,7 +36,7 @@
           <stats-card
             title="Owners"
             type="gradient-red"
-            :sub-title="contractData.numOwners"
+            :sub-title="$parent.$parent.formatNumberWithCommas(contractData.numOwners)"
             icon="ni ni-active-40"
             class="mb-4"
           >
@@ -47,7 +47,7 @@
           <stats-card
             title="Tokens"
             type="gradient-orange"
-            :sub-title="contractData.numTokens"
+            :sub-title="$parent.$parent.formatNumberWithCommas(contractData.numTokens)"
             icon="ni ni-chart-pie-35"
             class="mb-4"
           >
@@ -74,8 +74,9 @@
           <div class="text-center">
             <b-button
               @click="
-                offset += 10;
-                getNFTs(contractData.id, offset);
+                $router.push('/explorer?contract='+$route.query.contract+'&page_num='+(currentPage + 1))
+                /* currentPage += 1;
+                getNFTs($route.query.contract, currentPage); */
               "
               v-b-modal.modalOffer
               size="lg"
@@ -83,6 +84,7 @@
             >
               More
             </b-button>
+            <!-- <pre>{{test}}</pre> -->
           </div>
         </b-col>
       </b-row>
@@ -120,6 +122,8 @@ export default {
   },
   data() {
     return {
+      currentPage:1,
+      test:[],
       offset: 0,
       contractData: null,
       baselink0: "",
@@ -138,80 +142,76 @@ export default {
   async mounted() {
     document.title = "🦢 Explorer";
     this.$parent.$parent.routeName = "Explorer";
+    this.featuredCollections = [
+
+        // {
+        //   contract: "0x22dd2d9e9a4279834c928e2e71c68a17d1d09f12",
+        //   name: "Emojibotos",
+        // },
+        {
+          contract: "0x9498274b8c82b4a3127d67839f2127f2ae9753f4",
+          name: "Polygon Punks",
+        },
+        {
+          contract: "0xcda17cf2ac3cf8e6e818088f21ee9b52bf9e021f",
+          name: "Matic Monkeys",
+        },
+        {
+          contract: "0x36a8377e2bb3ec7d6b0f1675e243e542eb6a4764",
+          name: "Non-Fungible Matic V2",
+        },
+        {
+          contract: "0x76c52b2c4b2d2666663ce3318a5f35f912bd25c3",
+          name: "MaticPunks",
+        },
+        {
+          contract: "0xa5f1ea7df861952863df2e8d1312f7305dabf215",
+          name: "Zed run",
+        },
+        {
+          contract: "0x2cb9c915369747c228d087d6179a8ce7e114c011",
+          name: "Loot",
+        },
+        {
+          contract: "0x7227e371540cf7b8e512544ba6871472031f3335",
+          name: "Neon District Season One",
+        },
+      ];
     this.loadPage();
   },
   methods: {
     async loadPage() {
       this.assets = [];
       this.nfts = [];
-      if (this.$parent.$parent.network.chainId === 137) {
-        // Matic
-        this.featuredCollections = [
-          {
-            contract: "0x76c52b2c4b2d2666663ce3318a5f35f912bd25c3",
-            name: "MaticPunks",
-          },
-          {
-            contract: "0x36a8377e2bb3ec7d6b0f1675e243e542eb6a4764",
-            name: "Non-Fungible Matic V2",
-          },
-          {
-            contract: "0xa5f1ea7df861952863df2e8d1312f7305dabf215",
-            name: "Zed run",
-          },
-          {
-            contract: "0x2cb9c915369747c228d087d6179a8ce7e114c011",
-            name: "Loot",
-          },
-          {
-            contract: "0x7227e371540cf7b8e512544ba6871472031f3335",
-            name: "Neon District Season One",
-          },
-        ];
-        if (this.$route.query.contract) {
-          this.getNFTs(this.$route.query.contract);
-        } else {
-          // Show whats on UniSwan by user for now
-          await Promise.all(
-            this.$parent.$parent.uniSwanUsers.map(async user => {
-              // Get Users NFTS
-              var res = await this.$parent.$parent.getUserTokensFromSubGraph(
-                user,
-                10,
-                0
-              );
-              this.nfts = this.nfts.concat(res.nfts);
-            })
-          )
-        }
-      } else if (this.$parent.$parent.network.chainId === 1) {
-        // Main net
-        this.featuredCollections = [
-          { slug: "0xmons-xyz", name: "0xmons" },
-          { slug: "hd-punk", name: "HD Punks" },
-          { slug: "autoglyphs", name: "Autoglyphs" },
-          { slug: "cryptopunks", name: "Cryptopunks" },
-          { slug: "eulerbeats", name: "Eulerbeats" },
-          { slug: "ens", name: "ENS" },
-          { slug: "hashmasks", name: "HashMasks" },
-          { slug: "meebits", name: "Meebits" },
-          { slug: "cryptoanarchists", name: "Crypto Anarchists" },
-        ];
-        this.loadOS(0);
+      if (this.$route.query.contract) {
+        if (this.$route.query.page_num) {this.currentPage = parseInt(this.$route.query.page_num)}
+        this.getNFTs(this.$route.query.contract, this.currentPage);
+      } else {
+        // Show whats on UniSwan by user for now
+        await Promise.all(
+          this.$parent.$parent.uniSwanUsers.map(async user => {
+            // Get Users NFTS
+            var res = await this.$parent.$parent.getUserTokensFromSubGraph(
+              user,
+              10,
+              0
+            );
+            this.nfts = this.nfts.concat(res.nfts);
+          })
+        )
       }
     },
-    async getNFTs(collectionAddress, offset = 0) {
-      this.currentContract = collectionAddress;
-      var res = await this.$parent.$parent.getContractTokensFromSubGraph(
-        collectionAddress,
-        10,
-        offset
-      );
-      if (offset === 0) {
-        this.nfts = res.nfts;
-      } else {
-        this.nfts = this.nfts.concat(res.nfts);
-      }
+    async getNFTs(collectionAddress, page = 1) {
+      // console.log('Page ', page);
+      this.nfts = await this.$parent.$parent.getContractTokensFromNFTPort(
+        this.$route.query.contract,
+        20,
+        page
+      )
+      var res = await this.$parent.$parent.getContractFromSubGraph(
+        this.$route.query.contract
+      )
+      // console.log(res);
       this.contractData = res.raw;
       this.$parent.$parent.routeName = this.contractData.name;
     },

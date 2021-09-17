@@ -45,29 +45,31 @@
         <account-card :address="nft.owner" :root="root" />
       </div>
     </div>
-    <div v-if="!display" class="nftcard">
-      <b-media no-body class="text-left">
-        <a
-          :href="'/#/nft/' + nft.contract + '/' + nft.tokenID"
-          class="avatar avatar-sm rounded-circle"
-        >
-          <img
-            class="bgim smallim"
-            :style="{ backgroundImage: 'url(' + nft.tokenJSON.image + ')' }"
-            alt=""
-          /> </a
-        >&nbsp;
-        <b-media-body>
-          <span
-            :style="{ fontWeight: nft.owner === root.signeraddr ? 900 : 400 }"
-            class="name mb-0 text-sm"
-          >
+    <div v-if="!display" class="nft1Holder">
+        <div
+          @click="$router.push('/nft/'+nft.contract+'/'+nft.tokenID)"
+          :key="'wish'+idx"
+          :style="{height:'50px',width:'50px',backgroundImage: 'url('+nft.tokenJSON.image+')'}"
+          class="img1Holder">
+        </div>
+        <div style="float:left;">
+          <b>
             {{ nft.tokenJSON.name }}
-          </span>
-          <br />
-          <account-card :address="nft.owner" :root="root" />
-        </b-media-body>
-      </b-media>
+          </b>
+          <div class="" v-if="nft.owner">
+            <img
+              :title="'Owner: '+nft.owner"
+              class="blockie blockie2"
+              :src="
+                root.makeBlockie(nft.owner)
+              "
+            />
+            <account-card style="line-height:30px;" :address="nft.owner" :root="root" />
+          </div>
+        </div>
+        <div class="cb">
+
+        </div>
     </div>
   </div>
 </template>
@@ -86,17 +88,38 @@ export default {
 };
 </script>
 <style>
+.blockie2 {
+  margin-top: -4px !important;
+  margin-right: 5px;
+}
+
+.innerBody {
+  padding:6px;
+}
 .bundleHeader {
   margin-left: 7px;
   margin-bottom: -35px;
 }
-.nftHolder {
+.nft1Holder {
+  background: #eee;
+  padding:7px;
+  padding-right:10px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+  /* margin-left: 0px; */
+
 }
-.imgHolder {
+.img1Holder {
+  float:left;
+  margin-right: 5px;
   height: 150px;
   width: 150px;
-  border-radius: 10px;
-  padding: 5px;
+  border:3px solid #fff;
+  border-radius: 8px;
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Do not repeat the image */
+  background-size: cover;
+  cursor: pointer;
 }
 .imgHolder.small {
   height: 50px;
