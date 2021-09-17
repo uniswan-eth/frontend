@@ -55,6 +55,7 @@ import {
 import Bundle from "@/components/UniSwan/Bundle";
 import AccountCard from "@/components/UniSwan/AccountCard";
 import { assetDataUtils } from "@0x/order-utils";
+import { ethers } from "ethers";
 
 export default {
   name: "history-table",
@@ -83,31 +84,10 @@ export default {
           var exchangeBundle = [];
           var wishBundle = [];
 
-          await Promise.all(
-            assetDataUtils
-              .decodeMultiAssetDataRecursively(e.args[2])
-              .nestedAssetData.map(async (x) => {
-                var nftObj = await this.$props.root.getTokenFromSubgraph(
-                  x.tokenAddress,
-                  x.tokenId.toNumber()
-                );
+          exchangeBundle = await this.$props.root.dataToBundle(e.args[2]);
 
-                exchangeBundle.push(nftObj.nft);
-              })
-          );
+          wishBundle = await this.$props.root.dataToBundle(e.args[3]);
 
-          await Promise.all(
-            assetDataUtils
-              .decodeMultiAssetDataRecursively(e.args[3])
-              .nestedAssetData.map(async (x) => {
-                var nftObj = await this.$props.root.getTokenFromSubgraph(
-                  x.tokenAddress,
-                  x.tokenId.toNumber()
-                );
-
-                wishBundle.push(nftObj.nft);
-              })
-          );
           this.parsedEvents.push({
             makerAddress: e.args[0],
             takerAddress: e.args[7],
@@ -119,6 +99,19 @@ export default {
       );
       console.log("Events2", this.parsedEvents);
     },
+  },
+  async makeERC20(tokenAddress, amount) {
+    var collection = new ethers.Contract(tokenAddress, ERC20ABI, this.signer);
+
+    return [
+      {
+        address: tokenAddress,
+        name: await collection.name(),
+        symbol: await collection.symbol(),
+        decimals: await collection.decimals(),
+        amount: amount,
+      },
+    ];
   },
 };
 </script>
