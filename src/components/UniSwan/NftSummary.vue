@@ -36,8 +36,7 @@
                   "
                   class="imgHolder"
                   :style="{
-                    backgroundImage:
-                      'url(' + nft.tokenJSON ? nft.tokenJSON.image : null + ')',
+                    backgroundImage: 'url(' + nft.tokenJSON.image + ')',
                   }"
                   v-for="(nft, idx) in n.wishBundle"
                   :key="'wish' + idx"
@@ -68,6 +67,7 @@
                   v-for="(asset, jdx) in finalPools[idx]"
                   :key="'wish' + jdx"
                 >
+                  <h1>{{ asset }}</h1>
                   <div
                     v-if="asset.tokenJSON"
                     class="imgHolder"
@@ -126,16 +126,15 @@ export default {
         );
 
         const bundle = await this.$props.root.dataToBundle(ourAssetsEncoded);
+        const remainder = bundle.filter(
+          (x) =>
+            !this.$props.root.usernfts.some(
+              (y) => y.contract === x.contract && y.tokenID === x.tokenID
+            )
+        );
 
         // Filter out any assets that the user already owns
-        this.finalPools.push(
-          bundle.filter(
-            (x) =>
-              !this.$props.root.usernfts.some(
-                (y) => y.contract === x.contract && y.tokenID === x.tokenID
-              )
-          )
-        );
+        this.finalPools.push(remainder);
       }
     },
   },
