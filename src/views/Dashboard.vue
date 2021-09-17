@@ -86,10 +86,12 @@ import NftsTable from "./Dashboard/NftsTable";
 import OffersTable from "./Dashboard/OffersTable";
 import OptionsTable from "./Dashboard/OptionsTable";
 import NftSummary from "@/components/UniSwan/NftSummary";
+import NftCard2 from "@/components/UniSwan/NftCard2";
 
 export default {
   components: {
     NftSummary,
+    NftCard2,
     OptionsTable,
     NftsTable,
     OffersTable,
