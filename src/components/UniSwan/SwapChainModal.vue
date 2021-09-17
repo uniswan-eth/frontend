@@ -24,15 +24,19 @@
 
     <div>
       <h3>You will receive:</h3>
-      <div
-        @click="$router.push('/nft/' + nft.contract + '/' + nft.tokenID)"
-        v-for="(nft, jdx) in $props.receiveBundle"
-        :key="'wish' + jdx"
-        :style="{
-          backgroundImage: 'url(' + nft.tokenJSON.image + ')',
-        }"
-        class="imgHolder"
-      />
+      <span v-for="(asset, jdx) in $props.receiveBundle" :key="'wish' + jdx">
+        <div
+          v-if="asset.tokenJSON"
+          class="imgHolder"
+          @click="$router.push('/nft/' + asset.contract + '/' + asset.tokenID)"
+          :style="{
+            backgroundImage: 'url(' + asset.tokenJSON.image + ')',
+          }"
+        />
+        <div v-if="!asset.tokenJSON" class="imgHolder">
+          {{ asset.symbol }}
+        </div>
+      </span>
     </div>
 
     <template slot="modal-footer">

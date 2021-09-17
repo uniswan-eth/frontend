@@ -60,13 +60,14 @@
               v-for="(n, idx) in $parent.userERC20s"
               @click="addToExchangeBundle(n)"
               :key="'cp' + idx"
-              :title="n.name"
-              img-alt="Image"
-              img-top
+              :title="n.symbol"
               tag="article"
               style="max-width: 20rem"
               class="mb-2"
             >
+              <p>
+                {{ parseInt(n.amount) / 10 ** parseInt(n.decimals) }}
+              </p>
             </b-card>
           </b-card-group>
         </b-tab>
@@ -192,32 +193,16 @@ export default {
     async clearWishBundle() {
       this.currentWishBundle = [];
     },
-    bundleToData(bundle) {
-      let amounts = [];
-      let assetDatas = [];
-      for (let i = 0; i < bundle.length; i++) {
-        let assetData;
-        if (bundle[i].tokenJSON) {
-          assetData = assetDataUtils.encodeERC721AssetData(
-            bundle[i].contract,
-            new BigNumber(bundle[i].tokenID)
-          );
-          amounts.push(new BigNumber(1));
-        } else {
-          assetData = assetDataUtils.encodeERC20AssetData(bundle[i].address);
-          amounts.push(new BigNumber(bundle[i].balance));
-        }
-        assetDatas.push(assetData);
-      }
-      return [amounts, assetDatas];
-    },
     async generateSignature() {
-      const [haveAmounts, haveAssetData] = this.bundleToData(
+      const [haveAmounts, haveAssetData] = this.$parent.bundleToData(
         this.currentExchangeBundle
       );
-      const [wantAmounts, wantAssetData] = this.bundleToData(
+      const [wantAmounts, wantAssetData] = this.$parent.bundleToData(
         this.currentWishBundle
       );
+
+      console.log(haveAmounts.map((x) => x.toNumber()));
+
       const salt = new BigNumber(new Date().getTime()).toString();
       const order = {
         chainId: 137,
@@ -240,14 +225,8 @@ export default {
           wantAmounts,
           wantAssetData
         ),
-        makerFeeAssetData: assetDataUtils.encodeMultiAssetData(
-          haveAmounts,
-          haveAssetData
-        ),
-        takerFeeAssetData: assetDataUtils.encodeMultiAssetData(
-          wantAmounts,
-          wantAssetData
-        ),
+        makerFeeAssetData: "0x",
+        takerFeeAssetData: "0x",
       };
       const provider = new MetamaskSubprovider(
         "ethereum" in window ? window["ethereum"] : Web3.givenProvider

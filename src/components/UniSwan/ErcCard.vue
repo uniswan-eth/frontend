@@ -1,11 +1,7 @@
 <template>
-  <div class="">
+  <div class="erc20card">
     <h4>{{ asset.symbol }}</h4>
-    {{
-      Math.round(
-        (parseInt(asset.balance) / 10 ** parseInt(asset.decimals)) * 100000
-      ) / 100000
-    }}
+    {{ parseInt(asset.amount) / 10 ** parseInt(asset.decimals) }}
   </div>
 </template>
 <script>
@@ -18,3 +14,10 @@ export default {
   },
 };
 </script>
+<style>
+.erc20card {
+  background: #eee;
+  border-style: dashed;
+  padding: 10px;
+}
+</style>

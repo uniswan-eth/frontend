@@ -36,7 +36,8 @@
                   "
                   class="imgHolder"
                   :style="{
-                    backgroundImage: 'url(' + nft.tokenJSON.image + ')',
+                    backgroundImage:
+                      'url(' + nft.tokenJSON ? nft.tokenJSON.image : null + ')',
                   }"
                   v-for="(nft, idx) in n.wishBundle"
                   :key="'wish' + idx"
@@ -63,17 +64,26 @@
                 >
                   <i class="ni ni-spaceship"></i>
                 </b-button>
-                <div
-                  @click="
-                    $router.push('/nft/' + nft.contract + '/' + nft.tokenID)
-                  "
-                  v-for="(nft, jdx) in finalPools[idx]"
+                <span
+                  v-for="(asset, jdx) in finalPools[idx]"
                   :key="'wish' + jdx"
-                  :style="{
-                    backgroundImage: 'url(' + nft.tokenJSON.image + ')',
-                  }"
-                  class="imgHolder"
-                />
+                >
+                  <div
+                    v-if="asset.tokenJSON"
+                    class="imgHolder"
+                    @click="
+                      $router.push(
+                        '/nft/' + asset.contract + '/' + asset.tokenID
+                      )
+                    "
+                    :style="{
+                      backgroundImage: 'url(' + asset.tokenJSON.image + ')',
+                    }"
+                  />
+                  <div v-if="!asset.tokenJSON" class="imgHolder">
+                    {{ asset.symbol }}
+                  </div>
+                </span>
               </div>
               <div class="cb" />
             </div>

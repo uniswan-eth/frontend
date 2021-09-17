@@ -435,7 +435,7 @@ export default {
           name: await collection.name(),
           symbol: await collection.symbol(),
           decimals: await collection.decimals(),
-          balance: await collection.balanceOf(userAddress),
+          amount: await collection.balanceOf(userAddress),
         },
       ];
     },
@@ -568,7 +568,7 @@ export default {
           amounts.push(new BigNumber(1));
         } else {
           assetData = assetDataUtils.encodeERC20AssetData(bundle[i].address);
-          amounts.push(new BigNumber(bundle[i].balance));
+          amounts.push(new BigNumber(bundle[i].amount.toNumber()));
         }
         assetDatas.push(assetData);
       }
@@ -582,7 +582,7 @@ export default {
         if (inter.amounts[i] > 0) {
           if (inter.nestedAssetData[i].assetProxyId === "0xf47261b0") {
             var collection = new ethers.Contract(
-              "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619", // WETH
+              inter.nestedAssetData[i].tokenAddress,
               ERC20ABI,
               this.signer
             );
@@ -591,7 +591,7 @@ export default {
               name: await collection.name(),
               symbol: await collection.symbol(),
               decimals: await collection.decimals(),
-              balance: inter.amounts[i],
+              amount: inter.amounts[i],
             });
           } else if (inter.nestedAssetData[i].assetProxyId === "0x02571792") {
             var result = await this.getTokenFromSubgraph(
@@ -686,6 +686,8 @@ export default {
         this.signer
       );
       console.log("Executing", exchange, ringswap);
+
+      console.log(ringswap);
 
       exchange.batchFillOrders(
         ringswap.map((b) => b.signedOrder),
