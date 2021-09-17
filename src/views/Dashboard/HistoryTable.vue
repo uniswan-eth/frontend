@@ -54,8 +54,6 @@ import {
 } from "element-ui";
 import Bundle from "@/components/UniSwan/Bundle";
 import AccountCard from "@/components/UniSwan/AccountCard";
-import { assetDataUtils } from "@0x/order-utils";
-import { ethers } from "ethers";
 
 export default {
   name: "history-table",
@@ -97,21 +95,7 @@ export default {
           });
         })
       );
-      console.log("Events2", this.parsedEvents);
     },
-  },
-  async makeERC20(tokenAddress, amount) {
-    var collection = new ethers.Contract(tokenAddress, ERC20ABI, this.signer);
-
-    return [
-      {
-        address: tokenAddress,
-        name: await collection.name(),
-        symbol: await collection.symbol(),
-        decimals: await collection.decimals(),
-        amount: amount,
-      },
-    ];
   },
 };
 </script>
