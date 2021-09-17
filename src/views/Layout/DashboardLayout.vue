@@ -105,10 +105,17 @@ import { ethers } from "ethers";
 import PerfectScrollbar from "perfect-scrollbar";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 
-const DB_BASE_URL = "https://uns-backend.vercel.app/api/v3";
 const SUBGRAPH_URL =
   "https://api.thegraph.com/subgraphs/name/tranchien2002/eip721-matic";
-const EXCHANGE_ADDRESS = "0x1f98206be961f98d0c2d2e5f7d965244b2f2129a";
+
+export const DB_BASE_URL = "https://uns-backend.vercel.app/api/v3";
+export const EXCHANGE_ADDRESS = "0x1f98206be961f98d0c2d2e5f7d965244b2f2129a";
+export const ERC20_PROXY_ADDRESS = "0x66421DB72AeDF7ab6e75Ab05b7A0031E017Aa64B";
+export const ERC721_PROXY_ADDRESS =
+  "0x7931459d633a9639F26e851c9E63D30388957B60";
+export const MULTI_ASSET_PROXY_ADDRESS =
+  "0xdd718b40c72dc397a90cfac32c5c1ea8556928ba";
+
 const client = new ApolloClient({
   link: createHttpLink({
     uri: SUBGRAPH_URL,
@@ -147,7 +154,6 @@ export default {
       routeName: null,
       showSearch: false,
 
-      ERC721_PROXY_ADDRESS: "0x7931459d633a9639F26e851c9E63D30388957B60",
       nonFungibleMaticV2Address: "0x36a8377e2bb3ec7d6b0f1675e243e542eb6a4764",
       access: false,
       allowList: [
@@ -652,7 +658,7 @@ export default {
 
       return await collection.isApprovedForAll(
         this.signeraddr,
-        this.ERC721_PROXY_ADDRESS
+        ERC721_PROXY_ADDRESS
       );
     },
     async approveTransfers(collectionAddress) {
@@ -662,7 +668,7 @@ export default {
         this.signer
       );
 
-      collection.setApprovalForAll(this.ERC721_PROXY_ADDRESS, true);
+      collection.setApprovalForAll(ERC721_PROXY_ADDRESS, true);
     },
     async unApproveTransfers(collectionAddress) {
       var collection = new ethers.Contract(
@@ -671,7 +677,7 @@ export default {
         this.signer
       );
 
-      collection.setApprovalForAll(this.ERC721_PROXY_ADDRESS, false);
+      collection.setApprovalForAll(ERC721_PROXY_ADDRESS, false);
     },
     async executeSwap(ringswap) {
       const exchange = new ethers.Contract(

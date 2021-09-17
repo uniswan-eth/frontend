@@ -122,6 +122,7 @@
 </template>
 <script>
 import NftsTable from "@/views/Dashboard/NftsTable";
+import { EXCHANGE_ADDRESS, DB_BASE_URL } from "@/views/Layout/DashboardLayout";
 import Bundle from "@/components/UniSwan/Bundle";
 
 import Web3 from "web3";
@@ -129,9 +130,6 @@ import { assetDataUtils, signatureUtils } from "@0x/order-utils";
 import { BigNumber } from "@0x/utils";
 import { MetamaskSubprovider } from "@0x/subproviders";
 import { HttpClient } from "@0x/connect";
-
-const DB_BASE_URL = "https://uns-backend.vercel.app/api/v3";
-const EXCHANGE_ADDRESS = "0x1f98206bE961f98d0c2d2e5f7d965244B2f2129A";
 
 export default {
   name: "create-order-modal",
