@@ -3,8 +3,8 @@
     <notifications></notifications>
     <order-modal :order="currentOrder"></order-modal>
     <create-order-modal
-      :nft="newOrderNFT"
-      :ownernfts="newOrderOwnerNFTs"
+      :nft="orderToDeleteNFT"
+      :ownernfts="orderToDeleteOwnerNFTs"
     ></create-order-modal>
     <swap-chain-modal
       :chain="currentSwapChain"
@@ -176,8 +176,8 @@ export default {
       userSwapOptions: [],
       fillEvents: [],
       currentOrder: null,
-      newOrderNFT: null,
-      newOrderOwnerNFTs: null,
+      orderToDeleteNFT: null,
+      orderToDeleteOwnerNFTs: null,
       currentSwapChain: null,
       currentReceiveBundle: null,
 
@@ -227,28 +227,8 @@ export default {
       var res = this.normalizeNFTs(nfts);
       return res;
     },
-    async getUserTokensFromNFTPort(
-      accountAddress,
-      pageSize = 10,
-      pageNumber = 1
-    ) {
-      var nfts = await this.getNFTsFromAPI(
-        "account/" + accountAddress + "/nfts",
-        pageSize,
-        pageNumber
-      );
-      console.log("User NFTs", accountAddress, nfts);
-      var res = this.normalizeNFTs(nfts);
-      return res;
-    },
     async getNFTsFromAPI(path, pageSize = 10, pageNumber = 1) {
-      var res = await this.NFTPortAPI(
-        // 'nfts/' + contract + (tokenId ? '/'+tokenId : ''),
-        path,
-        "",
-        pageSize,
-        pageNumber
-      );
+      var res = await this.NFTPortAPI(path, "", pageSize, pageNumber);
       if (!res || res.length === 0 || res.error) {
         return [];
       }
@@ -365,8 +345,7 @@ export default {
       var blockNumber = await this.provider.getBlockNumber();
       this.fillEvents = await exchange.queryFilter(
         exchange.filters.Fill(),
-        blockNumber - 990
-        // 18900000
+        blockNumber - 10000
       );
     },
     buildNEDB() {
@@ -520,18 +499,6 @@ export default {
 
       return newOurAssetsEncoded;
     },
-    async getContract(collectionAddress) {
-      var collection = new ethers.Contract(
-        collectionAddress,
-        ERC721ABI,
-        this.signer
-      );
-      var collectionName = await collection.name();
-      var toret = {
-        name: collectionName,
-      };
-      return toret;
-    },
     async getUserERC20s(userAddress) {
       var collection = new ethers.Contract(
         "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619", // WETH
@@ -564,7 +531,6 @@ export default {
           }
           owner {
             id
-            numTokens
           }
           tokenURI
         }
@@ -603,43 +569,7 @@ export default {
       const data = await client.query({
         query: gql(tokensQuery),
       });
-      return {
-        raw: data.data.tokenContract,
-      };
-    },
-    async getContractTokensFromSubGraph(
-      contractAddress,
-      limit = 10,
-      offset = 0
-    ) {
-      const tokensQuery = `
-        {
-          tokenContract(id:"${contractAddress.toLowerCase()}") {
-            id
-            name
-            numTokens
-            numOwners
-            tokens(first:${limit}, skip:${offset}) {
-              id,
-              contract {id, name, numTokens, numOwners, symbol}
-              tokenID
-              owner {id, numTokens}
-              tokenURI
-              mintTime
-            }
-          }
-        }
-      `;
-      console.log(tokensQuery);
-      const data = await client.query({
-        query: gql(tokensQuery),
-      });
-      const tokenData = data.data.tokenContract.tokens;
-      const nfts = await this.constructBundle(tokenData);
-      return {
-        nfts: nfts,
-        raw: data.data.tokenContract,
-      };
+      return data.data.tokenContract;
     },
     async getUserTokensFromSubGraph(userAddress, limit = 20, offset = 0) {
       const tokensQuery = `
@@ -722,9 +652,9 @@ export default {
       return [amounts, assetDatas];
     },
     async dataToBundle(assetData) {
-      var assetDatas =
+      const assetDatas =
         assetDataUtils.decodeMultiAssetDataRecursively(assetData);
-      const bundle = [];
+      var bundle = [];
 
       Promise.all(
         assetDatas.nestedAssetData.map(async (n, i) => {
@@ -747,6 +677,7 @@ export default {
                 n.tokenAddress,
                 n.tokenId.toNumber().toString()
               );
+
               bundle.push(result.nft);
             }
           }
@@ -856,7 +787,7 @@ export default {
         EXCHANGEABI,
         this.signer
       );
-      const newOrder = {
+      const orderToDelete = {
         exchangeAddress: order.exchangeAddress,
         makerAddress: order.makerAddress,
         takerAddress: order.takerAddress,
@@ -873,7 +804,7 @@ export default {
         makerFeeAssetData: order.makerFeeAssetData,
         takerFeeAssetData: order.takerFeeAssetData,
       };
-      await exchange.cancelOrder(newOrder);
+      await exchange.cancelOrder(orderToDelete);
       this.$notify({
         type: "danger",
         message: "Deleted order",
@@ -889,75 +820,8 @@ export default {
       this.currentOrder = order;
     },
     createOrder(nft, ownerNFTs) {
-      this.newOrderNFT = nft;
-      this.newOrderOwnerNFTs = ownerNFTs.nfts;
-    },
-    async fetchOpenSea(searchObj) {
-      var url = "https://api.opensea.io/api/v1/assets?";
-      if (searchObj.urlcollection) {
-        url = "https://api.opensea.io/api/v1/collections?";
-      }
-      if (searchObj.urlcontract) {
-        url =
-          "https://api.opensea.io/api/v1/asset_contract/" +
-          searchObj.contractaddress;
-      }
-      if (searchObj.urlorders) {
-        url =
-          "https://api.opensea.io/wyvern/v1/orders?bundled=false&include_bundled=false&include_invalid=false";
-      }
-      if (searchObj.urlasset) {
-        url =
-          "https://api.opensea.io/api/v1/asset/" +
-          searchObj.contractaddress +
-          "/" +
-          searchObj.token_id;
-      }
-      if (searchObj.urlhistory) {
-        url =
-          "https://api.opensea.io/api/v1/events?only_opensea=false&asset_contract_address=" +
-          searchObj.contractaddress +
-          "&token_id=" +
-          searchObj.token_id;
-      }
-      if (searchObj.urlcollections) {
-        url = "https://api.opensea.io/api/v1/collections?";
-      }
-      if (searchObj.urlevents) {
-        url = "https://api.opensea.io/api/v1/events?";
-      }
-
-      if (searchObj.offset) {
-        url += "&offset=" + searchObj.offset;
-      }
-      if (searchObj.limit) {
-        url += "&limit=" + searchObj.limit;
-      }
-      if (searchObj.contract) {
-        url += "&asset_contract_address=" + searchObj.contract;
-      }
-      if (searchObj.slug) {
-        url += "&collection_slug=" + searchObj.slug;
-      }
-      if (searchObj.owner) {
-        url += "&owner=" + searchObj.owner;
-      }
-      if (searchObj.asset_owner) {
-        url += "&asset_owner=" + searchObj.asset_owner;
-      }
-      if (searchObj.side) {
-        url += "&side=" + searchObj.side;
-      }
-      if (searchObj.is_english) {
-        url += "&is_english=true";
-      }
-      if (searchObj.order) {
-        url += "&order_by=" + searchObj.order;
-      }
-
-      const response = await fetch(url);
-      const res = await response.json();
-      return res;
+      this.orderToDeleteNFT = nft;
+      this.orderToDeleteOwnerNFTs = ownerNFTs.nfts;
     },
     formatAsset(nft) {
       return {
@@ -981,9 +845,6 @@ export default {
     },
     formatNumberWithCommas(x) {
       return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    },
-    rnd(n) {
-      return Math.floor(Math.random() * n);
     },
     initScrollbar() {
       let isWindows = navigator.platform.startsWith("Win");

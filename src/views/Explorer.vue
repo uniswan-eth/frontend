@@ -202,10 +202,9 @@ export default {
         page
       );
 
-      var res = await this.$parent.$parent.getContractFromSubGraph(
+      this.contractData = await this.$parent.$parent.getContractFromSubGraph(
         collectionAddress
       );
-      this.contractData = res.raw;
 
       this.$parent.$parent.routeName = this.contractData.name;
     },

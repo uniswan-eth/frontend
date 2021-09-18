@@ -44,7 +44,7 @@
       </b-badge>
       <router-link :to="'/explorer?contract=' + nft.contract">
         <b-badge variant="default">
-          {{ contractName.substr(0, 7) }}...
+          {{ contractData.name.substr(0, 7) }}...
         </b-badge>
       </router-link>
     </div>
@@ -66,15 +66,15 @@ export default {
   data() {
     return {
       saved: [],
-      contractName: "",
+      contractData: { name: "" },
     };
   },
   async mounted() {
     this.saved = await this.root.checkSaved(this.nft);
 
-    var contract = await this.$props.root.getContract(this.$props.nft.contract);
-
-    this.contractName = contract.name;
+    this.contractData = await this.$props.root.getContractFromSubGraph(
+      this.nft.contract
+    );
   },
   methods: {},
 };

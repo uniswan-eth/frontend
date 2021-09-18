@@ -327,7 +327,7 @@ export default {
       this.validSwaps = [];
       this.ownerOrders = [];
 
-      this.contract = await this.$parent.$parent.getContract(
+      this.contract = await this.$parent.$parent.getContractFromSubGraph(
         this.$route.params.contract
       );
       this.signerApproved = await this.$parent.$parent.signerIsApproved(
@@ -387,14 +387,7 @@ export default {
         );
 
         // Filter out any assets that the user already owns
-        this.finalPools.push(
-          bundle.filter(
-            (x) =>
-              !nfts.some(
-                (y) => y.contract === x.contract && y.tokenID === x.tokenID
-              )
-          )
-        );
+        this.finalPools.push(bundle);
       }
     },
   },
