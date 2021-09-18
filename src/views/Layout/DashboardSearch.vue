@@ -3,9 +3,9 @@
     <div class="searchPopUp">
       <card header-classes="bg-transparent">
         <h6 class="navbar-heading text-muted text-uppercase">Collections</h6>
-        <div v-if="contracts && contracts.data.tokenContracts">
+        <div v-if="contracts">
           <contract-card
-            v-for="(n, idx) in contracts.data.tokenContracts"
+            v-for="(n, idx) in contracts"
             :key="'contract' + idx"
             :contract="n"
             :root="root"
@@ -25,7 +25,7 @@ export default {
   props: ["root", "searchQuery"],
   data() {
     return {
-      contracts: null,
+      contracts: [],
     };
   },
   async mounted() {},

@@ -214,6 +214,84 @@ export default {
     this.loadApp();
   },
   methods: {
+    async getUserTokensFromSubGraph(userAddress, limit = 20, offset = 0) {
+      const tokensQuery = `
+        {
+          owner(id:"${userAddress.toLowerCase()}") {
+            id
+            numTokens
+            tokens(first:${limit}, skip:${offset}) {
+              id,
+              contract {id, name, numTokens, numOwners, symbol}
+              tokenID
+              owner {id, numTokens}
+              tokenURI
+              mintTime
+            }
+          }
+        }
+        `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+
+      var nfts = [];
+      await Promise.all(
+        data.data.owner.tokens.map(async (x) => {
+          var nft = await this.getNFTsFromAPI(
+            "nfts/" + x.contract.id + "/" + x.tokenID
+          );
+          if (nft[0]) {
+            nfts.push(this.normalizeNFTs(nft)[0]);
+          } else {
+            // FIXME: Need to get data an alternative way
+            const nftAlt = await this.constructBundle([x]);
+            if (nftAlt[0]) {
+              nfts.push(nftAlt[0]);
+            } else {
+              console.log("Missing NFT", x);
+            }
+          }
+        })
+      );
+
+      return {
+        nfts: nfts,
+        raw: data.data.owner,
+      };
+    },
+    async getContractsFromSubGraph(search, limit = 10) {
+      const tokensQuery = `{
+        tokenContracts(first:${limit}, where: {name_contains:"${search}"}) {
+          id
+          name
+          numTokens
+          numOwners
+        }
+      }`;
+
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+
+      return data.data.tokenContracts;
+    },
+    async getContractFromSubGraph(contractAddress) {
+      const tokensQuery = `
+        {
+          tokenContract(id:"${contractAddress.toLowerCase()}") {
+            id
+            name
+            numTokens
+            numOwners
+          }
+        }
+      `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      return data.data.tokenContract;
+    },
     async getContractTokensFromNFTPort(
       contractAddress,
       pageSize = 10,
@@ -227,11 +305,70 @@ export default {
       var res = this.normalizeNFTs(nfts);
       return res;
     },
+    async getTokenFromSubgraphLean(contractAddress, tokenId) {
+      const id = contractAddress.toLowerCase() + "_" + tokenId;
+
+      const tokensQuery = `
+      query {
+        token(id:"${id}") {
+          contract {
+            name
+          }
+          owner {
+            id
+          }
+        }
+      }
+      `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+
+      return data.data.token;
+    },
+    async getTokenFromSubgraph(contractAddress, tokenId) {
+      const id = contractAddress.toLowerCase() + "_" + tokenId;
+
+      const tokensQuery = `
+      query {
+        tokens(where:{ id:"${id}"}) {
+          id
+          contract {
+            id
+            name
+            numTokens
+            numOwners
+          }
+          owner {
+            id
+          }
+          tokenURI
+        }
+      }
+      `;
+      const data = await client.query({
+        query: gql(tokensQuery),
+      });
+      const d = data.data.tokens[0];
+      var res = await fetch(d.tokenURI);
+      var tokenJSON = await res.json();
+
+      const nft = {
+        contract: d.contract.id,
+        tokenID: tokenId,
+        owner: d.owner.id,
+        tokenJSON: tokenJSON,
+      };
+
+      return {
+        nft: nft,
+        raw: data,
+      };
+    },
     async getNFTsFromAPI(path, pageSize = 10, pageNumber = 1) {
       var res = await this.NFTPortAPI(path, "", pageSize, pageNumber);
-      if (!res || res.length === 0 || res.error) {
-        return [];
-      }
+      if (!res || res.length === 0 || res.error) return [];
+
       var toret = [];
 
       if (res.nft) {
@@ -257,18 +394,17 @@ export default {
       var toret = [];
       nfts.map((x) => {
         if (x) {
-          if (!x.nft) {
-            x.nft = x;
-          }
+          if (!x.nft) x.nft = x;
+
           var nft = {
             contract: x.nft.contract_address,
             tokenID: x.nft.token_id,
-            owner: null, // x.owner.id,
+            owner: null,
             tokenJSON: x.nft.metadata,
           };
-          if (x.nft.cached_image_url) {
+          if (x.nft.cached_image_url)
             nft.tokenJSON.image = x.nft.cached_image_url;
-          }
+
           toret.push(nft);
         }
       });
@@ -515,122 +651,6 @@ export default {
           amount: await collection.balanceOf(userAddress),
         },
       ];
-    },
-    async getTokenFromSubgraph(contractAddress, tokenId) {
-      const id = contractAddress.toLowerCase() + "_" + tokenId;
-
-      const tokensQuery = `
-      query {
-        tokens(where:{ id:"${id}"}) {
-          id
-          contract {
-            id
-            name
-            numTokens
-            numOwners
-          }
-          owner {
-            id
-          }
-          tokenURI
-        }
-      }
-      `;
-      const data = await client.query({
-        query: gql(tokensQuery),
-      });
-      const d = data.data.tokens[0];
-      var res = await fetch(d.tokenURI);
-      var tokenJSON = await res.json();
-
-      const nft = {
-        contract: d.contract.id,
-        tokenID: tokenId,
-        owner: d.owner.id,
-        tokenJSON: tokenJSON,
-      };
-
-      return {
-        nft: nft,
-        raw: data,
-      };
-    },
-    async getContractFromSubGraph(contractAddress) {
-      const tokensQuery = `
-        {
-          tokenContract(id:"${contractAddress.toLowerCase()}") {
-            id
-            name
-            numTokens
-            numOwners
-          }
-        }
-      `;
-      const data = await client.query({
-        query: gql(tokensQuery),
-      });
-      return data.data.tokenContract;
-    },
-    async getUserTokensFromSubGraph(userAddress, limit = 20, offset = 0) {
-      const tokensQuery = `
-        {
-          owner(id:"${userAddress.toLowerCase()}") {
-            id
-            numTokens
-            tokens(first:${limit}, skip:${offset}) {
-              id,
-              contract {id, name, numTokens, numOwners, symbol}
-              tokenID
-              owner {id, numTokens}
-              tokenURI
-              mintTime
-            }
-          }
-        }
-        `;
-      const data = await client.query({
-        query: gql(tokensQuery),
-      });
-
-      var nfts = [];
-      await Promise.all(
-        data.data.owner.tokens.map(async (x) => {
-          var nft = await this.getNFTsFromAPI(
-            "nfts/" + x.contract.id + "/" + x.tokenID
-          );
-          if (nft[0]) {
-            nfts.push(this.normalizeNFTs(nft)[0]);
-          } else {
-            // FIXME: Need to get data an alternative way
-            const nftAlt = await this.constructBundle([x]);
-            if (nftAlt[0]) {
-              nfts.push(nftAlt[0]);
-            } else {
-              console.log("Missing NFT", x);
-            }
-          }
-        })
-      );
-
-      return {
-        nfts: nfts,
-        raw: data.data.owner,
-      };
-    },
-    async getContractsFromSubGraph(search, limit = 10) {
-      const tokensQuery = `{
-        tokenContracts(first:${limit}, where: {name_contains:"${search}"}) {
-          id
-          name
-          numTokens
-          numOwners
-        }
-      }`;
-
-      const data = await client.query({
-        query: gql(tokensQuery),
-      });
-      return data;
     },
     bundleToData(bundle) {
       let amounts = [];

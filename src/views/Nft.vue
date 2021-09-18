@@ -16,7 +16,7 @@
                 <router-link
                   :to="'/explorer/?contract=' + asset.asset_contract.address"
                 >
-                  {{ contract.name }}
+                  {{ assetSubGraph.contract.name }}
                 </router-link>
               </small>
               <h1 slot="header" class="mb-0">
@@ -93,22 +93,6 @@
               >
                 Contract {{ asset.asset_contract.address }}
               </a>
-            </div>
-            <br />
-            <div class="">
-              <span class="text-success mr-2">{{
-                $parent.$parent.formatNumberWithCommas(
-                  assetSubGraph.contract.numOwners
-                )
-              }}</span>
-              <span class="text-nowrap">Owners</span>
-              &nbsp;
-              <span class="text-success mr-2">{{
-                $parent.$parent.formatNumberWithCommas(
-                  assetSubGraph.contract.numTokens
-                )
-              }}</span>
-              <span class="text-nowrap">Tokens</span>
             </div>
             <br />
             <div
@@ -327,47 +311,59 @@ export default {
       this.validSwaps = [];
       this.ownerOrders = [];
 
-      this.contract = await this.$parent.$parent.getContractFromSubGraph(
-        this.$route.params.contract
-      );
       this.signerApproved = await this.$parent.$parent.signerIsApproved(
         this.$route.params.contract
       );
-      var data = await this.$parent.$parent.getTokenFromSubgraph(
+      this.assetSubGraph = await this.$parent.$parent.getTokenFromSubgraphLean(
         this.$route.params.contract,
         this.$route.params.tokenid.toString()
       );
-      var nft = data.nft;
-      this.nft = nft;
-      this.saved = await this.$parent.$parent.checkSaved(nft);
 
-      this.$parent.$parent.routeName = nft.tokenJSON.name;
+      var dataAPI = await this.$parent.$parent.getNFTsFromAPI(
+        "nfts/" +
+          this.$route.params.contract +
+          "/" +
+          this.$route.params.tokenid.toString()
+      );
+
+      this.nft = {
+        tokenID: dataAPI[0].token_id,
+        contract: dataAPI[0].contract_address,
+        tokenJSON: dataAPI[0].metadata,
+        owner: this.assetSubGraph.owner.id,
+      };
+
+      this.saved = await this.$parent.$parent.checkSaved(this.nft);
+
+      this.$parent.$parent.routeName = this.nft.tokenJSON.name;
 
       // Use same format as OpenSea API
-      this.asset = this.$parent.$parent.formatAsset(nft);
-      this.assetSubGraph = data.raw.data.tokens[0];
+      this.asset = this.$parent.$parent.formatAsset(this.nft);
 
       // Swap Options
-      this.validSwaps = await this.$parent.$parent.getSwapOptions([nft]);
+      this.validSwaps = await this.$parent.$parent.getSwapOptions([this.nft]);
+      this.finalPools = await this.buildFinalPools([this.nft]);
 
       // Owners Assets
       this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph(
-        nft.owner
+        this.nft.owner
       );
 
       var orders = await this.$parent.$parent.getOrdersFromDB({
-        makerAddress: nft.owner.toLowerCase(),
+        makerAddress: this.nft.owner.toLowerCase(),
       });
       orders.map((x) => {
         x.exchangeBundle.map((y) => {
-          if (y.tokenID === nft.tokenID && y.contract === nft.contract)
+          if (
+            y.tokenID === this.nft.tokenID &&
+            y.contract === this.nft.contract
+          )
             this.ownerOrders.push(x);
         });
       });
-      await this.buildFinalPools([nft]);
     },
     async buildFinalPools(nfts) {
-      this.finalPools = [];
+      var finalPools = [];
 
       for (let i = 0; i < this.validSwaps.length; i++) {
         var ourAssetsEncoded = assetDataUtils.encodeMultiAssetData(
@@ -387,8 +383,9 @@ export default {
         );
 
         // Filter out any assets that the user already owns
-        this.finalPools.push(bundle);
+        finalPools.push(bundle);
       }
+      return finalPools;
     },
   },
   watch: {
