@@ -214,19 +214,13 @@ export default {
     this.loadApp();
   },
   methods: {
-    async getUserTokensFromSubGraph(userAddress, limit = 20, offset = 0) {
+    async getUserTokens(userAddress, limit = 20, offset = 0) {
       const tokensQuery = `
         {
           owner(id:"${userAddress.toLowerCase()}") {
-            id
-            numTokens
             tokens(first:${limit}, skip:${offset}) {
-              id,
-              contract {id, name, numTokens, numOwners, symbol}
+              contract {id}
               tokenID
-              owner {id, numTokens}
-              tokenURI
-              mintTime
             }
           }
         }
@@ -255,10 +249,7 @@ export default {
         })
       );
 
-      return {
-        nfts: nfts,
-        raw: data.data.owner,
-      };
+      return nfts;
     },
     async getContractsFromSubGraph(search, limit = 10) {
       const tokensQuery = `{
@@ -305,15 +296,12 @@ export default {
       var res = this.normalizeNFTs(nfts);
       return res;
     },
-    async getTokenFromSubgraphLean(contractAddress, tokenId) {
+    async getOwnerFromSubgraph(contractAddress, tokenId) {
       const id = contractAddress.toLowerCase() + "_" + tokenId;
 
       const tokensQuery = `
       query {
         token(id:"${id}") {
-          contract {
-            name
-          }
           owner {
             id
           }
@@ -324,46 +312,7 @@ export default {
         query: gql(tokensQuery),
       });
 
-      return data.data.token;
-    },
-    async getTokenFromSubgraph(contractAddress, tokenId) {
-      const id = contractAddress.toLowerCase() + "_" + tokenId;
-
-      const tokensQuery = `
-      query {
-        tokens(where:{ id:"${id}"}) {
-          id
-          contract {
-            id
-            name
-            numTokens
-            numOwners
-          }
-          owner {
-            id
-          }
-          tokenURI
-        }
-      }
-      `;
-      const data = await client.query({
-        query: gql(tokensQuery),
-      });
-      const d = data.data.tokens[0];
-      var res = await fetch(d.tokenURI);
-      var tokenJSON = await res.json();
-
-      const nft = {
-        contract: d.contract.id,
-        tokenID: tokenId,
-        owner: d.owner.id,
-        tokenJSON: tokenJSON,
-      };
-
-      return {
-        nft: nft,
-        raw: data,
-      };
+      return data.data.token.owner.id;
     },
     async getNFTsFromAPI(path, pageSize = 10, pageNumber = 1) {
       var res = await this.NFTPortAPI(path, "", pageSize, pageNumber);
@@ -465,9 +414,7 @@ export default {
     async loadUser() {
       this.savedNFTs = await this.queryNEDB({}, this.nedbSaved);
       this.userERC20s = await this.getUserERC20s(this.signeraddr);
-      this.usernfts = (
-        await this.getUserTokensFromSubGraph(this.signeraddr)
-      ).nfts;
+      this.usernfts = await this.getUserTokens(this.signeraddr);
       this.userprefs = await this.getOrdersFromDB({
         makerAddress: this.signeraddr.toLowerCase(),
       });
@@ -693,12 +640,17 @@ export default {
                 amount: assetDatas.amounts[i],
               });
             } else if (n.assetProxyId === "0x02571792") {
-              var result = await this.getTokenFromSubgraph(
-                n.tokenAddress,
-                n.tokenId.toNumber().toString()
+              const dataAPI = await this.getNFTsFromAPI(
+                "nfts/" + n.tokenAddress + "/" + n.tokenId
               );
 
-              bundle.push(result.nft);
+              const nft = {
+                tokenID: dataAPI[0].token_id,
+                contract: dataAPI[0].contract_address,
+                tokenJSON: dataAPI[0].metadata,
+              };
+
+              bundle.push(nft);
             }
           }
         })
@@ -841,7 +793,7 @@ export default {
     },
     createOrder(nft, ownerNFTs) {
       this.orderToDeleteNFT = nft;
-      this.orderToDeleteOwnerNFTs = ownerNFTs.nfts;
+      this.orderToDeleteOwnerNFTs = ownerNFTs;
     },
     formatAsset(nft) {
       return {

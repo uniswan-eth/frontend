@@ -185,12 +185,8 @@ export default {
         await Promise.all(
           this.$parent.$parent.uniSwanUsers.map(async (user) => {
             // Get Users NFTS
-            var res = await this.$parent.$parent.getUserTokensFromSubGraph(
-              user,
-              10,
-              0
-            );
-            this.nfts = this.nfts.concat(res.nfts);
+            var res = await this.$parent.$parent.getUserTokens(user, 10, 0);
+            this.nfts = this.nfts.concat(res);
           })
         );
       }

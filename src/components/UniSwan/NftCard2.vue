@@ -17,7 +17,6 @@
     />
     <div class="nftCardBlockie" v-if="nft.owner">
       <router-link :to="'/account/' + nft.owner">
-        <!-- style="" -->
         <img
           :title="'Owner: ' + nft.owner"
           class="blockie"

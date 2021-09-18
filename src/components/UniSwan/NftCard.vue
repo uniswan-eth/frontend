@@ -46,30 +46,22 @@
       </div>
     </div>
     <div v-if="!display" class="nft1Holder">
-        <div
-          @click="$router.push('/nft/'+nft.contract+'/'+nft.tokenID)"
-          :key="'wish'+idx"
-          :style="{height:'50px',width:'50px',backgroundImage: 'url('+nft.tokenJSON.image+')'}"
-          class="img1Holder">
-        </div>
-        <div style="float:left;">
-          <b>
-            {{ nft.tokenJSON.name }}
-          </b>
-          <div class="" v-if="nft.owner">
-            <img
-              :title="'Owner: '+nft.owner"
-              class="blockie blockie2"
-              :src="
-                root.makeBlockie(nft.owner)
-              "
-            />
-            <account-card style="line-height:30px;" :address="nft.owner" :root="root" />
-          </div>
-        </div>
-        <div class="cb">
-
-        </div>
+      <div
+        @click="$router.push('/nft/' + nft.contract + '/' + nft.tokenID)"
+        :key="'wish' + idx"
+        :style="{
+          height: '50px',
+          width: '50px',
+          backgroundImage: 'url(' + nft.tokenJSON.image + ')',
+        }"
+        class="img1Holder"
+      ></div>
+      <div style="float: left">
+        <b>
+          {{ nft.tokenJSON.name }}
+        </b>
+      </div>
+      <div class="cb"></div>
     </div>
   </div>
 </template>
@@ -94,7 +86,7 @@ export default {
 }
 
 .innerBody {
-  padding:6px;
+  padding: 6px;
 }
 .bundleHeader {
   margin-left: 7px;
@@ -102,19 +94,18 @@ export default {
 }
 .nft1Holder {
   background: #eee;
-  padding:7px;
-  padding-right:10px;
+  padding: 7px;
+  padding-right: 10px;
   margin-bottom: 5px;
   border-radius: 5px;
   /* margin-left: 0px; */
-
 }
 .img1Holder {
-  float:left;
+  float: left;
   margin-right: 5px;
   height: 150px;
   width: 150px;
-  border:3px solid #fff;
+  border: 3px solid #fff;
   border-radius: 8px;
   background-position: center; /* Center the image */
   background-repeat: no-repeat; /* Do not repeat the image */

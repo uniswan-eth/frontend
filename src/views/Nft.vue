@@ -16,7 +16,7 @@
                 <router-link
                   :to="'/explorer/?contract=' + asset.asset_contract.address"
                 >
-                  {{ assetSubGraph.contract.name }}
+                  {{ nft.contractName }}
                 </router-link>
               </small>
               <h1 slot="header" class="mb-0">
@@ -249,7 +249,7 @@
                 minWidth="8rem"
                 maxWidth="12rem"
                 display="card"
-                v-for="(n, idx) in ownerAssets.nfts"
+                v-for="(n, idx) in ownerAssets"
                 :key="'ownernft' + idx"
                 :nft="n"
                 :root="$parent.$parent"
@@ -314,10 +314,6 @@ export default {
       this.signerApproved = await this.$parent.$parent.signerIsApproved(
         this.$route.params.contract
       );
-      this.assetSubGraph = await this.$parent.$parent.getTokenFromSubgraphLean(
-        this.$route.params.contract,
-        this.$route.params.tokenid.toString()
-      );
 
       var dataAPI = await this.$parent.$parent.getNFTsFromAPI(
         "nfts/" +
@@ -330,8 +326,18 @@ export default {
         tokenID: dataAPI[0].token_id,
         contract: dataAPI[0].contract_address,
         tokenJSON: dataAPI[0].metadata,
-        owner: this.assetSubGraph.owner.id,
       };
+
+      this.nft.contractName = (
+        await this.$parent.$parent.getContractFromSubGraph(
+          this.$route.params.contract
+        )
+      ).name;
+
+      this.nft.owner = await this.$parent.$parent.getOwnerFromSubgraph(
+        this.$route.params.contract,
+        this.$route.params.tokenid.toString()
+      );
 
       this.saved = await this.$parent.$parent.checkSaved(this.nft);
 
@@ -345,7 +351,7 @@ export default {
       this.finalPools = await this.buildFinalPools([this.nft]);
 
       // Owners Assets
-      this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph(
+      this.ownerAssets = await this.$parent.$parent.getUserTokens(
         this.nft.owner
       );
 

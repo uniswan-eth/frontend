@@ -251,10 +251,9 @@ export default {
         this.offers = this.$parent.$parent.userprefs;
         this.swapOptions = this.$parent.$parent.userSwapOptions;
       } else {
-        var res = await this.$parent.$parent.getUserTokensFromSubGraph(
+        this.nfts = await this.$parent.$parent.getUserTokens(
           this.$route.params.address
         );
-        this.nfts = res.nfts;
         this.offers = await this.$parent.$parent.getOrdersFromDB({
           makerAddress: this.$route.params.address,
         });

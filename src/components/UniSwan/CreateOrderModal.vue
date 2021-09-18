@@ -144,8 +144,6 @@ export default {
       initialWish: null,
       currentExchangeBundle: [],
       currentWishBundle: [],
-      wishTokenId: null,
-      exchangeTokenId: null,
     };
   },
   methods: {
@@ -154,11 +152,6 @@ export default {
       this.currentWishBundle = [];
       if (this.initialWish) {
         this.addToWishBundle(this.initialWish.tokenID);
-
-        // Get Counterpartys assets
-        this.counterPartyNFTs = await this.root.getUserTokensFromSubGraph(
-          this.initialWish.owner
-        );
       }
     },
     async addToExchangeBundle(asset) {
