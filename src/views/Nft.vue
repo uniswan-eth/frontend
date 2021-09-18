@@ -244,7 +244,7 @@
               </h6>
               <b-media no-body class="align-items-center">
                 <span class="avatar avatar-sm rounded-circle">
-                  <a :href="'/#/account/' + asset.owner.address">
+                  <a :href="'/#/account/' + asset.owner.address + '?tab=nfts'">
                     <img
                       :src="$parent.$parent.makeBlockie(asset.owner.address)"
                     />

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="nft && nft.tokenJSON">
     <b-card
       no-body
       class="overflow-hidden"
@@ -126,6 +126,8 @@ export default {
         );
 
         const bundle = await this.$props.root.dataToBundle(ourAssetsEncoded);
+
+        // Filter out any assets that the user already owns
         const remainder = bundle.filter(
           (x) =>
             !this.$props.root.usernfts.some(
@@ -133,7 +135,6 @@ export default {
             )
         );
 
-        // Filter out any assets that the user already owns
         this.finalPools.push(remainder);
       }
     },

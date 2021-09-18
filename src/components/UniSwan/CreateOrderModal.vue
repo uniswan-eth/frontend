@@ -201,8 +201,6 @@ export default {
         this.currentWishBundle
       );
 
-      console.log(haveAmounts.map((x) => x.toNumber()));
-
       const salt = new BigNumber(new Date().getTime()).toString();
       const order = {
         chainId: 137,

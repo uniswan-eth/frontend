@@ -52,6 +52,18 @@
     <b-container fluid class="mt--7">
       <b-row class="mt-5">
         <b-col xl="12" class="mb-5 mb-xl-0">
+          <nft-summary
+            display="card"
+            v-for="(summary, idx) in summarys"
+            :key="'nft' + idx"
+            :nft="summary.nft"
+            :summary="summary"
+            :root="$parent.$parent"
+          />
+        </b-col>
+      </b-row>
+      <b-row class="mt-5">
+        <b-col xl="12" class="mb-5 mb-xl-0">
           <card header-classes="bg-transparent">
             <h2 slot="header" class="mb-0">Saved</h2>
             <b-card-group deck>
@@ -64,18 +76,6 @@
               />
             </b-card-group>
           </card>
-        </b-col>
-      </b-row>
-      <b-row class="mt-5">
-        <b-col xl="12" class="mb-5 mb-xl-0">
-          <nft-summary
-            display="card"
-            v-for="(summary, idx) in summarys"
-            :key="'nft' + idx"
-            :nft="summary.nft"
-            :summary="summary"
-            :root="$parent.$parent"
-          />
         </b-col>
       </b-row>
     </b-container>

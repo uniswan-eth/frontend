@@ -238,6 +238,8 @@ export default {
       } else {
         var res = await this.$parent.$parent.getUserTokensFromSubGraph(this.$route.params.address);
         this.nfts = res.nfts
+        // var res = await this.$parent.$parent.getUserTokensFromNFTPort(this.$route.params.address);
+        // this.nfts = res
         this.offers = await this.$parent.$parent.getOrdersFromDB({
           makerAddress: this.$route.params.address,
         });
