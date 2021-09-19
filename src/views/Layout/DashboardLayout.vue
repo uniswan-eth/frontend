@@ -194,9 +194,12 @@ export default {
   },
   async mounted() {
     document.title = "🦢 UniSwan";
-    await window.ethereum.enable();
     var self = this;
     this.provider = new ethers.providers.Web3Provider(window.ethereum);
+    this.provider.on("requestAccounts", (blockNumber) => {
+      // Emitted on every block change
+      this.blockNumber = blockNumber;
+    });
     this.provider.on("block", (blockNumber) => {
       // Emitted on every block change
       this.blockNumber = blockNumber;
@@ -624,12 +627,19 @@ export default {
                 "nfts/" + n.tokenAddress + "/" + n.tokenId
               );
 
-              const nft = {
-                tokenID: dataAPI[0].token_id,
-                contract: dataAPI[0].contract_address,
-                tokenJSON: dataAPI[0].metadata,
+              var nft = {
+                tokenID: "fixme",
+                contract: "fixme",
+                tokenJSON: {},
               };
 
+              if (dataAPI.length > 0) {
+                nft = {
+                  tokenID: dataAPI[0].token_id,
+                  contract: dataAPI[0].contract_address,
+                  tokenJSON: dataAPI[0].metadata,
+                };
+              }
               bundle.push(nft);
             }
           }
