@@ -238,11 +238,10 @@ export default {
           var nft = await this.getNFTsFromAPI(
             "nfts/" + x.contract.id + "/" + x.tokenID
           );
-          nfts.push(this.normalizeNFTs(nft)[0]);
+          nfts.push(nft[0]);
         })
       );
-
-      return nfts;
+      return this.normalizeNFTs(nfts);
     },
     async getContractsFromSubGraph(search, limit = 10) {
       const tokensQuery = `{
@@ -329,6 +328,19 @@ export default {
         );
       }
       return toret;
+    },
+    async getTokenExtra(contract, tokenId) {
+      const dataAPI = await this.getNFTsFromAPI(
+        "nfts/" + contract + "/" + tokenId
+      );
+
+      var nft = this.normalizeNFTs(dataAPI)[0];
+
+      nft.contractName = (await this.getContractFromSubGraph(contract)).name;
+
+      nft.owner = await this.getOwnerFromSubgraph(contract, tokenId);
+
+      return nft;
     },
     normalizeNFTs(nfts) {
       var toret = [];
@@ -477,20 +489,12 @@ export default {
 
       return orders;
     },
-    async getSwapOptions(NFTs) {
-      let wantAssetData = [];
-      let wantAssetAmounts = [];
-      for (let i = 0; i < NFTs.length; i++) {
-        let assetData = assetDataUtils.encodeERC721AssetData(
-          NFTs[i].contract,
-          new BigNumber(NFTs[i].tokenID)
-        );
-        wantAssetData.push(assetData);
-        wantAssetAmounts.push(new BigNumber(1));
-      }
+    async getSwapOptions(bundle) {
+      let [amounts, assetDatas] = this.bundleToData(bundle);
+
       var encodedData = assetDataUtils.encodeMultiAssetData(
-        wantAssetAmounts,
-        wantAssetData
+        amounts,
+        assetDatas
       );
       const bundlesDBURI = DB_BASE_URL + "/options/" + encodedData;
       var res = await fetch(bundlesDBURI);
@@ -606,7 +610,7 @@ export default {
         assetDataUtils.decodeMultiAssetDataRecursively(assetData);
       var bundle = [];
 
-      Promise.all(
+      await Promise.all(
         assetDatas.nestedAssetData.map(async (n, i) => {
           if (assetDatas.amounts[i] > 0) {
             if (n.assetProxyId === "0xf47261b0") {

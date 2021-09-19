@@ -315,22 +315,7 @@ export default {
         this.$route.params.contract
       );
 
-      var dataAPI = await this.$parent.$parent.getNFTsFromAPI(
-        "nfts/" +
-          this.$route.params.contract +
-          "/" +
-          this.$route.params.tokenid.toString()
-      );
-
-      this.nft = this.$parent.$parent.normalizeNFTs(dataAPI)[0];
-
-      this.nft.contractName = (
-        await this.$parent.$parent.getContractFromSubGraph(
-          this.$route.params.contract
-        )
-      ).name;
-
-      this.nft.owner = await this.$parent.$parent.getOwnerFromSubgraph(
+      this.nft = await this.$parent.$parent.getTokenExtra(
         this.$route.params.contract,
         this.$route.params.tokenid.toString()
       );

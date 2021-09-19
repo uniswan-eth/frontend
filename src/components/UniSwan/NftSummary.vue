@@ -67,7 +67,6 @@
                   v-for="(asset, jdx) in finalPools[idx]"
                   :key="'wish' + jdx"
                 >
-                  <h1>{{ asset }}</h1>
                   <div
                     v-if="asset.tokenJSON"
                     class="imgHolder"
