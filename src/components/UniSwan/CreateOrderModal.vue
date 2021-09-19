@@ -177,7 +177,10 @@ export default {
         alreadyAdded = this.currentExchangeBundle.find(
           (x) => x.tokenID === asset.tokenID && x.contract === asset.contract
         );
-        if (!alreadyAdded)
+        if (
+          !alreadyAdded &&
+          !this.approvals.some((x) => x.contract === asset.contract)
+        )
           this.approvals.push({
             contract: asset.contract,
             isApproved: await this.$parent.isApproved(
