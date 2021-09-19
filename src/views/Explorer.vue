@@ -168,7 +168,7 @@ export default {
         this.getContractTokens(this.$route.query.contract, this.currentPage);
       } else {
         await Promise.all(
-          this.$parent.$parent.uniSwanUsers.map(async (user) => {
+          Array.from(this.$parent.$parent.uniSwanUsers).map(async (user) => {
             var res = await this.$parent.$parent.getUserTokens(user, 10, 0);
             this.nfts = this.nfts.concat(res);
           })

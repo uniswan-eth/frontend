@@ -187,7 +187,7 @@ export default {
       signerblockie: null,
       makeBlockie: makeBlockie,
       pageloaded: false,
-      uniSwanUsers: [],
+      uniSwanUsers: new Set(),
     };
   },
   async mounted() {
@@ -400,13 +400,9 @@ export default {
       this.network = await this.provider.getNetwork();
       this.blockNumber = await this.provider.getBlockNumber();
       this.orderbook = await this.getOrdersFromDB();
-      this.orderbook.map((x) => {
-        if (
-          !this.uniSwanUsers.includes(x.signedOrder.makerAddress.toLowerCase())
-        ) {
-          this.uniSwanUsers.push(x.signedOrder.makerAddress.toLowerCase());
-        }
-      });
+      this.orderbook.map((x) =>
+        this.uniSwanUsers.add(x.signedOrder.makerAddress.toLowerCase())
+      );
     },
     async loadUser() {
       this.savedNFTs = await this.queryNEDB({}, this.nedbSaved);
