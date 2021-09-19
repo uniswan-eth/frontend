@@ -169,10 +169,9 @@ export default {
 
       orderbook: [],
       savedNFTs: [],
-      tempnfts: [],
       usernfts: [],
       userERC20s: [],
-      userprefs: [],
+      userOrders: [],
       userSwapOptions: [],
       fillEvents: [],
       currentOrder: null,
@@ -418,7 +417,7 @@ export default {
       this.savedNFTs = await this.queryNEDB({}, this.nedbSaved);
       this.userERC20s = await this.getUserERC20s(this.signeraddr);
       this.usernfts = await this.getUserTokens(this.signeraddr);
-      this.userprefs = await this.getOrdersFromDB({
+      this.userOrders = await this.getOrdersFromDB({
         makerAddress: this.signeraddr.toLowerCase(),
       });
       this.userSwapOptions = await this.getSwapOptions(this.usernfts);
@@ -652,13 +651,10 @@ export default {
 
       return bundle;
     },
-    async signerIsApproved(contract) {
+    async isApproved(contract, user) {
       var collection = new ethers.Contract(contract, ERC721ABI, this.signer);
 
-      return await collection.isApprovedForAll(
-        this.signeraddr,
-        ERC721_PROXY_ADDRESS
-      );
+      return await collection.isApprovedForAll(user, ERC721_PROXY_ADDRESS);
     },
     async approveTransfers(collectionAddress) {
       var collection = new ethers.Contract(
@@ -668,15 +664,6 @@ export default {
       );
 
       collection.setApprovalForAll(ERC721_PROXY_ADDRESS, true);
-    },
-    async unApproveTransfers(collectionAddress) {
-      var collection = new ethers.Contract(
-        collectionAddress,
-        ERC721ABI,
-        this.signer
-      );
-
-      collection.setApprovalForAll(ERC721_PROXY_ADDRESS, false);
     },
     async executeSwap(ringswap) {
       const exchange = new ethers.Contract(

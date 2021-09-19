@@ -248,7 +248,7 @@ export default {
         this.$parent.$parent.signeraddr.toLowerCase()
       ) {
         this.nfts = this.$parent.$parent.usernfts;
-        this.offers = this.$parent.$parent.userprefs;
+        this.offers = this.$parent.$parent.userOrders;
         this.swapOptions = this.$parent.$parent.userSwapOptions;
       } else {
         this.nfts = await this.$parent.$parent.getUserTokens(

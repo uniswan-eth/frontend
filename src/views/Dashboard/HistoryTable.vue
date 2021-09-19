@@ -77,7 +77,7 @@ export default {
   methods: {
     async loadPage() {
       this.parsedEvents = [];
-      Promise.all(
+      await Promise.all(
         this.$props.events.map(async (e) => {
           var exchangeBundle = [];
           var wishBundle = [];

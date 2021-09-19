@@ -105,14 +105,23 @@
           </card>
         </b-col>
       </b-row>
+      <b-row class="mt-5">
+        <h1>Approvals</h1>
+        <div v-for="(n, idx) in approvals" :key="'appr' + idx">
+          <p>{{ n.contract }}</p>
+          <base-button
+            :disabled="n.isApproved === true"
+            @click="setApproval(idx)"
+            >Approve</base-button
+          >
+        </div>
+      </b-row>
     </div>
     <br />
     <template slot="modal-footer">
       <base-button
         :disabled="
-          currentExchangeBundle.length > 0 && currentWishBundle.length > 0
-            ? false
-            : true
+          currentExchangeBundle.length === 0 || currentWishBundle.length === 0
         "
         @click="generateSignature"
         type="success"
@@ -144,41 +153,57 @@ export default {
       initialWish: null,
       currentExchangeBundle: [],
       currentWishBundle: [],
+
+      approvals: [],
     };
   },
   methods: {
     async loadPage() {
       this.currentExchangeBundle = [];
       this.currentWishBundle = [];
-      if (this.initialWish) {
-        this.addToWishBundle(this.initialWish.tokenID);
-      }
+
+      if (this.initialWish) this.addToWishBundle(this.initialWish.tokenID);
+    },
+    async setApproval(i) {
+      await this.$parent.approveTransfers(
+        approvals[i].contract,
+        this.$parent.signeraddr
+      );
+      approvals[i].isApproved = true;
     },
     async addToExchangeBundle(asset) {
+      var alreadyAdded = false;
       if (asset.tokenJSON) {
-        var alreadyAdded = this.currentExchangeBundle.find(
+        alreadyAdded = this.currentExchangeBundle.find(
           (x) => x.tokenID === asset.tokenID && x.contract === asset.contract
         );
-        if (!alreadyAdded) this.currentExchangeBundle.push(asset);
+        if (!alreadyAdded)
+          this.approvals.push({
+            contract: asset.contract,
+            isApproved: await this.$parent.isApproved(
+              asset.contract,
+              this.$parent.signeraddr
+            ),
+          });
       } else {
-        var alreadyAdded = this.currentExchangeBundle.find(
+        alreadyAdded = this.currentExchangeBundle.find(
           (x) => x.address === asset.address
         );
-        if (!alreadyAdded) this.currentExchangeBundle.push(asset);
       }
+      if (!alreadyAdded) this.currentExchangeBundle.push(asset);
     },
     async addToWishBundle(asset) {
+      var alreadyAdded = false;
       if (asset.tokenJSON) {
-        var alreadyAdded = this.currentWishBundle.find(
+        alreadyAdded = this.currentWishBundle.find(
           (x) => x.tokenID === asset.tokenID && x.contract === asset.contract
         );
-        if (!alreadyAdded) this.currentWishBundle.push(asset);
       } else {
-        var alreadyAdded = this.currentWishBundle.find(
+        alreadyAdded = this.currentWishBundle.find(
           (x) => x.address === asset.address
         );
-        if (!alreadyAdded) this.currentWishBundle.push(asset);
       }
+      if (!alreadyAdded) this.currentWishBundle.push(asset);
     },
     async clearExchangeBundle() {
       this.currentExchangeBundle = [];
@@ -234,7 +259,7 @@ export default {
 
       var c = new HttpClient(DB_BASE_URL);
       await c.submitOrderAsync(signedOrder).then(async (res) => {
-        self.$parent.userprefs = await self.$parent.getOrdersFromDB({
+        self.$parent.userOrders = await self.$parent.getOrdersFromDB({
           makerAddress: self.$parent.signeraddr,
         });
 

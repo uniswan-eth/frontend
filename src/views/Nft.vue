@@ -32,7 +32,7 @@
               size="lg"
               variant="success"
             >
-              Save
+              Save nft
             </b-button>
             <b-button
               v-if="saved.length > 0"
@@ -40,7 +40,7 @@
               size="lg"
               variant="warning"
             >
-              Remove
+              Remove saved nft
             </b-button>
             <div v-if="nft.tokenJSON.attributes">
               <hr />
@@ -95,36 +95,6 @@
               </a>
             </div>
             <br />
-            <div
-              class="slide"
-              v-if="
-                asset.owner.address.toLowerCase() ===
-                $parent.$parent.signeraddr.toLowerCase()
-              "
-            >
-              <b-button
-                v-if="!signerApproved"
-                @click="
-                  $parent.$parent.approveTransfers(asset.asset_contract.address)
-                "
-                size="lg"
-                variant="success"
-              >
-                Approve transfers
-              </b-button>
-              <b-button
-                v-if="signerApproved"
-                @click="
-                  $parent.$parent.unApproveTransfers(
-                    asset.asset_contract.address
-                  )
-                "
-                size="sm"
-                variant="secondary"
-              >
-                Remove approval
-              </b-button>
-            </div>
           </card>
           <br />
         </b-col>
@@ -310,10 +280,6 @@ export default {
       this.asset = null;
       this.validSwaps = [];
       this.ownerOrders = [];
-
-      this.signerApproved = await this.$parent.$parent.signerIsApproved(
-        this.$route.params.contract
-      );
 
       this.nft = await this.$parent.$parent.getTokenExtra(
         this.$route.params.contract,

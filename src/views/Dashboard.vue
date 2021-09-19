@@ -17,7 +17,7 @@
           <stats-card
             title="Orders"
             type="gradient-orange"
-            :sub-title="$parent.$parent.userprefs.length.toString()"
+            :sub-title="$parent.$parent.userOrders.length.toString()"
             icon="ni ni-chart-pie-35"
             class="mb-4"
           >
@@ -114,7 +114,7 @@ export default {
       };
 
       // Find all of the orders where the user is offering this NFT in the exchange bundle
-      this.$parent.$parent.userprefs.map((order) => {
+      this.$parent.$parent.userOrders.map((order) => {
         order.exchangeBundle.map((exch) => {
           if (exch.contract === nft.contract && exch.tokenID === nft.tokenID)
             nftSummary.orders.push(order);
