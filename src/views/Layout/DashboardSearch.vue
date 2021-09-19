@@ -34,7 +34,7 @@ export default {
       if (searchWord.length < 3) {
         return;
       } else if (searchWord.length === 42) {
-        //Redirect to Account Page
+        // This is a users account
         this.$router.push("/account/" + searchWord);
       } else {
         this.contracts = await this.root.getContractsFromSubGraph(searchWord);
