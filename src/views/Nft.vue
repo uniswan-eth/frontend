@@ -322,11 +322,7 @@ export default {
           this.$route.params.tokenid.toString()
       );
 
-      this.nft = {
-        tokenID: dataAPI[0].token_id,
-        contract: dataAPI[0].contract_address,
-        tokenJSON: dataAPI[0].metadata,
-      };
+      this.nft = this.$parent.$parent.normalizeNFTs(dataAPI)[0];
 
       this.nft.contractName = (
         await this.$parent.$parent.getContractFromSubGraph(

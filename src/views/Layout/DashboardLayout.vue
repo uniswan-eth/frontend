@@ -235,17 +235,7 @@ export default {
           var nft = await this.getNFTsFromAPI(
             "nfts/" + x.contract.id + "/" + x.tokenID
           );
-          if (nft[0]) {
-            nfts.push(this.normalizeNFTs(nft)[0]);
-          } else {
-            // FIXME: Need to get data an alternative way
-            const nftAlt = await this.constructBundle([x]);
-            if (nftAlt[0]) {
-              nfts.push(nftAlt[0]);
-            } else {
-              console.log("Missing NFT", x);
-            }
-          }
+          nfts.push(this.normalizeNFTs(nft)[0]);
         })
       );
 
@@ -256,8 +246,6 @@ export default {
         tokenContracts(first:${limit}, where: {name_contains:"${search}"}) {
           id
           name
-          numTokens
-          numOwners
         }
       }`;
 
@@ -480,23 +468,10 @@ export default {
     },
     async getOrdersFromDB(requestOpts) {
       var orderClient = new HttpClient(DB_BASE_URL);
+
       var json = await orderClient.getOrdersAsync(requestOpts);
-      var orders = [];
-      await Promise.all(
-        json.records.map(async (signedOrder) => {
-          const exchangeBundle = await this.dataToBundle(
-            signedOrder.order.makerAssetData
-          );
-          const wishBundle = await this.dataToBundle(
-            signedOrder.order.takerAssetData
-          );
-          orders.push({
-            signedOrder: signedOrder.order,
-            exchangeBundle: exchangeBundle,
-            wishBundle: wishBundle,
-          });
-        })
-      );
+      var orders = await this.getOrders(json.records.map((r) => r.order));
+
       return orders;
     },
     async getSwapOptions(NFTs) {
@@ -520,23 +495,28 @@ export default {
       var newChains = [];
       await Promise.all(
         options.map(async (chain) => {
-          var orders = [];
-          for (let i = 0; i < chain.length; i++) {
-            var exchangeBundle = await this.dataToBundle(
-              chain[i].makerAssetData
-            );
-            var wishBundle = await this.dataToBundle(chain[i].takerAssetData);
-
-            orders.push({
-              exchangeBundle: exchangeBundle,
-              wishBundle: wishBundle,
-              signedOrder: chain[i],
-            });
-          }
+          var orders = await this.getOrders(chain);
           newChains.push(orders);
         })
       );
       return newChains;
+    },
+    async getOrders(chain) {
+      var orders = [];
+      await Promise.all(
+        chain.map(async (order) => {
+          const exchangeBundle = await this.dataToBundle(order.makerAssetData);
+          const wishBundle = await this.dataToBundle(order.takerAssetData);
+
+          orders.push({
+            signedOrder: order,
+            exchangeBundle: exchangeBundle,
+            wishBundle: wishBundle,
+          });
+        })
+      );
+
+      return orders;
     },
     executeOrder(ourAssetsEncoded, order) {
       const takerAssets = assetDataUtils.decodeAssetDataOrThrow(
@@ -656,55 +636,6 @@ export default {
         })
       );
 
-      return bundle;
-    },
-    async constructBundle(tokenData) {
-      var bundle = [];
-      await Promise.all(
-        tokenData.map(async (d) => {
-          try {
-            var nft;
-            // Check If we have it in cach
-            var test = await this.queryNEDB({
-              tokenID: d.tokenID,
-              contract: d.contract.id,
-            });
-            console.log(d, test);
-            if (test.length > 0) {
-              nft = {
-                contract: d.contract.id,
-                tokenID: d.tokenID,
-                owner: d.owner.id,
-                tokenJSON: test[0].tokenJSON,
-              };
-            } else {
-              // If the subgraph doesn't give us the metadata, retrieve it manually
-              var collection = new ethers.Contract(
-                d.contract.id,
-                ERC721ABI,
-                this.signer
-              );
-
-              var tokenURI = await collection.tokenURI(d.tokenID);
-              var res = await fetch(tokenURI);
-              var tokenJSON = await res.json();
-
-              nft = {
-                contract: d.contract.id,
-                tokenID: d.tokenID,
-                owner: d.owner.id,
-                tokenJSON: tokenJSON,
-              };
-              var toInsert = { ...nft };
-              toInsert._id = ethers.utils.id(nft.contract + "/" + nft.tokenID);
-              this.insertNEDB(toInsert);
-            }
-            bundle.push(nft);
-          } catch (e) {
-            console.log("err", e);
-          }
-        })
-      );
       return bundle;
     },
     async signerIsApproved(contract) {
