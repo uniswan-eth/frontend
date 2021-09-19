@@ -166,7 +166,6 @@ export default {
         "0x7b358DE6237deDf79ad102f3d55a1cC8EaD89677",
       ],
 
-      orderbook: [],
       savedNFTs: [],
       usernfts: [],
       userERC20s: [],
@@ -399,9 +398,9 @@ export default {
     async loadNetwork() {
       this.network = await this.provider.getNetwork();
       this.blockNumber = await this.provider.getBlockNumber();
-      this.orderbook = await this.getOrdersFromDB();
-      this.orderbook.map((x) =>
-        this.uniSwanUsers.add(x.signedOrder.makerAddress.toLowerCase())
+      var orderbook = await this.getOrdersFromDBRaw();
+      orderbook.map((x) =>
+        this.uniSwanUsers.add(x.order.makerAddress.toLowerCase())
       );
     },
     async loadUser() {
@@ -482,6 +481,13 @@ export default {
       var orders = await this.getOrders(json.records.map((r) => r.order));
 
       return orders;
+    },
+    async getOrdersFromDBRaw(requestOpts) {
+      var orderClient = new HttpClient(DB_BASE_URL);
+
+      var json = await orderClient.getOrdersAsync(requestOpts);
+
+      return json.records;
     },
     async getSwapOptions(bundle) {
       let [amounts, assetDatas] = this.bundleToData(bundle);
