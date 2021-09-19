@@ -10,8 +10,8 @@
     >
       <el-table-column label="NFT" min-width="130px" prop="page">
         <template v-slot="{ row }">
-          <nft-card v-if="row.tokenJSON" :nft="row" :root="root" />
-          <erc-card v-if="!row.tokenJSON" :asset="row" />
+          <nft-card v-if="row.metadata" :nft="row" :root="root" />
+          <erc-card v-if="!row.metadata" :asset="row" />
         </template>
       </el-table-column>
     </el-table>

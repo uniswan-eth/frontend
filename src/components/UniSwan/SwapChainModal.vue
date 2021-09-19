@@ -26,14 +26,18 @@
       <h3>You will receive:</h3>
       <span v-for="(asset, jdx) in $props.receiveBundle" :key="'wish' + jdx">
         <div
-          v-if="asset.tokenJSON"
+          v-if="asset.metadata"
           class="imgHolder"
-          @click="$router.push('/nft/' + asset.contract + '/' + asset.tokenID)"
+          @click="
+            $router.push(
+              '/nft/' + asset.contract_address + '/' + asset.token_id
+            )
+          "
           :style="{
-            backgroundImage: 'url(' + asset.tokenJSON.image + ')',
+            backgroundImage: 'url(' + asset.metadata.image + ')',
           }"
         />
-        <div v-if="!asset.tokenJSON" class="imgHolder">
+        <div v-if="!asset.metadata" class="imgHolder">
           {{ asset.symbol }}
         </div>
       </span>
@@ -41,12 +45,12 @@
 
     <div>
       <h3>Approvals</h3>
-      <div v-for="(n, idx) in approvals" :key="'appr' + idx">
-        <p>{{ n.contract }}</p>
+      <span v-for="(n, idx) in approvals" :key="'appr' + idx">
+        <h4>{{ n.contract_address }}</h4>
         <base-button :disabled="n.isApproved === true" @click="setApproval(idx)"
           >Approve</base-button
         >
-      </div>
+      </span>
     </div>
     <template slot="modal-footer">
       <base-button @click="$parent.executeSwap(chain)" type="success"
@@ -92,9 +96,9 @@ export default {
       if (this.$props.chain) {
         this.$props.chain[0].wishBundle.map(async (x) =>
           this.approvals.push({
-            contract: x.contract,
+            contract_address: x.contract_address,
             isApproved: await this.$parent.isApproved(
-              x.contract,
+              x.contract_address,
               this.$parent.signeraddr
             ),
           })
@@ -103,7 +107,7 @@ export default {
     },
     async setApproval(i) {
       await this.$parent.approveTransfers(
-        this.approvals[i].contract,
+        this.approvals[i].contract_address,
         this.$parent.signeraddr
       );
       this.approvals[i].isApproved = true;

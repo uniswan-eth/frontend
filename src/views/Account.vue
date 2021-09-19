@@ -268,8 +268,8 @@ export default {
         this.offers.map((order) => {
           order.exchangeBundle.map((exch) => {
             if (
-              exch.contract === nft.contract &&
-              exch.tokenID === nft.tokenID
+              exch.contract_address === nft.contract_address &&
+              exch.token_id === nft.token_id
             ) {
               nftSummary.orders.push(order);
             }
@@ -278,8 +278,8 @@ export default {
         this.swapOptions.map((ring) => {
           ring[ring.length - 1].wishBundle.map((exch) => {
             if (
-              exch.contract === nft.contract &&
-              exch.tokenID === nft.tokenID
+              exch.contract_address === nft.contract_address &&
+              exch.token_id === nft.token_id
             ) {
               nftSummary.options.push(ring);
             }

@@ -151,7 +151,6 @@ export default {
   data() {
     return {
       nedbSaved: null,
-      nedbNFTs: null,
       routeName: null,
       showSearch: false,
 
@@ -234,13 +233,11 @@ export default {
       var nfts = [];
       await Promise.all(
         data.data.owner.tokens.map(async (x) => {
-          var nft = await this.getNFTsFromAPI(
-            "nfts/" + x.contract.id + "/" + x.tokenID
-          );
-          nfts.push(nft[0]);
+          const nft = await this.getTokenFromAPI(x.contract.id, x.tokenID);
+          nfts.push(nft);
         })
       );
-      return this.normalizeNFTs(nfts);
+      return nfts;
     },
     async getContractsFromSubGraph(search, limit = 10) {
       const tokensQuery = `{
@@ -256,10 +253,10 @@ export default {
 
       return data.data.tokenContracts;
     },
-    async getContractFromSubGraph(contractAddress) {
+    async getContractFromSubGraph(contract_address) {
       const tokensQuery = `
         {
-          tokenContract(id:"${contractAddress.toLowerCase()}") {
+          tokenContract(id:"${contract_address.toLowerCase()}") {
             id
             name
             numTokens
@@ -272,21 +269,8 @@ export default {
       });
       return data.data.tokenContract;
     },
-    async getContractTokensFromNFTPort(
-      contractAddress,
-      pageSize = 10,
-      pageNumber = 1
-    ) {
-      var nfts = await this.getNFTsFromAPI(
-        "nfts/" + contractAddress,
-        pageSize,
-        pageNumber
-      );
-      var res = this.normalizeNFTs(nfts);
-      return res;
-    },
-    async getOwnerFromSubgraph(contractAddress, tokenId) {
-      const id = contractAddress.toLowerCase() + "_" + tokenId;
+    async getOwnerFromSubgraph(contract_address, tokenId) {
+      const id = contract_address.toLowerCase() + "_" + tokenId;
 
       const tokensQuery = `
       query {
@@ -303,63 +287,74 @@ export default {
 
       return data.data.token.owner.id;
     },
-    async getNFTsFromAPI(path, pageSize = 10, pageNumber = 1) {
-      var res = await this.NFTPortAPI(path, "", pageSize, pageNumber);
-      if (!res || res.length === 0 || res.error) return [];
+    async getTokenFromAPI(contract_address, token_id) {
+      var res = await this.NFTPortAPI(
+        "nfts/" + contract_address + "/" + token_id
+      );
+      if (res && res.nft) {
+        var out = res.nft;
 
-      var toret = [];
+        if (res.nft.cached_image_url)
+          out.metadata.image = res.nft.cached_image_url;
 
-      if (res.nft) {
-        toret.push(res.nft);
+        return out;
       } else {
+        // Get metadata from SubGraph
+        const id = contract_address.toLowerCase() + "_" + token_id;
+        const tokensQuery = `
+        {
+          token(id:"${id}") {
+            tokenURI
+          }
+        }
+        `;
+        const data = await client.query({
+          query: gql(tokensQuery),
+        });
+        var res = await fetch(data.data.token.tokenURI);
+        var metadata = await res.json();
+
+        return {
+          contract_address: contract_address,
+          token_id: token_id,
+          metadata: metadata,
+        };
+      }
+    },
+    async getContractTokensFromAPI(
+      contract_address,
+      pageSize = 10,
+      pageNumber = 1
+    ) {
+      var res = await this.NFTPortAPI(
+        "nfts/" + contract_address,
+        "",
+        pageSize,
+        pageNumber
+      );
+
+      var nfts = [];
+      if (res) {
         await Promise.all(
           res.nfts.map(async (x) => {
-            var nft = await this.NFTPortAPI(
-              "nfts/" + x.contract_address + "/" + x.token_id,
-              ""
+            var nft = await this.getTokenFromAPI(
+              x.contract_address,
+              x.token_id
             );
-            if (nft) {
-              toret.push(nft);
-            } else {
-              console.log("Err fetching", x);
-            }
+            nfts.push(nft);
           })
         );
       }
-      return toret;
+      return nfts;
     },
     async getTokenExtra(contract, tokenId) {
-      const dataAPI = await this.getNFTsFromAPI(
-        "nfts/" + contract + "/" + tokenId
-      );
-
-      var nft = this.normalizeNFTs(dataAPI)[0];
+      const nft = await this.getTokenFromAPI(contract, tokenId);
 
       nft.contractName = (await this.getContractFromSubGraph(contract)).name;
 
       nft.owner = await this.getOwnerFromSubgraph(contract, tokenId);
 
       return nft;
-    },
-    normalizeNFTs(nfts) {
-      var toret = [];
-      nfts.map((x) => {
-        if (x) {
-          if (!x.nft) x.nft = x;
-
-          var nft = {
-            contract: x.nft.contract_address,
-            tokenID: x.nft.token_id,
-            owner: null,
-            tokenJSON: x.nft.metadata,
-          };
-          if (x.nft.cached_image_url)
-            nft.tokenJSON.image = x.nft.cached_image_url;
-
-          toret.push(nft);
-        }
-      });
-      return toret;
     },
     async NFTPortAPI(addUrl, urlParams, pageSize = 10, pageNumber = 1) {
       try {
@@ -434,10 +429,9 @@ export default {
       );
     },
     buildNEDB() {
-      this.nedbNFTs = new Datastore({ filename: "NFTs", autoload: true });
       this.nedbSaved = new Datastore({ filename: "Saved", autoload: true });
     },
-    insertNEDB(x, db = this.nedbNFTs) {
+    insertNEDB(x, db) {
       var self = this;
       return new Promise(function (resolve) {
         db.update({ _id: x._id }, x, { upsert: true }, () => {
@@ -445,7 +439,7 @@ export default {
         });
       });
     },
-    queryNEDB(sea, db = this.nedbNFTs) {
+    queryNEDB(sea, db) {
       var self = this;
       return new Promise(function (resolve) {
         db.find(sea)
@@ -460,23 +454,28 @@ export default {
     async checkSaved(nft) {
       var saved = await this.queryNEDB(
         {
-          tokenID: nft.tokenID,
-          contract: nft.contract,
+          token_id: nft.token_id,
+          contract_address: nft.contract_address,
         },
         this.nedbSaved
       );
+
       return saved;
     },
     async removeSavedNFT(nft) {
       var self = this;
-      var id = ethers.utils.id("nft/" + nft.contract + "/" + nft.tokenID);
+      var id = ethers.utils.id(
+        "nft/" + nft.contract_address + "/" + nft.token_id
+      );
       this.nedbSaved.remove({ _id: id }, {}, async () => {
         self.savedNFTs = await self.queryNEDB({}, self.nedbSaved);
       });
     },
     async saveNFT(nft) {
       var toInsert = { ...nft };
-      toInsert._id = ethers.utils.id("nft/" + nft.contract + "/" + nft.tokenID);
+      toInsert._id = ethers.utils.id(
+        "nft/" + nft.contract_address + "/" + nft.token_id
+      );
       await this.insertNEDB(toInsert, this.nedbSaved);
       this.savedNFTs = await this.queryNEDB({}, this.nedbSaved);
     },
@@ -590,10 +589,10 @@ export default {
       let assetDatas = [];
       for (let i = 0; i < bundle.length; i++) {
         let assetData;
-        if (bundle[i].tokenJSON) {
+        if (bundle[i].metadata) {
           assetData = assetDataUtils.encodeERC721AssetData(
-            bundle[i].contract,
-            new BigNumber(bundle[i].tokenID)
+            bundle[i].contract_address,
+            new BigNumber(bundle[i].token_id)
           );
           amounts.push(new BigNumber(1));
         } else {
@@ -626,23 +625,8 @@ export default {
                 amount: assetDatas.amounts[i],
               });
             } else if (n.assetProxyId === "0x02571792") {
-              const dataAPI = await this.getNFTsFromAPI(
-                "nfts/" + n.tokenAddress + "/" + n.tokenId
-              );
+              const nft = await this.getTokenFromAPI(n.tokenAddress, n.tokenId);
 
-              var nft = {
-                tokenID: "fixme",
-                contract: "fixme",
-                tokenJSON: {},
-              };
-
-              if (dataAPI.length > 0) {
-                nft = {
-                  tokenID: dataAPI[0].token_id,
-                  contract: dataAPI[0].contract_address,
-                  tokenJSON: dataAPI[0].metadata,
-                };
-              }
               bundle.push(nft);
             }
           }
@@ -726,21 +710,6 @@ export default {
     createOrder(nft, ownerNFTs) {
       this.orderToDeleteNFT = nft;
       this.orderToDeleteOwnerNFTs = ownerNFTs;
-    },
-    formatAsset(nft) {
-      return {
-        token_id: nft.tokenID,
-        image_url: nft.tokenJSON.image,
-        image_preview_url: nft.tokenJSON.image,
-        name: nft.tokenJSON.name,
-        description: nft.tokenJSON.description,
-        asset_contract: {
-          address: nft.contract,
-        },
-        owner: {
-          address: nft.owner,
-        },
-      };
     },
     formatNum(num, leading = 2) {
       return this.formatNumberWithCommas(

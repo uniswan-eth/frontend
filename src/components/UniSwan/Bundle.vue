@@ -2,7 +2,7 @@
   <div style="float: left">
     <div v-for="(n, idx) in bundle" :key="'id' + idx">
       <nft-card
-        v-if="n.tokenJSON"
+        v-if="n.metadata"
         :idx="idx"
         :display="display"
         :root="root"
@@ -12,7 +12,7 @@
           <slot name="bundleHeader"></slot>
         </template>
       </nft-card>
-      <erc-card v-if="!n.tokenJSON" :asset="n">
+      <erc-card v-if="!n.metadata" :asset="n">
         <template v-slot:nftHeader>
           <slot name="bundleHeader"></slot>
         </template>

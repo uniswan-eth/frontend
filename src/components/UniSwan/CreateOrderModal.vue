@@ -22,8 +22,8 @@
               v-for="(n, idx) in ownernfts"
               @click="addToWishBundle(n)"
               :key="'cp' + idx"
-              :title="n.tokenJSON.name"
-              :img-src="n.tokenJSON.image"
+              :title="n.metadata.name"
+              :img-src="n.metadata.image"
               img-alt="Image"
               img-top
               tag="article"
@@ -45,8 +45,8 @@
               v-for="(n, idx) in $parent.usernfts"
               @click="addToExchangeBundle(n)"
               :key="'cp' + idx"
-              :title="n.tokenJSON.name"
-              :img-src="n.tokenJSON.image"
+              :title="n.metadata.name"
+              :img-src="n.metadata.image"
               img-alt="Image"
               img-top
               tag="article"
@@ -106,15 +106,19 @@
         </b-col>
       </b-row>
       <b-row class="mt-5">
-        <h1>Approvals</h1>
-        <div v-for="(n, idx) in approvals" :key="'appr' + idx">
-          <p>{{ n.contract }}</p>
-          <base-button
-            :disabled="n.isApproved === true"
-            @click="setApproval(idx)"
-            >Approve</base-button
-          >
-        </div>
+        <b-col xl="6" class="mb-5 mb-xl-0">
+          <h3>Collections that require approval</h3>
+          <span v-for="(n, idx) in approvals" :key="'appr' + idx">
+            <card header-classes="bg-transparent">
+              <h4>{{ n.contract_address }}</h4>
+              <base-button
+                :disabled="n.isApproved === true"
+                @click="setApproval(idx)"
+                >Approve</base-button
+              >
+            </card>
+          </span>
+        </b-col>
       </b-row>
     </div>
     <br />
@@ -162,29 +166,33 @@ export default {
       this.currentExchangeBundle = [];
       this.currentWishBundle = [];
 
-      if (this.initialWish) this.addToWishBundle(this.initialWish.tokenID);
+      if (this.initialWish) this.addToWishBundle(this.initialWish.token_id);
     },
     async setApproval(i) {
       await this.$parent.approveTransfers(
-        this.approvals[i].contract,
+        this.approvals[i].contract_address,
         this.$parent.signeraddr
       );
       this.approvals[i].isApproved = true;
     },
     async addToExchangeBundle(asset) {
       var alreadyAdded = false;
-      if (asset.tokenJSON) {
+      if (asset.metadata) {
         alreadyAdded = this.currentExchangeBundle.find(
-          (x) => x.tokenID === asset.tokenID && x.contract === asset.contract
+          (x) =>
+            x.token_id === asset.token_id &&
+            x.contract_address === asset.contract_address
         );
         if (
           !alreadyAdded &&
-          !this.approvals.some((x) => x.contract === asset.contract)
+          !this.approvals.some(
+            (x) => x.contract_address === asset.contract_address
+          )
         )
           this.approvals.push({
-            contract: asset.contract,
+            contract_address: asset.contract_address,
             isApproved: await this.$parent.isApproved(
-              asset.contract,
+              asset.contract_address,
               this.$parent.signeraddr
             ),
           });
@@ -197,9 +205,11 @@ export default {
     },
     async addToWishBundle(asset) {
       var alreadyAdded = false;
-      if (asset.tokenJSON) {
+      if (asset.metadata) {
         alreadyAdded = this.currentWishBundle.find(
-          (x) => x.tokenID === asset.tokenID && x.contract === asset.contract
+          (x) =>
+            x.token_id === asset.token_id &&
+            x.contract_address === asset.contract_address
         );
       } else {
         alreadyAdded = this.currentWishBundle.find(

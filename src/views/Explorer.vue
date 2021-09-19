@@ -14,19 +14,9 @@
             >
               {{ n.name }}
             </b-button>
-            <br /><br />
-            <div class="p-4 bg-secondary">
-              <p>Enter NFT contract address</p>
-              <form @submit="navContract">
-                <b-input
-                  v-model="currentContract"
-                  placeholder="Enter NFT contract address"
-                  class="form-control-alternative"
-                />
-                <br />
-              </form>
-            </div>
             <br />
+            <br />
+            <h1>{{ title }}</h1>
           </card>
         </b-col>
       </b-row>
@@ -90,7 +80,7 @@
               size="lg"
               variant="success"
             >
-              More
+              Next page
             </b-button>
           </div>
         </b-col>
@@ -128,48 +118,44 @@ export default {
   data() {
     return {
       currentPage: 1,
-      test: [],
-      offset: 0,
       contractData: null,
-      currentContract: null,
       nfts: [],
-
-      featuredCollections: [],
+      title: "NFTs held by UniSwan users",
+      featuredCollections: [
+        {
+          contract: "0x9498274b8c82b4a3127d67839f2127f2ae9753f4",
+          name: "Polygon Punks",
+        },
+        {
+          contract: "0xcda17cf2ac3cf8e6e818088f21ee9b52bf9e021f",
+          name: "Matic Monkeys",
+        },
+        {
+          contract: "0x36a8377e2bb3ec7d6b0f1675e243e542eb6a4764",
+          name: "Non-Fungible Matic V2",
+        },
+        {
+          contract: "0x76c52b2c4b2d2666663ce3318a5f35f912bd25c3",
+          name: "MaticPunks",
+        },
+        {
+          contract: "0xa5f1ea7df861952863df2e8d1312f7305dabf215",
+          name: "Zed run",
+        },
+        {
+          contract: "0x2cb9c915369747c228d087d6179a8ce7e114c011",
+          name: "Loot",
+        },
+        {
+          contract: "0x7227e371540cf7b8e512544ba6871472031f3335",
+          name: "Neon District Season One",
+        },
+      ],
     };
   },
   async mounted() {
     document.title = "🦢 Explorer";
     this.$parent.$parent.routeName = "Explorer";
-    this.featuredCollections = [
-      {
-        contract: "0x9498274b8c82b4a3127d67839f2127f2ae9753f4",
-        name: "Polygon Punks",
-      },
-      {
-        contract: "0xcda17cf2ac3cf8e6e818088f21ee9b52bf9e021f",
-        name: "Matic Monkeys",
-      },
-      {
-        contract: "0x36a8377e2bb3ec7d6b0f1675e243e542eb6a4764",
-        name: "Non-Fungible Matic V2",
-      },
-      {
-        contract: "0x76c52b2c4b2d2666663ce3318a5f35f912bd25c3",
-        name: "MaticPunks",
-      },
-      {
-        contract: "0xa5f1ea7df861952863df2e8d1312f7305dabf215",
-        name: "Zed run",
-      },
-      {
-        contract: "0x2cb9c915369747c228d087d6179a8ce7e114c011",
-        name: "Loot",
-      },
-      {
-        contract: "0x7227e371540cf7b8e512544ba6871472031f3335",
-        name: "Neon District Season One",
-      },
-    ];
     this.loadPage();
   },
   methods: {
@@ -179,20 +165,18 @@ export default {
         if (this.$route.query.page_num)
           this.currentPage = parseInt(this.$route.query.page_num);
 
-        this.getNFTs(this.$route.query.contract, this.currentPage);
+        this.getContractTokens(this.$route.query.contract, this.currentPage);
       } else {
-        // Show whats on UniSwan by user for now
         await Promise.all(
           this.$parent.$parent.uniSwanUsers.map(async (user) => {
-            // Get Users NFTS
             var res = await this.$parent.$parent.getUserTokens(user, 10, 0);
             this.nfts = this.nfts.concat(res);
           })
         );
       }
     },
-    async getNFTs(collectionAddress, page = 1) {
-      this.nfts = await this.$parent.$parent.getContractTokensFromNFTPort(
+    async getContractTokens(collectionAddress, page = 1) {
+      this.nfts = await this.$parent.$parent.getContractTokensFromAPI(
         collectionAddress,
         20,
         page
@@ -201,12 +185,7 @@ export default {
       this.contractData = await this.$parent.$parent.getContractFromSubGraph(
         collectionAddress
       );
-
-      this.$parent.$parent.routeName = this.contractData.name;
-    },
-    navContract(ev) {
-      ev.preventDefault();
-      this.$router.push("/explorer?contract=" + this.currentContract);
+      this.title = this.contractData.name;
     },
   },
   watch: {

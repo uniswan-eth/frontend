@@ -1,5 +1,5 @@
 <template>
-  <div v-if="nft && nft.tokenJSON">
+  <div v-if="nft && nft.metadata">
     <b-card
       no-body
       class="overflow-hidden"
@@ -8,21 +8,23 @@
       <b-row no-gutters>
         <b-col md="3" style="zzbackground: purple">
           <div
-            @click="$router.push('/nft/' + nft.contract + '/' + nft.tokenID)"
+            @click="
+              $router.push('/nft/' + nft.contract_address + '/' + nft.token_id)
+            "
             class="bgim"
             :style="{
               cursor: 'pointer',
-              backgroundImage: 'url(' + nft.tokenJSON.image + ')',
+              backgroundImage: 'url(' + nft.metadata.image + ')',
               width: '100%',
               height: '100%',
               minHeight: '150px',
             }"
-            :title="nft.tokenJSON.name"
+            :title="nft.metadata.name"
             alt=""
           />
         </b-col>
         <b-col md="9">
-          <b-card-body :title="nft.tokenJSON.name">
+          <b-card-body :title="nft.metadata.name">
             <div class="nftHolder">
               <h6 class="text-muted text-uppercase">Want in exchange</h6>
               <div
@@ -32,11 +34,13 @@
               >
                 <div
                   @click="
-                    $router.push('/nft/' + nft.contract + '/' + nft.tokenID)
+                    $router.push(
+                      '/nft/' + nft.contract_address + '/' + nft.token_id
+                    )
                   "
                   class="imgHolder"
                   :style="{
-                    backgroundImage: 'url(' + nft.tokenJSON.image + ')',
+                    backgroundImage: 'url(' + nft.metadata.image + ')',
                   }"
                   v-for="(nft, idx) in n.wishBundle"
                   :key="'wish' + idx"
@@ -68,18 +72,18 @@
                   :key="'wish' + jdx"
                 >
                   <div
-                    v-if="asset.tokenJSON"
+                    v-if="asset.metadata"
                     class="imgHolder"
                     @click="
                       $router.push(
-                        '/nft/' + asset.contract + '/' + asset.tokenID
+                        '/nft/' + asset.contract_address + '/' + asset.token_id
                       )
                     "
                     :style="{
-                      backgroundImage: 'url(' + asset.tokenJSON.image + ')',
+                      backgroundImage: 'url(' + asset.metadata.image + ')',
                     }"
                   />
-                  <div v-if="!asset.tokenJSON" class="imgHolder">
+                  <div v-if="!asset.metadata" class="imgHolder">
                     {{ asset.symbol }}
                   </div>
                 </span>
@@ -130,7 +134,9 @@ export default {
         const remainder = bundle.filter(
           (x) =>
             !this.$props.root.usernfts.some(
-              (y) => y.contract === x.contract && y.tokenID === x.tokenID
+              (y) =>
+                y.contract_address === x.contract_address &&
+                y.token_id === x.token_id
             )
         );
 

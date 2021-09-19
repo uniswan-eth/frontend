@@ -116,7 +116,10 @@ export default {
       // Find all of the orders where the user is offering this NFT in the exchange bundle
       this.$parent.$parent.userOrders.map((order) => {
         order.exchangeBundle.map((exch) => {
-          if (exch.contract === nft.contract && exch.tokenID === nft.tokenID)
+          if (
+            exch.contract_address === nft.contract_address &&
+            exch.token_id === nft.token_id
+          )
             nftSummary.orders.push(order);
         });
       });
@@ -125,7 +128,8 @@ export default {
       this.$parent.$parent.userSwapOptions.map((chain) => {
         const found = chain[0].wishBundle.find(
           (exch) =>
-            exch.contract === nft.contract && exch.tokenID === nft.tokenID
+            exch.contract_address === nft.contract_address &&
+            exch.token_id === nft.token_id
         );
         if (found) nftSummary.options.push(chain);
       });

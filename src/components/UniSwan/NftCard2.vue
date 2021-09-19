@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="nft.tokenJSON"
+    v-if="nft.metadata"
     :style="{
       minWidth: minWidth ? minWidth : '10rem',
       maxWidth: maxWidth ? maxWidth : '15rem',
@@ -9,10 +9,10 @@
   >
     <img
       class="nftCardImage"
-      @click="$router.push('/nft/' + nft.contract + '/' + nft.tokenID)"
+      @click="$router.push('/nft/' + nft.contract_address + '/' + nft.token_id)"
       fluid
-      :src="nft.tokenJSON.image"
-      :title="nft.tokenJSON.name"
+      :src="nft.metadata.image"
+      :title="nft.metadata.name"
       alt=""
     />
     <div class="nftCardBlockie" v-if="nft.owner">
@@ -41,7 +41,7 @@
       >
         <i class="ni ni-fat-remove text-warning"></i>
       </b-badge>
-      <router-link :to="'/explorer?contract=' + nft.contract">
+      <router-link :to="'/explorer?contract=' + nft.contract_address">
         <b-badge variant="default">
           {{ contractData.name.substr(0, 7) }}...
         </b-badge>
@@ -49,7 +49,7 @@
     </div>
     <div class="nftCardFooter text-center">
       <b>
-        {{ nft.tokenJSON.name }}
+        {{ nft.metadata.name }}
       </b>
     </div>
   </div>
@@ -72,7 +72,7 @@ export default {
     this.saved = await this.root.checkSaved(this.nft);
 
     this.contractData = await this.$props.root.getContractFromSubGraph(
-      this.nft.contract
+      this.$props.nft.contract_address
     );
   },
   methods: {},
