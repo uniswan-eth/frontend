@@ -89,15 +89,17 @@ export default {
   methods: {
     async loadPage() {
       this.approvals = [];
-      this.$props.chain[0].wishBundle.map(async (x) =>
-        this.approvals.push({
-          contract: x.contract,
-          isApproved: await this.$parent.isApproved(
-            x.contract,
-            this.$parent.signeraddr
-          ),
-        })
-      );
+      if (this.$props.chain) {
+        this.$props.chain[0].wishBundle.map(async (x) =>
+          this.approvals.push({
+            contract: x.contract,
+            isApproved: await this.$parent.isApproved(
+              x.contract,
+              this.$parent.signeraddr
+            ),
+          })
+        );
+      }
     },
     async setApproval(i) {
       await this.$parent.approveTransfers(
