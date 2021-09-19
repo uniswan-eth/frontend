@@ -166,10 +166,10 @@ export default {
     },
     async setApproval(i) {
       await this.$parent.approveTransfers(
-        approvals[i].contract,
+        this.approvals[i].contract,
         this.$parent.signeraddr
       );
-      approvals[i].isApproved = true;
+      this.approvals[i].isApproved = true;
     },
     async addToExchangeBundle(asset) {
       var alreadyAdded = false;

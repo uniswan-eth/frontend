@@ -39,6 +39,15 @@
       </span>
     </div>
 
+    <div>
+      <h3>Approvals</h3>
+      <div v-for="(n, idx) in approvals" :key="'appr' + idx">
+        <p>{{ n.contract }}</p>
+        <base-button :disabled="n.isApproved === true" @click="setApproval(idx)"
+          >Approve</base-button
+        >
+      </div>
+    </div>
     <template slot="modal-footer">
       <base-button @click="$parent.executeSwap(chain)" type="success"
         >Execute offer</base-button
@@ -72,10 +81,32 @@ export default {
     [DropdownMenu.name]: DropdownMenu,
   },
   data() {
-    return {};
+    return { approvals: [] };
   },
-  mounted() {},
-  methods: {},
+  mounted() {
+    this.loadPage();
+  },
+  methods: {
+    async loadPage() {
+      this.approvals = [];
+      this.$props.chain[0].wishBundle.map(async (x) =>
+        this.approvals.push({
+          contract: x.contract,
+          isApproved: await this.$parent.isApproved(
+            x.contract,
+            this.$parent.signeraddr
+          ),
+        })
+      );
+    },
+    async setApproval(i) {
+      await this.$parent.approveTransfers(
+        this.approvals[i].contract,
+        this.$parent.signeraddr
+      );
+      this.approvals[i].isApproved = true;
+    },
+  },
 };
 </script>
 <style>
