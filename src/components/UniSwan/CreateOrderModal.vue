@@ -22,8 +22,8 @@
               v-for="(n, idx) in ownernfts"
               @click="addToWishBundle(n)"
               :key="'cp' + idx"
-              :title="n.tokenJSON.name"
-              :img-src="n.tokenJSON.image"
+              :title="n.metadata.name"
+              :img-src="n.metadata.image"
               img-alt="Image"
               img-top
               tag="article"
@@ -45,8 +45,8 @@
               v-for="(n, idx) in $parent.usernfts"
               @click="addToExchangeBundle(n)"
               :key="'cp' + idx"
-              :title="n.tokenJSON.name"
-              :img-src="n.tokenJSON.image"
+              :title="n.metadata.name"
+              :img-src="n.metadata.image"
               img-alt="Image"
               img-top
               tag="article"
@@ -60,13 +60,14 @@
               v-for="(n, idx) in $parent.userERC20s"
               @click="addToExchangeBundle(n)"
               :key="'cp' + idx"
-              :title="n.name"
-              img-alt="Image"
-              img-top
+              :title="n.symbol"
               tag="article"
               style="max-width: 20rem"
               class="mb-2"
             >
+              <p>
+                {{ parseInt(n.amount) / 10 ** parseInt(n.decimals) }}
+              </p>
             </b-card>
           </b-card-group>
         </b-tab>
@@ -104,14 +105,27 @@
           </card>
         </b-col>
       </b-row>
+      <b-row class="mt-5">
+        <b-col xl="6" class="mb-5 mb-xl-0">
+          <h3>Collections that require approval</h3>
+          <span v-for="(n, idx) in approvals" :key="'appr' + idx">
+            <card header-classes="bg-transparent">
+              <h4>{{ n.contract_address }}</h4>
+              <base-button
+                :disabled="n.isApproved === true"
+                @click="setApproval(idx)"
+                >Approve</base-button
+              >
+            </card>
+          </span>
+        </b-col>
+      </b-row>
     </div>
     <br />
     <template slot="modal-footer">
       <base-button
         :disabled="
-          currentExchangeBundle.length > 0 && currentWishBundle.length > 0
-            ? false
-            : true
+          currentExchangeBundle.length === 0 || currentWishBundle.length === 0
         "
         @click="generateSignature"
         type="success"
@@ -122,6 +136,7 @@
 </template>
 <script>
 import NftsTable from "@/views/Dashboard/NftsTable";
+import { EXCHANGE_ADDRESS, DB_BASE_URL } from "@/views/Layout/DashboardLayout";
 import Bundle from "@/components/UniSwan/Bundle";
 
 import Web3 from "web3";
@@ -129,9 +144,6 @@ import { assetDataUtils, signatureUtils } from "@0x/order-utils";
 import { BigNumber } from "@0x/utils";
 import { MetamaskSubprovider } from "@0x/subproviders";
 import { HttpClient } from "@0x/connect";
-
-const DB_BASE_URL = "https://uns-backend.vercel.app/api/v3";
-const EXCHANGE_ADDRESS = "0x1f98206bE961f98d0c2d2e5f7d965244B2f2129A";
 
 export default {
   name: "create-order-modal",
@@ -145,48 +157,66 @@ export default {
       initialWish: null,
       currentExchangeBundle: [],
       currentWishBundle: [],
-      wishTokenId: null,
-      exchangeTokenId: null,
+
+      approvals: [],
     };
   },
   methods: {
     async loadPage() {
       this.currentExchangeBundle = [];
       this.currentWishBundle = [];
-      if (this.initialWish) {
-        this.addToWishBundle(this.initialWish.tokenID);
 
-        // Get Counterpartys assets
-        this.counterPartyNFTs = await this.root.getUserTokensFromSubGraph(
-          this.initialWish.owner
-        );
-      }
+      if (this.initialWish) this.addToWishBundle(this.initialWish.token_id);
+    },
+    async setApproval(i) {
+      await this.$parent.approveTransfers(
+        this.approvals[i].contract_address,
+        this.$parent.signeraddr
+      );
+      this.approvals[i].isApproved = true;
     },
     async addToExchangeBundle(asset) {
-      if (asset.tokenJSON) {
-        var alreadyAdded = this.currentExchangeBundle.find(
-          (x) => x.tokenID === asset.tokenID && x.contract === asset.contract
+      var alreadyAdded = false;
+      if (asset.metadata) {
+        alreadyAdded = this.currentExchangeBundle.find(
+          (x) =>
+            x.token_id === asset.token_id &&
+            x.contract_address === asset.contract_address
         );
-        if (!alreadyAdded) this.currentExchangeBundle.push(asset);
+        if (
+          !alreadyAdded &&
+          !this.approvals.some(
+            (x) => x.contract_address === asset.contract_address
+          )
+        )
+          this.approvals.push({
+            contract_address: asset.contract_address,
+            isApproved: await this.$parent.isApproved(
+              asset.contract_address,
+              this.$parent.signeraddr
+            ),
+          });
       } else {
-        var alreadyAdded = this.currentExchangeBundle.find(
+        alreadyAdded = this.currentExchangeBundle.find(
           (x) => x.address === asset.address
         );
-        if (!alreadyAdded) this.currentExchangeBundle.push(asset);
       }
+      if (!alreadyAdded) this.currentExchangeBundle.push(asset);
     },
     async addToWishBundle(asset) {
-      if (asset.tokenJSON) {
-        var alreadyAdded = this.currentWishBundle.find(
-          (x) => x.tokenID === asset.tokenID && x.contract === asset.contract
+      var alreadyAdded = false;
+      if (asset.metadata) {
+        alreadyAdded = this.currentWishBundle.find(
+          (x) =>
+            x.token_id === asset.token_id &&
+            x.contract_address === asset.contract_address
         );
-        if (!alreadyAdded) this.currentWishBundle.push(asset);
       } else {
-        var alreadyAdded = this.currentWishBundle.find(
+        alreadyAdded = this.currentWishBundle.find(
           (x) => x.address === asset.address
         );
-        if (!alreadyAdded) this.currentWishBundle.push(asset);
       }
+      if (!alreadyAdded) this.currentWishBundle.push(asset);
     },
     async clearExchangeBundle() {
       this.currentExchangeBundle = [];
@@ -194,32 +224,14 @@ export default {
     async clearWishBundle() {
       this.currentWishBundle = [];
     },
-    encodeAssets(bundle) {
-      let amounts = [];
-      let assetDatas = [];
-      for (let i = 0; i < bundle.length; i++) {
-        let assetData;
-        if (bundle[i].tokenJSON) {
-          assetData = assetDataUtils.encodeERC721AssetData(
-            bundle[i].contract,
-            new BigNumber(bundle[i].tokenID)
-          );
-          amounts.push(new BigNumber(1));
-        } else {
-          assetData = assetDataUtils.encodeERC20AssetData(bundle[i].address);
-          amounts.push(new BigNumber(bundle[i].balance));
-        }
-        assetDatas.push(assetData);
-      }
-      return [amounts, assetDatas];
-    },
     async generateSignature() {
-      const [haveAmounts, haveAssetData] = this.encodeAssets(
+      const [haveAmounts, haveAssetData] = this.$parent.bundleToData(
         this.currentExchangeBundle
       );
-      const [wantAmounts, wantAssetData] = this.encodeAssets(
+      const [wantAmounts, wantAssetData] = this.$parent.bundleToData(
         this.currentWishBundle
       );
+
       const salt = new BigNumber(new Date().getTime()).toString();
       const order = {
         chainId: 137,
@@ -242,14 +254,8 @@ export default {
           wantAmounts,
           wantAssetData
         ),
-        makerFeeAssetData: assetDataUtils.encodeMultiAssetData(
-          haveAmounts,
-          haveAssetData
-        ),
-        takerFeeAssetData: assetDataUtils.encodeMultiAssetData(
-          wantAmounts,
-          wantAssetData
-        ),
+        makerFeeAssetData: "0x",
+        takerFeeAssetData: "0x",
       };
       const provider = new MetamaskSubprovider(
         "ethereum" in window ? window["ethereum"] : Web3.givenProvider
@@ -266,7 +272,7 @@ export default {
 
       var c = new HttpClient(DB_BASE_URL);
       await c.submitOrderAsync(signedOrder).then(async (res) => {
-        self.$parent.userprefs = await self.$parent.getOrdersFromDB({
+        self.$parent.userOrders = await self.$parent.getOrdersFromDB({
           makerAddress: self.$parent.signeraddr,
         });
 

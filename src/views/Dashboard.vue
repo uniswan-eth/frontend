@@ -10,20 +10,18 @@
             icon="ni ni-active-40"
             class="mb-4"
           >
-            <template slot="footer">
-            </template>
+            <template slot="footer"> </template>
           </stats-card>
         </b-col>
         <b-col xl="3" md="6">
           <stats-card
             title="Orders"
             type="gradient-orange"
-            :sub-title="$parent.$parent.userprefs.length.toString()"
+            :sub-title="$parent.$parent.userOrders.length.toString()"
             icon="ni ni-chart-pie-35"
             class="mb-4"
           >
-            <template slot="footer">
-            </template>
+            <template slot="footer"> </template>
           </stats-card>
         </b-col>
         <b-col xl="3" md="6">
@@ -55,151 +53,89 @@
       <b-row class="mt-5">
         <b-col xl="12" class="mb-5 mb-xl-0">
           <nft-summary
-          display="card"
-          v-for="(n,idx) in summary"
-          :key="'nft'+idx"
-          :nft="n.nft"
-          :summary="n"
-          :root="$parent.$parent"
+            display="card"
+            v-for="(summary, idx) in summarys"
+            :key="'nft' + idx"
+            :nft="summary.nft"
+            :summary="summary"
+            :root="$parent.$parent"
           />
         </b-col>
       </b-row>
       <b-row class="mt-5">
         <b-col xl="12" class="mb-5 mb-xl-0">
           <card header-classes="bg-transparent">
-            <h2 slot="header" class="mb-0">
-              Saved
-            </h2>
+            <h2 slot="header" class="mb-0">Saved</h2>
             <b-card-group deck>
               <nft-card2
                 display="card"
-                v-for="(n,idx) in $parent.$parent.savedNFTs"
-                :key="'savednft'+idx"
+                v-for="(n, idx) in $parent.$parent.savedNFTs"
+                :key="'savednft' + idx"
                 :nft="n"
                 :root="$parent.$parent"
-                />
+              />
             </b-card-group>
           </card>
         </b-col>
       </b-row>
-      <!-- <br>
-      <card type="default" header-classes="bg-transparent">
-        <b-row align-v="center" slot="header">
-          <b-col>
-            <h6 class="text-light text-uppercase ls-1 mb-1">Overview</h6>
-            <h5 class="h3 text-white mb-0">Example</h5>
-          </b-col>
-          <b-col>
-          </b-col>
-        </b-row>
-        <line-chart
-          :height="350"
-          ref="bigChart"
-          :chart-data="bigLineChart.chartData"
-          :extra-options="bigLineChart.extraOptions"
-        >
-        </line-chart>
-      </card> -->
-
-
     </b-container>
   </div>
 </template>
 <script>
-import NftsTable from './Dashboard/NftsTable';
-import OffersTable from './Dashboard/OffersTable';
-import OptionsTable from './Dashboard/OptionsTable';
-import Bundle from '@/components/UniSwan/Bundle';
-import NftCard2 from "@/components/UniSwan/NftCard2";
+import NftsTable from "./Dashboard/NftsTable";
+import OffersTable from "./Dashboard/OffersTable";
+import OptionsTable from "./Dashboard/OptionsTable";
 import NftSummary from "@/components/UniSwan/NftSummary";
-
-import * as chartConfigs from '@/components/Charts/config';
-import LineChart from '@/components/Charts/LineChart';
-import BarChart from '@/components/Charts/BarChart';
-
-
+import NftCard2 from "@/components/UniSwan/NftCard2";
 
 export default {
   components: {
-    LineChart,
-    BarChart,
     NftSummary,
     NftCard2,
     OptionsTable,
-    Bundle,
     NftsTable,
     OffersTable,
   },
   data() {
     return {
-      nftPort:[],
-      bigLineChart: {
-        allData: [
-          [40, 40, 60, 0, 80, 60, 60, 60, 60],
-          // [0, 20, 5, 25, 10, 30, 15, 40, 40]
-        ],
-        activeIndex: 0,
-        chartData: {
-          datasets: [
-            {
-              label: 'Options',
-              data: [0, 20, 10, 30, 15, 40, 20, 60, 60],
-            }
-          ],
-          labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        },
-        extraOptions: chartConfigs.blueChartOptions,
-      },
-      summary:[],
+      summarys: [],
     };
   },
-  async mounted() {
-    document.title ="🦢 UniSwan"
-    this.$parent.$parent.routeName = 'Dashboard';
+  mounted() {
+    document.title = "🦢 UniSwan";
+    this.$parent.$parent.routeName = "Dashboard";
 
-    this.initBigChart(0);
-
-    // this.nftPort = await this.$parent.$parent.getNFTsFromAPI('0x76c52b2c4b2d2666663ce3318a5f35f912bd25c3')
-
-
-    // Build summary
-    this.$parent.$parent.usernfts.map(nft => {
+    // Build summarys
+    this.$parent.$parent.usernfts.map((nft) => {
       var nftSummary = {
-        nft:nft,
-        orders:[],
-        options:[],
-      }
-      this.$parent.$parent.userprefs.map(order => {
-        order.exchangeBundle.map(exch => {
-          if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {
-            nftSummary.orders.push(order)
-          }
-        })
-      })
-      this.$parent.$parent.userSwapOptions.map(ring => {
-        ring[0].wishBundle.map(exch => {
-          if (exch.contract === nft.contract && exch.tokenID === nft.tokenID) {
-            nftSummary.options.push(ring)
-          }
-        })
-      })
-      this.summary.push(nftSummary)
-    })
-  },
-  methods: {
-    initBigChart(index) {
-      let chartData = {
-        datasets: [
-          {
-            label: 'Options',
-            data: this.bigLineChart.allData[index]
-          }
-        ],
-        labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        nft: nft,
+        orders: [],
+        options: [],
       };
-      this.bigLineChart.chartData = chartData;
-      this.bigLineChart.activeIndex = index;
-    }
+
+      // Find all of the orders where the user is offering this NFT in the exchange bundle
+      this.$parent.$parent.userOrders.map((order) => {
+        order.exchangeBundle.map((exch) => {
+          if (
+            exch.contract_address === nft.contract_address &&
+            exch.token_id === nft.token_id
+          )
+            nftSummary.orders.push(order);
+        });
+      });
+
+      // Find all of the orders which includes this NFT in the wish bundle
+      this.$parent.$parent.userSwapOptions.map((chain) => {
+        const found = chain[0].wishBundle.find(
+          (exch) =>
+            exch.contract_address === nft.contract_address &&
+            exch.token_id === nft.token_id
+        );
+        if (found) nftSummary.options.push(chain);
+      });
+
+      this.summarys.push(nftSummary);
+    });
   },
 };
 </script>

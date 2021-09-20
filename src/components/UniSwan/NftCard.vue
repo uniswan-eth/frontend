@@ -2,16 +2,16 @@
   <div class="">
     <div v-if="display === 'card'" class="nftcard">
       <b-card
-        :title="nft.tokenJSON.image"
-        :img-src="nft.tokenJSON.image"
-        :img-alt="nft.tokenJSON.image"
+        :title="nft.metadata.image"
+        :img-src="nft.metadata.image"
+        :img-alt="nft.metadata.image"
         img-top
         tag="article"
         style="max-width: 20rem"
         class="mb-2"
       >
         <b-card-text>
-          {{ nft.tokenJSON.description }}
+          {{ nft.metadata.description }}
         </b-card-text>
         <b-button href="javascript:;" variant="primary">Go somewhere</b-button>
       </b-card>
@@ -22,17 +22,17 @@
         class=""
         style="font-size: 12px; padding-bottom: 10px; padding-left: 5px"
       >
-        {{ nft.tokenJSON.name }}
+        {{ nft.metadata.name }}
       </div>
       <div v-if="!idx || idx === 0" class="bundleHeader">
         <slot v-if="!idx || idx === 0" name="nftHeader"></slot>
       </div>
-      <router-link :to="'/nft/' + nft.contract + '/' + nft.tokenID">
+      <router-link :to="'/nft/' + nft.contract_address + '/' + nft.token_id">
         <div
           :style="{
             marginLeft:
               idx > 1 ? (idx - 1) * 30 + 'px' : idx === 1 ? '5px' : '0px',
-            backgroundImage: 'url(' + nft.tokenJSON.image + ')',
+            backgroundImage: 'url(' + nft.metadata.image + ')',
           }"
           :class="['imgHolder', 'bgim', idx > 0 ? 'small' : '']"
         ></div>
@@ -46,30 +46,24 @@
       </div>
     </div>
     <div v-if="!display" class="nft1Holder">
-        <div
-          @click="$router.push('/nft/'+nft.contract+'/'+nft.tokenID)"
-          :key="'wish'+idx"
-          :style="{height:'50px',width:'50px',backgroundImage: 'url('+nft.tokenJSON.image+')'}"
-          class="img1Holder">
-        </div>
-        <div style="float:left;">
-          <b>
-            {{ nft.tokenJSON.name }}
-          </b>
-          <div class="" v-if="nft.owner">
-            <img
-              :title="'Owner: '+nft.owner"
-              class="blockie blockie2"
-              :src="
-                root.makeBlockie(nft.owner)
-              "
-            />
-            <account-card style="line-height:30px;" :address="nft.owner" :root="root" />
-          </div>
-        </div>
-        <div class="cb">
-
-        </div>
+      <div
+        @click="
+          $router.push('/nft/' + nft.contract_address + '/' + nft.token_id)
+        "
+        :key="'wish' + idx"
+        :style="{
+          height: '50px',
+          width: '50px',
+          backgroundImage: 'url(' + nft.metadata.image + ')',
+        }"
+        class="img1Holder"
+      ></div>
+      <div style="float: left">
+        <b>
+          {{ nft.metadata.name }}
+        </b>
+      </div>
+      <div class="cb"></div>
     </div>
   </div>
 </template>
@@ -94,7 +88,7 @@ export default {
 }
 
 .innerBody {
-  padding:6px;
+  padding: 6px;
 }
 .bundleHeader {
   margin-left: 7px;
@@ -102,19 +96,18 @@ export default {
 }
 .nft1Holder {
   background: #eee;
-  padding:7px;
-  padding-right:10px;
+  padding: 7px;
+  padding-right: 10px;
   margin-bottom: 5px;
   border-radius: 5px;
   /* margin-left: 0px; */
-
 }
 .img1Holder {
-  float:left;
+  float: left;
   margin-right: 5px;
   height: 150px;
   width: 150px;
-  border:3px solid #fff;
+  border: 3px solid #fff;
   border-radius: 8px;
   background-position: center; /* Center the image */
   background-repeat: no-repeat; /* Do not repeat the image */

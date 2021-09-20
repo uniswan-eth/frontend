@@ -54,7 +54,6 @@ import {
 } from "element-ui";
 import Bundle from "@/components/UniSwan/Bundle";
 import AccountCard from "@/components/UniSwan/AccountCard";
-import { assetDataUtils } from "@0x/order-utils";
 
 export default {
   name: "history-table",
@@ -78,36 +77,15 @@ export default {
   methods: {
     async loadPage() {
       this.parsedEvents = [];
-      Promise.all(
+      await Promise.all(
         this.$props.events.map(async (e) => {
           var exchangeBundle = [];
           var wishBundle = [];
 
-          await Promise.all(
-            assetDataUtils
-              .decodeMultiAssetDataRecursively(e.args[2])
-              .nestedAssetData.map(async (x) => {
-                var nftObj = await this.$props.root.getTokenFromSubgraph(
-                  x.tokenAddress,
-                  x.tokenId.toNumber()
-                );
+          exchangeBundle = await this.$props.root.dataToBundle(e.args[2]);
 
-                exchangeBundle.push(nftObj.nft);
-              })
-          );
+          wishBundle = await this.$props.root.dataToBundle(e.args[3]);
 
-          await Promise.all(
-            assetDataUtils
-              .decodeMultiAssetDataRecursively(e.args[3])
-              .nestedAssetData.map(async (x) => {
-                var nftObj = await this.$props.root.getTokenFromSubgraph(
-                  x.tokenAddress,
-                  x.tokenId.toNumber()
-                );
-
-                wishBundle.push(nftObj.nft);
-              })
-          );
           this.parsedEvents.push({
             makerAddress: e.args[0],
             takerAddress: e.args[7],
@@ -117,7 +95,6 @@ export default {
           });
         })
       );
-      console.log("Events2", this.parsedEvents);
     },
   },
 };

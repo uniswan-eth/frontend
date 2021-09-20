@@ -1,115 +1,124 @@
 <template>
   <div
-    v-if="nft.tokenJSON"
+    v-if="nft.metadata"
     :style="{
       minWidth: minWidth ? minWidth : '10rem',
-      maxWidth: maxWidth ? maxWidth : '15rem'
+      maxWidth: maxWidth ? maxWidth : '15rem',
     }"
-    class="nftCardHolder card">
-      <img
-        class="nftCardImage"
-        @click="$router.push('/nft/'+nft.contract+'/'+nft.tokenID)"
-        fluid
-        :src="nft.tokenJSON.image"
-        :title="nft.tokenJSON.name"
-        alt=""/>
-      <div class="nftCardBlockie" v-if="nft.owner">
-        <router-link :to="'/account/'+nft.owner">
-          <!-- style="" -->
-          <img
-            :title="'Owner: '+nft.owner"
-            class="blockie"
-            :src="
-              root.makeBlockie(nft.owner)
-            "
-          />
-        </router-link>
-      </div>
-      <div class="nftCardContract">
-        <b-badge
-          v-if="!saved.length ||  saved.length === 0"
-          class="addFavBtn"
-          @click="root.saveNFT(nft)"
-          variant="default">
-          <i class="ni ni-favourite-28 text-danger"></i>
+    class="nftCardHolder card"
+  >
+    <img
+      class="nftCardImage"
+      @click="$router.push('/nft/' + nft.contract_address + '/' + nft.token_id)"
+      fluid
+      :src="nft.metadata.image"
+      :title="nft.metadata.name"
+      alt=""
+    />
+    <div class="nftCardBlockie" v-if="nft.owner">
+      <router-link :to="'/account/' + nft.owner">
+        <img
+          :title="'Owner: ' + nft.owner"
+          class="blockie"
+          :src="root.makeBlockie(nft.owner)"
+        />
+      </router-link>
+    </div>
+    <div class="nftCardContract">
+      <b-badge
+        v-if="!saved.length || saved.length === 0"
+        class="addFavBtn"
+        @click="root.saveNFT(nft)"
+        variant="default"
+      >
+        <i class="ni ni-favourite-28 text-danger"></i>
+      </b-badge>
+      <b-badge
+        v-if="saved.length > 0"
+        class="addFavBtn"
+        @click="root.removeSavedNFT(nft)"
+        variant="default"
+      >
+        <i class="ni ni-fat-remove text-warning"></i>
+      </b-badge>
+      <router-link :to="'/explorer?contract=' + nft.contract_address">
+        <b-badge variant="default">
+          {{ contractData.name.substr(0, 7) }}...
         </b-badge>
-        <b-badge v-if="saved.length > 0"
-          class="addFavBtn"
-          @click="root.removeSavedNFT(nft)"
-          variant="default">
-          <i class="ni ni-fat-remove text-warning"></i>
-        </b-badge>
-        <router-link :to="'/explorer?contract='+nft.contract">
-          <b-badge variant="default">
-            {{nft.contract.substr(0,6)}}
-          </b-badge>
-        </router-link>
-      </div>
-      <div class="nftCardFooter text-center">
-        <b>
-          {{nft.tokenJSON.name}}
-        </b>
-      </div>
+      </router-link>
+    </div>
+    <div class="nftCardFooter text-center">
+      <b>
+        {{ nft.metadata.name }}
+      </b>
+    </div>
   </div>
 </template>
 <script>
 import AccountCard from "@/components/UniSwan/AccountCard";
 export default {
   name: "nft-card2",
-  props: ["nft", "display", "root", "idx", "minWidth", "maxWidth"],
+  props: ["nft", "root", "minWidth", "maxWidth"],
   components: {
     AccountCard,
   },
   data() {
     return {
       saved: [],
+      contractData: { name: "" },
     };
   },
   async mounted() {
-    this.saved = await this.root.checkSaved(this.nft)
-  },
-  methods: {
+    this.saved = await this.root.checkSaved(this.nft);
 
+    this.contractData = await this.$props.root.getContractFromSubGraph(
+      this.$props.nft.contract_address
+    );
   },
+  methods: {},
 };
 </script>
 <style>
 .addFavBtn {
-  margin-right:5px;
-  cursor:pointer;
+  margin-right: 5px;
+  cursor: pointer;
 }
 .nftCardHolder {
   margin-bottom: 20px !important;
 }
 .nftCardFooter {
-  padding:10px 15px;
+  padding: 10px 15px;
 }
 .nftCardImage {
   cursor: pointer;
   border-radius: 5px 5px 0px 0px;
 }
 .nftCardBlockie {
-  position:absolute;
+  position: absolute;
 }
-.nftCardHolder:hover .blockie {opacity:100%}
-.nftCardHolder:hover .nftCardContract {opacity:100%}
+.nftCardHolder:hover .blockie {
+  opacity: 100%;
+}
+.nftCardHolder:hover .nftCardContract {
+  opacity: 100%;
+}
 .blockie {
   transition: opacity 0.6s;
-  opacity:50%;
-  height:1.5rem;
+  opacity: 50%;
+  height: 1.5rem;
   border-radius: 50%;
   margin-top: 6px;
   margin-left: 6px;
 }
 .nftCardContract {
-  opacity:50%;
+  opacity: 50%;
   transition: opacity 0.6s;
-  position:absolute;
+  position: absolute;
   text-align: right;
   margin-left: calc(100% - 125px);
-  width:125px;
+  width: 125px;
   overflow: hidden;
-  padding:5px 10px;
+  padding: 5px 10px;
 }
 .nftCardHolder img {
 }

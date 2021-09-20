@@ -22,6 +22,36 @@
       </template>
     </options-table>
 
+    <div>
+      <h3>You will receive:</h3>
+      <span v-for="(asset, jdx) in $props.receiveBundle" :key="'wish' + jdx">
+        <div
+          v-if="asset.metadata"
+          class="imgHolder"
+          @click="
+            $router.push(
+              '/nft/' + asset.contract_address + '/' + asset.token_id
+            )
+          "
+          :style="{
+            backgroundImage: 'url(' + asset.metadata.image + ')',
+          }"
+        />
+        <div v-if="!asset.metadata" class="imgHolder">
+          {{ asset.symbol }}
+        </div>
+      </span>
+    </div>
+
+    <div>
+      <h3>Approvals</h3>
+      <span v-for="(n, idx) in approvals" :key="'appr' + idx">
+        <h4>{{ n.contract_address }}</h4>
+        <base-button :disabled="n.isApproved === true" @click="setApproval(idx)"
+          >Approve</base-button
+        >
+      </span>
+    </div>
     <template slot="modal-footer">
       <base-button @click="$parent.executeSwap(chain)" type="success"
         >Execute offer</base-button
@@ -44,7 +74,7 @@ import {
 
 export default {
   name: "swap-chain-modal",
-  props: ["chain"],
+  props: ["chain", "receiveBundle"],
   components: {
     OptionsTable,
     Bundle,
@@ -55,9 +85,34 @@ export default {
     [DropdownMenu.name]: DropdownMenu,
   },
   data() {
-    return {};
+    return { approvals: [] };
   },
-  methods: {},
+  mounted() {
+    this.loadPage();
+  },
+  methods: {
+    async loadPage() {
+      this.approvals = [];
+      if (this.$props.chain) {
+        this.$props.chain[0].wishBundle.map(async (x) =>
+          this.approvals.push({
+            contract_address: x.contract_address,
+            isApproved: await this.$parent.isApproved(
+              x.contract_address,
+              this.$parent.signeraddr
+            ),
+          })
+        );
+      }
+    },
+    async setApproval(i) {
+      await this.$parent.approveTransfers(
+        this.approvals[i].contract_address,
+        this.$parent.signeraddr
+      );
+      this.approvals[i].isApproved = true;
+    },
+  },
 };
 </script>
 <style>

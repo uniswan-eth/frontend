@@ -1,82 +1,65 @@
 <template>
-  <div v-if="asset">
+  <div v-if="nft">
     <base-header class="pb-6 pb-8 pt-5 pt-md-8 bg-gradient-success">
-      <!-- <b-row>
-        <b-col xl="6" md="6">
-          <stats-card
-            title="Contract"
-            type="gradient-red"
-            :sub-title="assetSubGraph.contract.name"
-            icon="ni ni-active-40"
-            class="mb-4">
-            <template slot="footer">
-              <span class="text-success mr-2">{{$parent.$parent.formatNumberWithCommas(assetSubGraph.contract.numOwners)}}</span>
-              <span class="text-nowrap">Owners</span>
-              &nbsp;
-              <span class="text-success mr-2">{{$parent.$parent.formatNumberWithCommas(assetSubGraph.contract.numTokens)}}</span>
-              <span class="text-nowrap">Tokens</span>
-            </template>
-          </stats-card>
-        </b-col>
-      </b-row> -->
     </base-header>
 
     <b-container fluid class="mt--7">
       <b-row class="">
         <b-col lg="6">
           <card header-classes="bg-transparent">
-            <b-img :src="asset.image_url" alt="" fluid rounded />
+            <b-img :src="nft.metadata.image" alt="" fluid rounded />
           </card>
           <br />
           <card header-classes="bg-transparent">
             <div slot="header" class="mb-0">
               <small class="text-muted text-uppercase">
                 <router-link
-                  :to="'/explorer/?contract=' + asset.asset_contract.address"
+                  :to="'/explorer/?contract=' + nft.contract_address"
                 >
-                  {{ contract.name }}
+                  {{ nft.contractName }}
                 </router-link>
               </small>
               <h1 slot="header" class="mb-0">
-                {{ asset.name }}
+                {{ nft.metadata.name }}
               </h1>
             </div>
             <p>
-              {{ asset.description }}
+              {{ nft.metadata.description }}
             </p>
             <b-button
-              v-if="!saved.length ||  saved.length === 0"
+              v-if="saved.length === 0"
               @click="$parent.$parent.saveNFT(nft)"
               size="lg"
-              variant="success">
-              Save
+              variant="success"
+            >
+              Save nft
             </b-button>
             <b-button
               v-if="saved.length > 0"
               @click="$parent.$parent.removeSavedNFT(nft)"
               size="lg"
-              variant="warning">
-              Remove
+              variant="warning"
+            >
+              Remove saved nft
             </b-button>
-            <div v-if="nft.tokenJSON.attributes">
-              <hr>
-              <!-- <h3>Attributes</h3> -->
-              <div v-for="(attr,idx) in nft.tokenJSON.attributes" :key="'trait'+idx">
+            <div v-if="nft.metadata.attributes">
+              <hr />
+              <div
+                v-for="(attr, idx) in nft.metadata.attributes"
+                :key="'trait' + idx"
+              >
                 <div class="attr">
                   <div class="type">
-                    {{attr.trait_type}}
+                    {{ attr.trait_type }}
                   </div>
                   <div class="value">
-                    {{attr.value}}
+                    {{ attr.value }}
                   </div>
-                  <!-- <div class="rarity">
-                    {{ Math.round((attr.trait_count / assetSubGraph.contract.numTokens) * 100) }}%
-                  </div> -->
                 </div>
               </div>
-              <div class="cb"/>
+              <div class="cb" />
             </div>
-            <hr>
+            <hr />
             <div>
               <a
                 class="btn btn-secondary btn-sm"
@@ -84,18 +67,18 @@
                 target="_blank"
                 :href="
                   'https://opensea.io/assets/matic/' +
-                  asset.asset_contract.address +
+                  nft.contract_address +
                   '/' +
-                  +asset.token_id
+                  +nft.token_id
                 "
               >
                 Token ID
                 <b>
-                  {{ asset.token_id.substr(0, 10) }}
+                  {{ nft.token_id.substr(0, 10) }}
                 </b>
                 {{
-                  asset.token_id.length > 10
-                    ? "..." + asset.token_id.substr(asset.token_id.length - 5)
+                  nft.token_id.length > 10
+                    ? "..." + nft.token_id.substr(nft.token_id.length - 5)
                     : ""
                 }}
               </a>
@@ -104,60 +87,13 @@
                 rel="noreferrer"
                 target="_blank"
                 :href="
-                  'https://polygonscan.com/address/' +
-                  asset.asset_contract.address
+                  'https://polygonscan.com/address/' + nft.contract_address
                 "
               >
-                Contract {{ asset.asset_contract.address }}
+                Contract {{ nft.contract_address }}
               </a>
             </div>
             <br />
-            <div class="">
-              <span class="text-success mr-2">{{
-                $parent.$parent.formatNumberWithCommas(
-                  assetSubGraph.contract.numOwners
-                )
-              }}</span>
-              <span class="text-nowrap">Owners</span>
-              &nbsp;
-              <span class="text-success mr-2">{{
-                $parent.$parent.formatNumberWithCommas(
-                  assetSubGraph.contract.numTokens
-                )
-              }}</span>
-              <span class="text-nowrap">Tokens</span>
-            </div>
-            <br />
-            <div
-              class="slide"
-              v-if="
-                asset.owner.address.toLowerCase() ===
-                $parent.$parent.signeraddr.toLowerCase()
-              "
-            >
-              <b-button
-                v-if="!signerApproved"
-                @click="
-                  $parent.$parent.approveTransfers(asset.asset_contract.address)
-                "
-                size="lg"
-                variant="success"
-              >
-                Approve transfers
-              </b-button>
-              <b-button
-                v-if="signerApproved"
-                @click="
-                  $parent.$parent.unApproveTransfers(
-                    asset.asset_contract.address
-                  )
-                "
-                size="sm"
-                variant="secondary"
-              >
-                Remove approval
-              </b-button>
-            </div>
           </card>
           <br />
         </b-col>
@@ -175,7 +111,7 @@
                 class="swapBtn"
                 @click="
                   $event.preventDefault();
-                  $parent.$parent.viewSwapChain(ring);
+                  $parent.$parent.viewSwapChain(ring, finalPools[idx]);
                 "
                 v-b-modal.modalSwapChain
                 size="sm"
@@ -187,18 +123,20 @@
                 v-for="(nft, idx) in ring[ring.length - 1].exchangeBundle"
                 :key="'wish' + idx"
                 @click="
-                  $router.push('/nft/' + nft.contract + '/' + nft.tokenID)
+                  $router.push(
+                    '/nft/' + nft.contract_address + '/' + nft.token_id
+                  )
                 "
-                :style="{ backgroundImage: 'url(' + nft.tokenJSON.image + ')' }"
+                :style="{ backgroundImage: 'url(' + nft.metadata.image + ')' }"
                 class="imgHolder"
               ></div>
             </div>
             <div class="cb" />
             <b-button
-              @click="$parent.$parent.createOrder(asset, ownerAssets)"
+              @click="$parent.$parent.createOrder(nft, ownerAssets)"
               :disabled="
                 $parent.$parent.signeraddr.toLowerCase() ===
-                asset.owner.address.toLowerCase()
+                nft.owner.toLowerCase()
               "
               v-b-modal.modalCreateOffer
               size="lg"
@@ -207,96 +145,41 @@
               Make offer
             </b-button>
           </card>
-          <!-- <options-table
-            display="simple"
-            :root="$parent.$parent"
-            :options="validSwaps">
-            <template v-slot:unsHeader>
-              <b-row align-v="center">
-                <b-col>
-                  <h6
-                    slot="header"
-                    class="navbar-heading text-muted text-uppercase"
-                  >
-                    This NFT can be swapped for
-                  </h6>
-                </b-col>
-                <b-col class="text-right">
-                  <b-button
-                    :disabled="
-                      $parent.$parent.signeraddr.toLowerCase() ===
-                      asset.owner.address.toLowerCase()
-                    "
-                    @click="$parent.$parent.createOrder(asset, ownerAssets)"
-                    v-b-modal.modalCreateOffer
-                    size="lg"
-                    variant="success"
-                  >
-                    Make offer
-                  </b-button>
-                </b-col>
-              </b-row>
-            </template>
-          </options-table> -->
           <br />
           <card header-classes="bg-transparent">
             <h6 slot="header" class="navbar-heading text-muted text-uppercase">
               What &nbsp;
               <img
-                :title="'Owner: ' + asset.owner.address"
+                :title="'Owner: ' + nft.owner"
                 class="blockie"
-                :src="$parent.$parent.makeBlockie(asset.owner.address)"
+                :src="$parent.$parent.makeBlockie(nft.owner)"
               />
-              <account-card
-                :address="asset.owner.address"
-                :root="$parent.$parent"
-              />
-              &nbsp; wish in return for {{ asset.name }}
+              <account-card :address="nft.owner" :root="$parent.$parent" />
+              &nbsp; wish in return for {{ nft.metadata.name }}
             </h6>
-            <!-- <pre>{{ownerOrders}}</pre> -->
-            <div v-for="(order, idx) in ownerOrders"
+            <div
+              v-for="(order, idx) in ownerOrders"
               :key="'order' + idx"
-              class="bundleHolder">
-
+              class="bundleHolder"
+            >
               <div
                 v-for="(nft, idx) in order.wishBundle"
-                :key="'wish'+idx"
-                @click="$router.push('/nft/'+nft.contract+'/'+nft.tokenID)"
-                :style="{backgroundImage: 'url('+nft.tokenJSON.image+')'}"
-                class="imgHolder">
-              </div>
+                :key="'wish' + idx"
+                @click="
+                  $router.push('/nft/' + nft.contract + '/' + nft.token_id)
+                "
+                :style="{ backgroundImage: 'url(' + nft.metadata.image + ')' }"
+                class="imgHolder"
+              ></div>
 
-              <!-- <bundle
-                display="medium"
-                :bundle="order.wishBundle"
-                :root="$parent.$parent"
-              >
-                <template v-slot:bundleHeader>
-                  <b-button
-                    @click="
-                      $event.preventDefault();
-                      $parent.$parent.viewOrder(order);
-                    "
-                    v-b-modal.modalOffer
-                    size="sm"
-                    variant="secondary"
-                  >
-                    <span>
-                      {{
-                        order.wishBundle[0].owner.toLowerCase() ===
-                        $parent.$parent.signeraddr.toLowerCase()
-                          ? "Execute"
-                          : "View"
-                      }}
-                    </span>
-                  </b-button>
-                </template>
-              </bundle> -->
               <br />
             </div>
-            <div class="cb"/>
-            <br/>
-            <router-link class="btn btn-secondary btn-sm" :to="'/account/'+asset.owner.address+'?tab=offers'">
+            <div class="cb" />
+            <br />
+            <router-link
+              class="btn btn-secondary btn-sm"
+              :to="'/account/' + nft.owner + '?tab=offers'"
+            >
               See all
             </router-link>
           </card>
@@ -313,16 +196,14 @@
               </h6>
               <b-media no-body class="align-items-center">
                 <span class="avatar avatar-sm rounded-circle">
-                  <a :href="'/#/account/' + asset.owner.address + '?tab=nfts'">
-                    <img
-                      :src="$parent.$parent.makeBlockie(asset.owner.address)"
-                    />
+                  <a :href="'/#/account/' + nft.owner + '?tab=nfts'">
+                    <img :src="$parent.$parent.makeBlockie(nft.owner)" />
                   </a>
                 </span>
                 <b-media-body class="ml-2 d-none d-lg-block">
                   <h3>
                     <account-card
-                      :address="asset.owner.address"
+                      :address="nft.owner"
                       :root="$parent.$parent"
                     />
                   </h3>
@@ -334,18 +215,13 @@
                 minWidth="8rem"
                 maxWidth="12rem"
                 display="card"
-                v-for="(n, idx) in ownerAssets.nfts"
+                v-for="(n, idx) in ownerAssets"
                 :key="'ownernft' + idx"
                 :nft="n"
                 :root="$parent.$parent"
               />
             </b-card-group>
           </card>
-
-          <!-- <card header-classes="bg-transparent">
-            <h3 slot="header" class="mb-0">Collection</h3>
-            <collection :collection="asset.collection" />
-          </card> -->
         </b-col>
       </b-row>
       <br />
@@ -359,10 +235,10 @@ import BaseHeader from "@/components/BaseHeader";
 import Collection from "@/components/UniSwan/Collection";
 import NftsTable from "./Dashboard/NftsTable";
 import OptionsTable from "./Dashboard/OptionsTable";
-import NftCard from "@/components/UniSwan/NftCard";
 import Bundle from "@/components/UniSwan/Bundle";
 import AccountCard from "@/components/UniSwan/AccountCard";
 import NftCard2 from "@/components/UniSwan/NftCard2";
+import { assetDataUtils } from "@0x/order-utils";
 
 Vue.use(VueClipboard);
 export default {
@@ -372,22 +248,18 @@ export default {
     AccountCard,
     OptionsTable,
     Bundle,
-    NftCard,
     NftsTable,
     Collection,
     BaseHeader,
   },
   data() {
     return {
-      saved:null,
-      contract: null,
-      asset: null,
-      nft: null, // our format
-      assetSubGraph: null,
+      saved: [],
+      nft: null,
       ownerAssets: null,
       validSwaps: [],
       ownerOrders: [],
-      signerApproved: false,
+      finalPools: [],
     };
   },
   async mounted() {
@@ -397,45 +269,63 @@ export default {
   methods: {
     async loadPage() {
       this.ownerAssets = [];
-      this.asset = null;
       this.validSwaps = [];
       this.ownerOrders = [];
 
-      this.contract = await this.$parent.$parent.getContract(
-        this.$route.params.contract
-      );
-      this.signerApproved = await this.$parent.$parent.signerIsApproved(
-        this.$route.params.contract
-      );
-      var data = await this.$parent.$parent.getTokenFromSubgraph(
+      this.nft = await this.$parent.$parent.getTokenExtra(
         this.$route.params.contract,
         this.$route.params.tokenid.toString()
       );
-      var nft = data.nft
-      this.nft = nft
-      this.saved = await this.$parent.$parent.checkSaved(nft)
 
-      this.$parent.$parent.routeName = nft.tokenJSON.name;
+      this.saved = await this.$parent.$parent.checkSaved(this.nft);
 
-      // Use same format as OpenSea API
-      this.asset = this.$parent.$parent.formatAsset(nft);
-      this.assetSubGraph = data.raw.data.tokens[0];
+      this.$parent.$parent.routeName = this.nft.metadata.name;
 
       // Swap Options
-      this.validSwaps = await this.$parent.$parent.getSwapOptions([nft]);
+      this.validSwaps = await this.$parent.$parent.getSwapOptions([this.nft]);
+      this.finalPools = await this.buildFinalPools([this.nft]);
 
       // Owners Assets
-      this.ownerAssets = await this.$parent.$parent.getUserTokensFromSubGraph(nft.owner);
+      this.ownerAssets = await this.$parent.$parent.getUserTokens(
+        this.nft.owner
+      );
 
       var orders = await this.$parent.$parent.getOrdersFromDB({
-        makerAddress: nft.owner.toLowerCase(),
+        makerAddress: this.nft.owner.toLowerCase(),
       });
       orders.map((x) => {
         x.exchangeBundle.map((y) => {
-          if (y.tokenID === nft.tokenID && y.contract === nft.contract)
+          if (
+            y.token_id === this.nft.token_id &&
+            y.contract_address === this.nft.contract_address
+          )
             this.ownerOrders.push(x);
         });
       });
+    },
+    async buildFinalPools(nfts) {
+      var finalPools = [];
+      for (let i = 0; i < this.validSwaps.length; i++) {
+        var ourAssetsEncoded = assetDataUtils.encodeMultiAssetData(
+          ...this.$parent.$parent.bundleToData(nfts)
+        );
+
+        this.validSwaps[i].map(
+          (order) =>
+            (ourAssetsEncoded = this.$parent.$parent.executeOrder(
+              ourAssetsEncoded,
+              order.signedOrder
+            ))
+        );
+
+        const bundle = await this.$parent.$parent.dataToBundle(
+          ourAssetsEncoded
+        );
+
+        // Filter out any assets that the user already owns
+        finalPools.push(bundle);
+      }
+      return finalPools;
     },
   },
   watch: {
@@ -447,7 +337,7 @@ export default {
 </script>
 <style>
 .attr {
-  float:left;
+  float: left;
   border: 1px solid #ccc;
   border-radius: 5px;
   padding: 10px 20px;
@@ -457,7 +347,7 @@ export default {
   margin-bottom: 10px;
 }
 .type {
-  color:grey;
+  color: grey;
 }
 .value {
   font-weight: bold;
