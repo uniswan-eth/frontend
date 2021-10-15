@@ -106,10 +106,12 @@ import { ethers } from "ethers";
 import PerfectScrollbar from "perfect-scrollbar";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 
+export const DB_BASE_URL = process.env.DB_BASE_URL;
+export const NFTPORT_API_KEY = process.env.NFTPORT_API_KEY;
+
 const SUBGRAPH_URL =
   "https://api.thegraph.com/subgraphs/name/tranchien2002/eip721-matic";
 
-export const DB_BASE_URL = "https://uns-backend.vercel.app/api/v3";
 export const EXCHANGE_ADDRESS = "0x1f98206be961f98d0c2d2e5f7d965244b2f2129a";
 export const ERC20_PROXY_ADDRESS = "0x66421DB72AeDF7ab6e75Ab05b7A0031E017Aa64B";
 export const ERC721_PROXY_ADDRESS =
@@ -369,7 +371,7 @@ export default {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "150f5df4-cf22-4bbd-9c58-93e4cac2582b",
+            Authorization: NFTPORT_API_KEY,
           },
         });
         var toret = await resp.json();
